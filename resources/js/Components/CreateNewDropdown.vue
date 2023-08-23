@@ -6,7 +6,7 @@
             >
                 Create New
                 <ChevronDownIcon
-                    class="ml-2 -mr-1 h-5 w-5 text-gray-600 hover:text-gray-300"
+                    class="ml-2 mr-1 h-5 w-5 text-gray-600 hover:text-gray-300"
                     aria-hidden="true"
                 />
             </MenuButton>
@@ -24,25 +24,28 @@
                 class="absolute left-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
             >
                 <div class="px-1 py-1">
-                    <MenuItem v-slot="{ active }">
+                    <MenuItem v-slot="{ active }" class="flex gap-2.5 items-center">
                         <ResponsiveNavLink
                             href="/"
                             :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
-                            New Folder
+                            <FolderPlusIcon class="w-6 h-auto"/>
+                            <span>New Folder</span>
                         </ResponsiveNavLink>
                     </MenuItem>
-                    <MenuItem v-slot="{ active }">
+                    <MenuItem v-slot="{ active }" class="flex gap-2.5 items-center">
                         <ResponsiveNavLink
                             href="/"
                             :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
-                            Upload files
+                            <DocumentPlusIcon class="w-6 h-6"/>
+                            <span>Upload files</span>
                         </ResponsiveNavLink>
                     </MenuItem>
-                    <MenuItem v-slot="{ active }">
+                    <MenuItem v-slot="{ active }" class="flex gap-2.5 items-center">
                         <ResponsiveNavLink
                             href="/"
                             :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
-                            Upload folder
+                            <FolderArrowDownIcon class="w-6 h-auto"/>
+                            <span>Upload folder</span>
                         </ResponsiveNavLink>
                     </MenuItem>
                 </div>
@@ -52,7 +55,8 @@
 </template>
 
 <script setup>
-import {ChevronDownIcon} from "@heroicons/vue/20/solid/index.js";
-import {Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
+import { ChevronDownIcon } from "@heroicons/vue/20/solid/index.js";
+import { DocumentPlusIcon, FolderArrowDownIcon, FolderPlusIcon } from "@heroicons/vue/24/outline/index.js";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 </script>

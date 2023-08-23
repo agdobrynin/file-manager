@@ -1,6 +1,6 @@
 <template>
     <Menu as="div" class="relative inline-block text-left">
-        <div>
+        <div class="whitespace-nowrap">
             <MenuButton
                 class="inline-flex w-full justify-center rounded-md px-4 py-2 text-sm font-medium text-gray-800     focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
             >
@@ -24,20 +24,20 @@
                 class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
             >
                 <div class="px-1 py-1">
-                    <MenuItem v-slot="{ active }">
+                    <MenuItem v-slot="{ active }" class="flex gap-4">
                         <ResponsiveNavLink
                             :href="route('profile.edit')"
                             :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
+                            <UserCircleIcon class="w-5 h-5"/>
                             Profile
                         </ResponsiveNavLink>
                     </MenuItem>
-                    <MenuItem v-slot="{ active }">
-                        <ResponsiveNavLink
-                            :href="route('logout')"
-                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
-                            Log out
-                        </ResponsiveNavLink>
-                    </MenuItem>
+                    <Link :href="route('logout')"
+                          class="flex gap-4 text-gray-700', 'block px-4 py-2 text-sm hover:text-indigo-600 hover:border-l-4 hover:border-amber-300 border-l-4 border-transparent"
+                          method="post" as="button">
+                      <ArrowRightOnRectangleIcon class="w-5 h-5"/>
+                      Log out
+                    </Link>
                 </div>
             </MenuItems>
         </transition>
@@ -45,7 +45,9 @@
 </template>
 
 <script setup>
-import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
-import {ChevronDownIcon} from '@heroicons/vue/20/solid'
-import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
+import { Link } from "@inertiajs/vue3"
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue"
+import { ArrowRightOnRectangleIcon, ChevronDownIcon } from "@heroicons/vue/20/solid"
+import { UserCircleIcon } from "@heroicons/vue/24/outline"
+import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue"
 </script>
