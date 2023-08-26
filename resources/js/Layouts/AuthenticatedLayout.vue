@@ -6,7 +6,7 @@
                 <SearchForm/>
                 <UserSettingsDropdown/>
             </div>
-            <div class="flex-1 flex flex-col overflow-auto px-1.5">
+            <div class="flex-1 flex flex-col overflow-hidden px-1.5">
               <slot/>
             </div>
         </main>
