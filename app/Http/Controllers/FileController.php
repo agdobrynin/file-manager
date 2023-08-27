@@ -19,6 +19,10 @@ class FileController extends Controller
 
     public function createFolder(StoreFolderRequest $request): RedirectResponse
     {
+        if (!$request->parent) {
+            abort(404, 'Parent folder not found');
+        }
+
         $dto = new StoreFolderDto(...$request->validated());
 
         $request->parent->appendNode(File::make([

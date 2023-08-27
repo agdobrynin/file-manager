@@ -10,7 +10,7 @@ use Illuminate\Validation\Rule;
 
 class ParentIdBaseRequest extends FormRequest
 {
-    public File $parent;
+    public File|null $parent;
 
     /**
      * Determine if the user is authorized to make this request.
