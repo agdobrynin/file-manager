@@ -25,6 +25,11 @@ class File extends Model
         'is_folder' => 'boolean'
     ];
 
+    public function isOwnedBy(int $userId): bool
+    {
+        return $this->created_by === $userId;
+    }
+
     public static function boot(): void
     {
         parent::boot();

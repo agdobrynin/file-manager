@@ -5,7 +5,7 @@
             type="text"
             class="block w-full mr-2"
             placeholder="Serach for files and filders"
-            autocomplete
+            autocomplete="off"
         />
     </form>
 </template>

@@ -31,8 +31,12 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
-    Route::get('my-files', [FileController::class, 'myFiles'])
+    Route::get('/my-files/{folder?}', [FileController::class, 'myFiles'])
+        ->where('folder', '(.*)')
         ->name('my.files');
+
+    Route::post('/folder/create', [FileController::class, 'createFolder'])
+        ->name('folder.create');
 
 });
 
