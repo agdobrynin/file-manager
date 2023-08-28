@@ -26,7 +26,8 @@
                 <div class="px-1 py-1">
                     <MenuItem v-slot="{ active }" class="flex gap-2.5 items-center">
                         <ResponsiveNavLink
-                            href="/"
+                            :href="route('folder.create')"
+                            @click.prevent="createFolderShow = true"
                             :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
                             <FolderPlusIcon class="w-6 h-auto"/>
                             <span>New Folder</span>
@@ -52,6 +53,7 @@
             </MenuItems>
         </transition>
     </Menu>
+    <CreateFolderModal :show="createFolderShow" @close="createFolderShow = false"/>
 </template>
 
 <script setup>
@@ -59,4 +61,8 @@ import { ChevronDownIcon } from "@heroicons/vue/20/solid/index.js";
 import { DocumentPlusIcon, FolderArrowDownIcon, FolderPlusIcon } from "@heroicons/vue/24/outline/index.js";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
+import CreateFolderModal from "@/Components/CreateFolderModal.vue";
+import { ref } from "vue";
+
+const createFolderShow = ref(false);
 </script>

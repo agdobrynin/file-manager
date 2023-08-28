@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasCreatorAndUpdater;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Kalnoy\Nestedset\NodeTrait;
 
 class File extends Model
@@ -13,6 +15,7 @@ class File extends Model
     use HasFactory;
     use NodeTrait;
     use SoftDeletes;
+    use HasCreatorAndUpdater;
 
     protected $fillable = [
         'name',
@@ -25,22 +28,31 @@ class File extends Model
         'is_folder' => 'boolean'
     ];
 
-    public function isOwnedBy(int $userId): bool
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(__CLASS__, 'parent_id');
+    }
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function isOwnedByUserId(int $userId): bool
     {
         return $this->created_by === $userId;
     }
 
-    public static function boot(): void
+    protected static function boot(): void
     {
         parent::boot();
 
         static::creating(static function (File $model) {
-            $model->created_by = Auth::id();
-            $model->updated_by = Auth::id();
-        });
+            if ($model->parent) {
+                $model->path = ($model->isRoot() ? '' : $model->parent->path . '/')
+                    . Str::slug($model->name);
 
-        static::updating(static function (File $model) {
-            $model->updated_by = Auth::id();
+            }
         });
     }
 }

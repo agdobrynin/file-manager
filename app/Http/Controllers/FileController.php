@@ -17,20 +17,19 @@ class FileController extends Controller
         return inertia('MyFiles', ['folder' => $folder]);
     }
 
-    public function createFolder(StoreFolderRequest $request): RedirectResponse
+    public function createFolder(StoreFolderRequest $request): void
     {
         if (!$request->parent) {
             abort(404, 'Parent folder not found');
         }
 
         $dto = new StoreFolderDto(...$request->validated());
-
-        $request->parent->appendNode(File::make([
+        /** @var File $file */
+        $file = File::make([
             'name' => $dto->name,
-        ]));
+            'is_folder' => true,
+        ]);
 
-        $pathToFolder = $request->parent->ancestors->each(fn(File $node) => $node->name);
-
-        return to_route('my.files', ['folder' => $pathToFolder]);
+        $file->appendToNode($request->parent)->save();
     }
 }

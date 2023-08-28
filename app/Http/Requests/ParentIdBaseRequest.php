@@ -26,7 +26,7 @@ class ParentIdBaseRequest extends FormRequest
                     ->whereIsRoot()
                     ->where('created_by', $userId)->first();
 
-            return $this->parent->isOwnedBy($userId);
+            return $this->parent->isOwnedByUserId($userId);
         }
 
         return false;
