@@ -73,11 +73,6 @@ class File extends Model
         });
     }
 
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(__CLASS__, 'parent_id');
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
