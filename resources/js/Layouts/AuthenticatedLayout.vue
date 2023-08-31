@@ -7,9 +7,10 @@
                 <UserSettingsDropdown/>
             </div>
             <div class="flex-1 flex flex-col overflow-hidden px-1.5">
-              <slot/>
+                <slot/>
             </div>
         </main>
+        <Notification/>
     </div>
 </template>
 
@@ -17,4 +18,5 @@
 import Navigation from "@/Components/Navigation.vue";
 import UserSettingsDropdown from "@/Components/UserSettingsDropdown.vue";
 import SearchForm from "@/Components/SearchForm.vue";
+import Notification from "@/Components/Notification.vue";
 </script>
