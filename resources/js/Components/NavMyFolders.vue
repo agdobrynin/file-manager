@@ -8,7 +8,7 @@
                         <div>My files</div>
                     </div>
                     <div v-else class="inline-flex items-center space-x-0.5">
-                        <ChevronRightIcon class="w-6 h-6"/>
+                        <ChevronRightIcon class="w-6 h-6 text-slate-300"/>
                         <div>{{ ancestor.name }}</div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@
 
     <AuthenticatedLayout>
         <div class="overflow-y-auto">
-            <NavFolder :ancestors="ancestors.data || []" @openFolder="openFolder" class="whitespace-nowrap"/>
+            <NavMyFolders :ancestors="ancestors.data || []" @openFolder="openFolder" class="whitespace-nowrap"/>
         </div>
         <div class="max-w-7xl overflow-auto">
             <div class="bg-white shadow sm:rounded-lg">
@@ -48,7 +48,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
-import NavFolder from "@/Components/NavFolder.vue";
+import NavMyFolders from "@/Components/NavMyFolders.vue";
 
 
 defineProps({
