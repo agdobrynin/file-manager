@@ -31,11 +31,10 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
-    Route::get('/my-files/{folder?}', [FileController::class, 'myFiles'])
-        ->where('folder', '(.*)')
+    Route::get('/my-files/{parentFolder?}', [FileController::class, 'myFiles'])
         ->name('my.files');
 
-    Route::post('/folder/create', [FileController::class, 'createFolder'])
+    Route::post('/folder/create/{parentFolder?}', [FileController::class, 'createFolder'])
         ->name('folder.create');
 
 });

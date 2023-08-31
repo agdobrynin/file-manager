@@ -39,14 +39,7 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
-
-        $file = File::make([
-            'name' => $user->email,
-            'is_folder' => true,
-            'path' => '/'
-        ]);
-
-        $file->makeRoot()->save();
+        File::makeRootByUser($user);
 
         return redirect(RouteServiceProvider::HOME);
     }

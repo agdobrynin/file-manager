@@ -1,7 +1,7 @@
 <template>
   <nav class="min-w-[200px]">
     <div class="h-[80px] px-3 flex items-center gap-3 hover:text-indigo-700 text-indigo-600">
-      <Link :href="route('my.files')" class="flex gap-3 items-center">
+      <Link :href="route('dashboard')" class="flex gap-3 items-center">
         <ApplicationLogo class="block h-9 w-auto"/>
         LaraStorage
       </Link>
@@ -11,7 +11,7 @@
         <CreateNewDropdown/>
       </div>
       <div class="py-3">
-        <NavLink :href="route('my.files')" :active="$page.url === route('my.files', [], false)" class="flex gap-2">
+        <NavLink :href="route('my.files')" :active="$page.url.startsWith(route('my.files', [], false))" class="flex gap-2">
           <CloudIcon class="w-7 h-auto"/>
           My files
         </NavLink>

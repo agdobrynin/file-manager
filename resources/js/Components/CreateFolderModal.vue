@@ -15,7 +15,6 @@
                     ref="folderNameInput"
                 />
                 <InputError :message="form.errors.name"/>
-                <InputError :message="form.errors.parent_id"/>
             </div>
             <div class="mt-5 flex justify-between">
                 <SecondaryButton @click="closeModal">Cancel</SecondaryButton>
@@ -38,9 +37,9 @@ import { useForm, usePage } from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import { nextTick, onUpdated, ref } from "vue";
+import { nextTick, ref } from "vue";
 
-defineProps({
+const props = defineProps({
     show: {
         type: Boolean,
         required: true,
@@ -50,7 +49,6 @@ defineProps({
 
 const form = useForm({
     name: '',
-    parent_id: null
 });
 
 const page = usePage();
@@ -68,15 +66,14 @@ const closeModal = () => {
 };
 
 const createFolder = () => {
-    form.parent_id = page.props?.folder?.id || null;
     const name = form.name;
 
-    form.post(route('folder.create'), {
+    form.post(route('folder.create', { parentFolder: page.props.parentId || null }), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();
-            // Show success notification
-            // showSuccessNotification(`The folder "${name}" was created`)
+            // TODO Show success notification by beautiful lib
+            // alert(`The folder "${name}" was created`);
             form.reset();
         },
         onError: () => folderNameInput.value.focus()

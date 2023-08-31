@@ -16,16 +16,13 @@ class StoreFolderRequest extends ParentIdBaseRequest
     public function rules(): array
     {
         return [
-            ...parent::rules(),
-            ...[
-                'name' => [
-                    'required',
-                    Rule::unique(File::class, 'name')
-                        ->where('created_by', Auth::id())
-                        ->where('parent_id',  $this->parent?->id)
-                        ->whereNull('deleted_at')
-                ],
-            ]
+            'name' => [
+                'required',
+                Rule::unique(File::class, 'name')
+                    ->where('created_by', Auth::id())
+                    ->where('parent_id', $this->parentFolder->id)
+                    ->whereNull('deleted_at')
+            ],
         ];
     }
 
