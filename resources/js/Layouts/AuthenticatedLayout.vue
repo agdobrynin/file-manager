@@ -61,9 +61,6 @@ const handleDrop = (e) => {
  */
 const uploadFiles = (files) => {
     if (files.length) {
-        // TODO delete debug.
-        console.log(files);
-
         fileUploadForm.files = [...files];
         fileUploadForm.relativePaths = [...files].map((file) => file.webkitRelativePath);
 
