@@ -1,6 +1,5 @@
 <?php
 
-use App\Helpers\PhpConfig;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -26,12 +25,6 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-
-Inertia::share('upload', static fn() => [
-    'maxUploadFiles' => PhpConfig::maxUploadFiles(),
-    'maxUploadFileBytes' => PhpConfig::maxUploadFileBytes(),
-    'maxPostBytes' => PhpConfig::maxPostBytes(),
-]);
 
 Route::middleware(['auth', 'verified'])->group(static function () {
     Route::get('/dashboard', static function () {

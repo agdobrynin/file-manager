@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\PhpConfig;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
@@ -39,6 +40,11 @@ class HandleInertiaRequests extends Middleware
                     'location' => $request->url(),
                 ]);
             },
+            'upload' => [
+                'maxUploadFiles' => PhpConfig::maxUploadFiles(),
+                'maxUploadFileBytes' => PhpConfig::maxUploadFileBytes(),
+                'maxPostBytes' => PhpConfig::maxPostBytes(),
+            ]
         ]);
     }
 }
