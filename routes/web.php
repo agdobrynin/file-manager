@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\PhpConfig;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -26,6 +27,12 @@ Route::get('/', function () {
     ]);
 });
 
+Inertia::share('upload', static fn() => [
+    'maxUploadFiles' => PhpConfig::maxUploadFiles(),
+    'maxUploadFileBytes' => PhpConfig::maxUploadFileBytes(),
+    'maxPostBytes' => PhpConfig::maxPostBytes(),
+]);
+
 Route::middleware(['auth', 'verified'])->group(static function () {
     Route::get('/dashboard', static function () {
         return Inertia::render('Dashboard');
@@ -36,6 +43,9 @@ Route::middleware(['auth', 'verified'])->group(static function () {
 
     Route::post('/folder/create/{parentFolder?}', [FileController::class, 'createFolder'])
         ->name('folder.create');
+
+    Route::post('/file/{parentFolder?}', [FileController::class, 'upload'])
+        ->name('file.upload');
 
 });
 

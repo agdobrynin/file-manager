@@ -33,23 +33,12 @@ class File extends Model
         'is_folder' => 'boolean'
     ];
 
-    /**
-     * @throws ModelNotFoundException
-     */
-    public static function rootFolderByUser(?User $user): File
-    {
-        return File::query()
-            ->whereIsRoot()
-            ->where('created_by', $user?->getAuthIdentifier())
-            ->firstOrFail();
-    }
-
     public static function makeRootByUser(User $user): File
     {
         try {
-            return static::rootFolderByUser($user);
+            return self::rootFolderByUser($user);
         } catch (ModelNotFoundException $exception) {
-            $file = File::make([
+            $file = self::make([
                 'name' => $user->email,
                 'is_folder' => true,
             ]);
@@ -58,6 +47,27 @@ class File extends Model
 
             return $file;
         }
+    }
+
+    /**
+     * @throws ModelNotFoundException
+     */
+    public static function rootFolderByUser(?User $user): File
+    {
+        return self::query()
+            ->whereIsRoot()
+            ->where('created_by', $user?->getAuthIdentifier())
+            ->firstOrFail();
+    }
+
+    public static function isUniqueName(string $name, User $user, File $parentFolder): bool
+    {
+        return self::query()
+            ->where('created_by', $user->getAuthIdentifier())
+            ->where('name', $name)
+            ->where('parent_id', $parentFolder->id)
+            ->whereNull('deleted_at')
+            ->exists();
     }
 
     protected static function boot(): void
@@ -98,7 +108,7 @@ class File extends Model
     public function scopeMyFiles(Builder $builder, User $user, MyFilesFilterDto $dto, File $folder): Builder
     {
         if ($dto->search) {
-            $builder->where('name', 'like', "%{$dto->search}%");
+            $builder->where('name', 'like', "%$dto->search%");
         } else {
             $builder->where('parent_id', $folder->id);
         }

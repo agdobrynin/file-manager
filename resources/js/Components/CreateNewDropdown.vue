@@ -36,8 +36,11 @@
                         </MenuItem>
                         <MenuItem v-slot="{ active }" class="flex gap-2.5 items-center">
                             <ResponsiveNavLink
-                                href="/"
-                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
+                                href="#"
+                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm relative']">
+                                <input type="file" @change="uploadFiles"
+                                       class="w-full absolute opacity-0 cursor-pointer"
+                                       multiple/>
                                 <DocumentPlusIcon class="w-6 h-6"/>
                                 <span>Upload files</span>
                             </ResponsiveNavLink>
@@ -45,7 +48,10 @@
                         <MenuItem v-slot="{ active }" class="flex gap-2.5 items-center">
                             <ResponsiveNavLink
                                 href="/"
-                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
+                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm relative']">
+                                <input type="file" @change="uploadFiles"
+                                       class="w-full absolute opacity-0 cursor-pointer"
+                                       multiple webkitdirectory mozdirectory/>
                                 <FolderArrowDownIcon class="w-6 h-auto"/>
                                 <span>Upload folder</span>
                             </ResponsiveNavLink>
@@ -64,7 +70,26 @@ import { DocumentPlusIcon, FolderArrowDownIcon, FolderPlusIcon } from "@heroicon
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import CreateFolderModal from "@/Components/CreateFolderModal.vue";
-import { ref } from "vue";
+import { onUnmounted, ref } from "vue";
+import { emitter, errorMessage, FILES_CHOOSE } from "@/event-bus.js";
+import { usePage } from "@inertiajs/vue3";
 
 const createFolderShow = ref(false);
+
+const page = usePage();
+
+/**
+ * @param {Event} e
+ */
+const uploadFiles = (e) => {
+    const maxUpload = page.props.upload.maxUploadFiles;
+
+    if (maxUpload >= e.target.files.length) {
+        emitter.emit(FILES_CHOOSE, e.target.files);
+    } else {
+        errorMessage(`Available maximum upload ${maxUpload} files`);
+    }
+}
+
+onUnmounted(() => emitter.off(FILES_CHOOSE));
 </script>

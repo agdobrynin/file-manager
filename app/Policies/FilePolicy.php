@@ -27,7 +27,7 @@ class FilePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function createFolder(User $user, File $parent): bool
+    public function create(User $user, File $parent): bool
     {
         return $parent->isOwnedByUser($user) && $parent->isFolder();
     }

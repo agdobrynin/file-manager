@@ -9,7 +9,7 @@
     >
         <div v-if="show"
              @click="close"
-             class="cursor-pointer fixed top-2.5 right-2.5 text-white py-2 px-4 rounded-lg shadow-md w-[200px]"
+             class="cursor-pointer fixed top-2.5 right-2.5 text-white py-2 px-4 rounded-lg shadow-md w-[200px] text-center"
              :class="{
                 'bg-emerald-500': type === 'success',
                 'bg-red-500': type === 'error'
