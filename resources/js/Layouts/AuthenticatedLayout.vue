@@ -34,6 +34,8 @@ import Notification from "@/Components/Notification.vue";
 import { emitter, errorMessage, FILES_CHOOSE, successMessage } from "@/event-bus.js";
 import { onMounted, ref } from "vue";
 import { useForm, usePage } from "@inertiajs/vue3";
+import { fromEvent } from "file-selector";
+
 
 const page = usePage();
 const over = ref(false);
@@ -51,18 +53,20 @@ const onDragLeave = () => over.value = false;
  *
  * @param {DragEvent} e
  */
-const handleDrop = (e) => {
+const handleDrop = async (e) => {
     over.value = false;
-    uploadFiles(e.dataTransfer.files);
+    uploadFiles(await fromEvent(e));
 };
 
 /**
- * @param {FileList} files
+ * @param {FileList|File[]} files
  */
 const uploadFiles = (files) => {
     if (files.length) {
         fileUploadForm.files = [...files];
-        fileUploadForm.relativePaths = [...files].map((file) => file.webkitRelativePath);
+        fileUploadForm.relativePaths = [...files].map((file) => file.path?.replace(/^\//, '') || file.webkitRelativePath || file.name);
+
+        // TODO before upload make test unique load folders and files.
 
         fileUploadForm.post(route('file.upload', { parentFolder: page.props.parentId || null }), {
             onSuccess: () => {

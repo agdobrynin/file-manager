@@ -5,6 +5,9 @@
         <div class="overflow-y-auto">
             <NavMyFolders :ancestors="ancestors.data || []" @openFolder="openFolder" class="whitespace-nowrap"/>
         </div>
+        <div class="mb-4 border p-2 rounded-md">
+            <CreateNewDropdown/>
+        </div>
         <div class="max-w-7xl overflow-auto">
             <div class="bg-white shadow sm:rounded-lg">
                 <table class="min-w-full">
@@ -49,6 +52,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
+import CreateNewDropdown from "@/Components/CreateNewDropdown.vue";
 
 
 defineProps({

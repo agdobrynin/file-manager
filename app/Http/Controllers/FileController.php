@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\MyFilesFilterDto;
-use App\Dto\StoreFolderDto;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\MyFilesRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
+use App\Jobs\MoveFileToCloud;
 use App\Models\File;
+use App\VO\FileFolderVO;
 use App\VO\UploadFilesVO;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
@@ -16,10 +18,7 @@ use Throwable;
 
 class FileController extends Controller
 {
-    public function myFiles(
-        MyFilesRequest $request,
-        ?File          $parentFolder = null,
-    ): Response
+    public function myFiles(MyFilesRequest $request): Response
     {
         $this->authorize('view', $request->parentFolder);
 
@@ -38,16 +37,12 @@ class FileController extends Controller
         ]);
     }
 
-    public function createFolder(StoreFolderRequest $request, ?File $parentFolder = null): RedirectResponse
+    public function createFolder(StoreFolderRequest $request): RedirectResponse
     {
         $this->authorize('create', $request->parentFolder);
-
-        $dto = new StoreFolderDto(...$request->validated());
+        $newFolder = new FileFolderVO(...$request->validated());
         /** @var File $file */
-        $file = File::make([
-            'name' => $dto->name,
-            'is_folder' => true,
-        ]);
+        $file = File::query()->make($newFolder->toArray());
 
         $file->appendToNode($request->parentFolder)->save();
 
@@ -57,15 +52,16 @@ class FileController extends Controller
     /**
      * @throws Throwable
      */
-    public function upload(FileUploadRequest $request, ?File $parentFolder = null): RedirectResponse
+    public function upload(FileUploadRequest $request, UploadTreeFilesServiceInterface $filesService): RedirectResponse
     {
         $this->authorize('create', $request->parentFolder);
 
         $vo = new UploadFilesVO(...$request->validated());
+        $files = $filesService->upload($request->parentFolder, $vo->tree);
 
-        // TODO add to local storage
-        // TODO save File model
-        // TODO Dispatch job for loading to cloud (MinIO) - job delete from local storage after load to cloud
+        foreach ($files as $file) {
+            MoveFileToCloud::dispatch($file);
+        }
 
         return to_route('my.files', ['parentFolder' => $request->parentFolder]);
     }

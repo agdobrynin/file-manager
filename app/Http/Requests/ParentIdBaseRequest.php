@@ -14,9 +14,15 @@ class ParentIdBaseRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $this->parentFolder = $this->route('parentFolder') ?: File::rootFolderByUser($this->user());
+        if ($parentFolder = $this->route('parentFolder')) {
+            $this->parentFolder = File::findOrFail($parentFolder);
 
-        return $this->parentFolder->isFolder();
+            return $this->parentFolder->isFolder();
+        }
+
+        $this->parentFolder = File::rootFolderByUser($this->user());
+
+        return true;
     }
 
     /**

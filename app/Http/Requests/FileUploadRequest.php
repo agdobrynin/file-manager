@@ -9,6 +9,8 @@ use Illuminate\Http\UploadedFile;
 
 class FileUploadRequest extends ParentIdBaseRequest
 {
+    protected const RELATIVE_PATHS_KEY = 'relativePaths';
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -17,6 +19,24 @@ class FileUploadRequest extends ParentIdBaseRequest
     public function rules(): array
     {
         return [
+            self::RELATIVE_PATHS_KEY => [
+                'required',
+                'array',
+                function (string $attribute, array $values, Closure $fail) {
+                    if (($max = PhpConfig::maxUploadFiles()) && $max < count($values)) {
+                        $fail('Maximum available ' . $max . ' files for upload.');
+                    }
+                },
+            ],
+            self::RELATIVE_PATHS_KEY . '.*' => [
+                'string',
+                function (string $attribute, string $value, Closure $fail) {
+                    if (($folder = explode('/', $value)[0])
+                        && File::isUniqueName($folder, $this->user(), $this->parentFolder)) {
+                        $fail('Folder "' . $folder . '" already exist for file ' . $value);
+                    }
+                },
+            ],
             'files.*' => [
                 'required',
                 'file',
@@ -24,29 +44,9 @@ class FileUploadRequest extends ParentIdBaseRequest
                     /** @var UploadedFile $value */
                     $name = $value->getClientOriginalName();
 
-                    if (File::isUniqueName($name, $this->user(), $this->parentFolder)) {
+                    if (in_array($name, $this->input(self::RELATIVE_PATHS_KEY), true)
+                        && File::isUniqueName($name, $this->user(), $this->parentFolder)) {
                         $fail('File "' . $name . '" already exist.');
-                    }
-                },
-            ],
-            'relativePaths' => [
-                'required',
-                'array',
-                function (string $attr, array $values, Closure $fail) {
-                    if (($max = PhpConfig::maxUploadFiles()) && $max < count($values)) {
-                        $fail('Maximum available ' . $max . ' files for upload.');
-                    }
-                },
-            ],
-            'folderName' => [
-                'nullable',
-                'string',
-                'min:1',
-                function (string $attr, ?string $value, Closure $fail) {
-                    if ($value) {
-                        if (File::isUniqueName($value, $this->user(), $this->parentFolder)) {
-                            $fail('Folder "' . $value . '" already exist.');
-                        }
                     }
                 },
             ],
@@ -58,8 +58,11 @@ class FileUploadRequest extends ParentIdBaseRequest
      */
     protected function prepareForValidation(): void
     {
+        // Remove lead slash.
+        $relativePathsFixed = array_map(static fn($item) => ltrim($item, '/'), $this->{self::RELATIVE_PATHS_KEY});
+
         $this->merge([
-            'folderName' => explode('/', $this->relativePaths[0])[0] ?: null
+            self::RELATIVE_PATHS_KEY => $relativePathsFixed,
         ]);
     }
 }

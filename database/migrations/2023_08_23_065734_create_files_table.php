@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,14 +16,15 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('name', 1024);
-            $table->string('path', 1024)->nullable();
+            $table->string('disk');
+            $table->text('path')->nullable();
             $table->nestedSet();
             $table->boolean('is_folder');
             $table->string('mime')->nullable();
-            $table->integer('size')->nullable();
+            $table->unsignedBigInteger('size')->nullable();
             $table->softDeletes();
-            $table->foreignIdFor(\App\Models\User::class, 'created_by');
-            $table->foreignIdFor(\App\Models\User::class, 'updated_by');
+            $table->foreignIdFor(User::class, 'created_by');
+            $table->foreignIdFor(User::class, 'updated_by');
         });
     }
 

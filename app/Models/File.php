@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Dto\MyFilesFilterDto;
+use App\Enums\DiskEnum;
 use App\Traits\HasCreatorAndUpdater;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -12,25 +13,24 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Kalnoy\Nestedset\NodeTrait;
 
 class File extends Model
 {
-    use HasFactory;
-    use NodeTrait;
-    use SoftDeletes;
-    use HasCreatorAndUpdater;
+    use HasFactory, NodeTrait, SoftDeletes, HasCreatorAndUpdater;
 
     protected $fillable = [
         'name',
+        'disk',
         'path',
         'is_folder',
         'mime',
         'size',
     ];
+
     protected $casts = [
-        'is_folder' => 'boolean'
+        'is_folder' => 'boolean',
+        'disk' => DiskEnum::class,
     ];
 
     public static function makeRootByUser(User $user): File
@@ -41,6 +41,7 @@ class File extends Model
             $file = self::make([
                 'name' => $user->email,
                 'is_folder' => true,
+                'disk' => DiskEnum::LOCAL,
             ]);
 
             $file->makeRoot()->save();
@@ -75,10 +76,8 @@ class File extends Model
         parent::boot();
 
         static::creating(static function (File $model) {
-            if ($model->parent) {
-                $model->path = ($model->isRoot() ? '' : $model->parent->path . '/')
-                    . Str::slug($model->name);
-
+            if (!$model->isRoot() && $model->is_folder) {
+                $model->path = ($model->parent->path ? $model->parent->path . '/' : '') . $model->name;
             }
         });
     }
@@ -86,13 +85,6 @@ class File extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function owner(): Attribute
-    {
-        return Attribute::make(
-            get: fn(mixed $value, array $attr) => $attr['created_by'] === Auth::id() ? 'me' : $this->user->name
-        );
     }
 
     public function isOwnedByUser(?User $user): bool
@@ -116,5 +108,19 @@ class File extends Model
         return $builder->where('created_by', '=', $user->getAuthIdentifier())
             ->orderBy('is_folder', 'desc')
             ->orderBy('created_at', 'desc');
+    }
+
+    protected function owner(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value, array $attr) => $attr['created_by'] === Auth::id() ? 'me' : $this->user->name
+        );
+    }
+
+    protected function disk(): Attribute
+    {
+        return Attribute::make(
+            set: static fn(DiskEnum $value) => $value->value,
+        );
     }
 }

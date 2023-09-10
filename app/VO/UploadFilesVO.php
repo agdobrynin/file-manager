@@ -9,45 +9,39 @@ use Throwable;
 readonly class UploadFilesVO
 {
     /**
-     * @var UploadedFile[]|null
+     * @var array<string, UploadedFile|array<string|UploadedFile>>|null
      */
-    public ?array $files;
-    /**
-     * @var array<string, array<string|UploadedFile, string|UploadedFile>>|null
-     */
-    public ?array $tree;
+    public array $tree;
 
     /**
      * @throws Throwable
      */
     public function __construct(
-        array   $files,
-        array   $relativePaths,
-        ?string $folderName,
+        array $files,
+        array $relativePaths,
     )
     {
+        throw_unless(
+            count($files) === count($relativePaths),
+            message: 'The number of elements of the input arrays must be equal to.'
+        );
+
         foreach ($files as $file) {
-            throw_unless($file instanceof UploadedFile, message: 'All uploaded file must be instance of ' . UploadedFile::class);
+            throw_unless(
+                $file instanceof UploadedFile,
+                message: 'All uploaded file must be instance of ' . UploadedFile::class
+            );
         }
 
-        if ($folderName) {
-            $this->tree = $this->makeTree($files, $relativePaths);
-            $this->files = null;
-        } else {
-            $this->files = $files;
-            $this->tree = null;
-        }
+        $this->tree = $this->makeTree($files, $relativePaths);
     }
 
     protected function makeTree(array $files, array $paths): array
     {
-        $filePaths = array_slice($paths, 0, count($files));
-        $filePaths = array_filter($filePaths, static fn($f) => $f !== null);
-
         $tree = [];
 
-        foreach ($filePaths as $ind => $filePath) {
-            $parts = explode('/', $filePath);
+        foreach ($paths as $ind => $path) {
+            $parts = explode('/', $path);
 
             $currentNode = &$tree;
 

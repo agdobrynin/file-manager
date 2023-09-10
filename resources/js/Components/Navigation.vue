@@ -7,9 +7,6 @@
       </Link>
     </div>
     <div class="px-3">
-      <div class="px-3">
-        <CreateNewDropdown/>
-      </div>
       <div class="py-3">
         <NavLink :href="route('my.files')" :active="$page.url.startsWith(route('my.files', [], false))" class="flex gap-2">
           <CloudIcon class="w-7 h-auto"/>
