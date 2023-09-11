@@ -22,7 +22,7 @@ class StoreFolderRequest extends ParentIdBaseRequest
                 'not_regex:/[:*?<>|\/\\\]/',
                 Rule::unique(File::class, 'name')
                     ->where('created_by', Auth::id())
-                    ->where('parent_id', $this->parentFolder->id)
+                    ->where('parent_id', $this->parentFolder?->id ?? File::rootFolderByUser(Auth::user())->id)
                     ->whereNull('deleted_at')
             ],
         ];

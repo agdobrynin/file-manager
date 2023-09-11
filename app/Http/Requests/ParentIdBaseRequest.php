@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ParentIdBaseRequest extends FormRequest
 {
-    public File $parentFolder;
+    public ?File $parentFolder = null;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -19,8 +19,6 @@ class ParentIdBaseRequest extends FormRequest
 
             return $this->parentFolder->isFolder();
         }
-
-        $this->parentFolder = File::rootFolderByUser($this->user());
 
         return true;
     }

@@ -20,18 +20,19 @@ class FileController extends Controller
 {
     public function myFiles(MyFilesRequest $request): Response
     {
-        $this->authorize('view', $request->parentFolder);
+        $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
+        $this->authorize('view', $parentFolder);
 
         $dto = new MyFilesFilterDto(...$request->validated());
 
-        $files = File::myFiles($request->user(), $dto, $request->parentFolder)->get();
+        $files = File::myFiles($request->user(), $dto, $parentFolder)->get();
 
         $fileResourceCollection = FileResource::collection($files);
-        $ancestors = FileResource::collection([...$request->parentFolder->ancestors, $request->parentFolder]);
+        $ancestors = FileResource::collection([...$parentFolder->ancestors, $parentFolder]);
 
         return inertia(
             'MyFiles', [
-            'parentId' => $request->parentFolder->id,
+            'parentId' => $parentFolder->id,
             'files' => $fileResourceCollection,
             'ancestors' => $ancestors,
         ]);
@@ -39,14 +40,15 @@ class FileController extends Controller
 
     public function createFolder(StoreFolderRequest $request): RedirectResponse
     {
-        $this->authorize('create', $request->parentFolder);
+        $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
+        $this->authorize('create', $parentFolder);
         $newFolder = new FileFolderVO(...$request->validated());
         /** @var File $file */
         $file = File::query()->make($newFolder->toArray());
 
-        $file->appendToNode($request->parentFolder)->save();
+        $file->appendToNode($parentFolder)->save();
 
-        return to_route('my.files', ['parentFolder' => $request->parentFolder]);
+        return to_route('my.files', ['parentFolder' => $parentFolder]);
     }
 
     /**
@@ -54,15 +56,16 @@ class FileController extends Controller
      */
     public function upload(FileUploadRequest $request, UploadTreeFilesServiceInterface $filesService): RedirectResponse
     {
-        $this->authorize('create', $request->parentFolder);
+        $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
+        $this->authorize('create', $parentFolder);
 
         $vo = new UploadFilesVO(...$request->validated());
-        $files = $filesService->upload($request->parentFolder, $vo->tree);
+        $files = $filesService->upload($parentFolder, $vo->tree);
 
         foreach ($files as $file) {
             MoveFileToCloud::dispatch($file);
         }
 
-        return to_route('my.files', ['parentFolder' => $request->parentFolder]);
+        return to_route('my.files', ['parentFolder' => $parentFolder]);
     }
 }

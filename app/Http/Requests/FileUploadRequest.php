@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\File;
+use App\Models\User;
 use Closure;
+use Illuminate\Support\Facades\Auth;
 
 class FileUploadRequest extends ParentIdBaseRequest
 {
@@ -28,8 +30,9 @@ class FileUploadRequest extends ParentIdBaseRequest
                 function (string $attribute, array $values, Closure $fail) {
                     $maxCountFiles = config('upload_files.upload.max_files');
 
-                    if (($max = $maxCountFiles) && $max < count($values)) {
-                        $fail('Maximum available ' . $max . ' files for upload.');
+                    if ($maxCountFiles < count($values)) {
+                        $fail('Maximum available ' . $maxCountFiles . ' files for upload.');
+                        return;
                     }
 
                     $firstLevelFolders = collect();
@@ -48,13 +51,18 @@ class FileUploadRequest extends ParentIdBaseRequest
                         }
                     }
 
-                    $folders = File::existNames($firstLevelFolders->unique()->toArray(), $this->user(), $this->parentFolder);
+                    /** @var User $user */
+                    $user = Auth::user();
+                    $parentFolder = $this->parentFolder ?: File::rootFolderByUser($user);
+
+
+                    $folders = File::existNames($firstLevelFolders->unique()->toArray(), $user, $parentFolder);
 
                     foreach ($folders->pluck('name')->toArray() as $index => $folder) {
                         $this->validator->errors()->add('folder.' . $index, 'Folder "' . $folder . '" already exist');
                     }
 
-                    $files = File::existNames($firstLevelFiles->unique()->toArray(), $this->user(), $this->parentFolder);
+                    $files = File::existNames($firstLevelFiles->unique()->toArray(), $user, $parentFolder);
 
                     foreach ($files->pluck('name')->toArray() as $index => $file) {
                         $this->validator->errors()->add('file.' . $index, 'File "' . $file . '" already exist');
