@@ -28,7 +28,7 @@
                         <MenuItem v-slot="{ active }" class="flex gap-2.5 items-center">
                             <ResponsiveNavLink
                                 href="#"
-                                @click.prevent="createFolderShow = true"
+                                @click="createFolderShow = true"
                                 :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">
                                 <FolderPlusIcon class="w-6 h-auto"/>
                                 <span>New Folder</span>
@@ -60,7 +60,7 @@
                 </MenuItems>
             </transition>
         </Menu>
-        <CreateFolderModal :show="createFolderShow" @close="createFolderShow = false"/>
+        <CreateFolderModal :show="createFolderShow" @closeModal="createFolderShow = false"/>
     </div>
 </template>
 

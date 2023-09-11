@@ -1,5 +1,5 @@
 <template>
-    <Modal :show="show" max-width="sm" @show="setFocus">
+    <Modal :show="show" @close="closeModal" max-width="sm" @show="setFocus" :closeable="true">
         <div class="p-5">
             <h2 class="text-lg font-medium">Create new folder</h2>
             <div class="mt-5">
@@ -56,14 +56,14 @@ const page = usePage();
 
 const folderNameInput = ref(null)
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close-modal']);
 
 const setFocus = () => nextTick(() => folderNameInput.value?.focus());
 
 const closeModal = () => {
-    emit('close');
     form.clearErrors();
     form.reset()
+    emit('close-modal');
 };
 
 const createFolder = () => {
@@ -73,9 +73,7 @@ const createFolder = () => {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();
-            // Emit success message
             successMessage(`The folder "${name}" was created`);
-            form.reset();
         },
         onError: () => folderNameInput.value.focus()
     });
