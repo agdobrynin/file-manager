@@ -7,6 +7,7 @@ use App\Enums\DiskEnum;
 use App\Traits\HasCreatorAndUpdater;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -61,14 +62,14 @@ class File extends Model
             ->firstOrFail();
     }
 
-    public static function isUniqueName(string $name, User $user, File $parentFolder): bool
+    public static function existNames(array $names, User $user, File $parentFolder): Collection
     {
         return self::query()
             ->where('created_by', $user->getAuthIdentifier())
-            ->where('name', $name)
             ->where('parent_id', $parentFolder->id)
             ->whereNull('deleted_at')
-            ->exists();
+            ->whereIn('name', $names)
+            ->get();
     }
 
     protected static function boot(): void

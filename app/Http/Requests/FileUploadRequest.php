@@ -5,11 +5,12 @@ namespace App\Http\Requests;
 use App\Helpers\PhpConfig;
 use App\Models\File;
 use Closure;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 
 class FileUploadRequest extends ParentIdBaseRequest
 {
     protected const RELATIVE_PATHS_KEY = 'relativePaths';
+    protected const FILES_KEY = 'files';
 
     /**
      * Get the validation rules that apply to the request.
@@ -19,6 +20,10 @@ class FileUploadRequest extends ParentIdBaseRequest
     public function rules(): array
     {
         return [
+            self::FILES_KEY . '.*' => [
+                'required',
+                'file',
+            ],
             self::RELATIVE_PATHS_KEY => [
                 'required',
                 'array',
@@ -26,27 +31,32 @@ class FileUploadRequest extends ParentIdBaseRequest
                     if (($max = PhpConfig::maxUploadFiles()) && $max < count($values)) {
                         $fail('Maximum available ' . $max . ' files for upload.');
                     }
-                },
-            ],
-            self::RELATIVE_PATHS_KEY . '.*' => [
-                'string',
-                function (string $attribute, string $value, Closure $fail) {
-                    if (($folder = explode('/', $value)[0])
-                        && File::isUniqueName($folder, $this->user(), $this->parentFolder)) {
-                        $fail('Folder "' . $folder . '" already exist for file ' . $value);
-                    }
-                },
-            ],
-            'files.*' => [
-                'required',
-                'file',
-                function (string $attribute, mixed $value, Closure $fail) {
-                    /** @var UploadedFile $value */
-                    $name = $value->getClientOriginalName();
 
-                    if (in_array($name, $this->input(self::RELATIVE_PATHS_KEY), true)
-                        && File::isUniqueName($name, $this->user(), $this->parentFolder)) {
-                        $fail('File "' . $name . '" already exist.');
+                    $firstLevelFolders = collect();
+                    $firstLevelFiles = collect();
+
+                    foreach ($this->input(self::RELATIVE_PATHS_KEY) as $index => $path) {
+                        $folder = explode('/', $path)[0];
+
+                        if ($folder === $path) {
+                            $firstLevelFiles->add($this->allFiles()[self::FILES_KEY][$index]->getClientOriginalName());
+                        }
+
+                        if ($folder !== $path) {
+                            $firstLevelFolders->add($folder);
+                        }
+                    }
+
+                    $folders = File::existNames($firstLevelFolders->unique()->toArray(), $this->user(), $this->parentFolder);
+
+                    if ($names = $folders->pluck('name')->implode(', ')) {
+                        $fail(Str::plural('Folder', $folders->count()) . ' "' . $names . '" already exist');
+                    }
+
+                    $files = File::existNames($firstLevelFiles->unique()->toArray(), $this->user(), $this->parentFolder);
+
+                    if ($names = $files->pluck('name')->implode(', ')) {
+                        $fail(Str::plural('File', $files->count()) . ' "' . $names . '" already exist');
                     }
                 },
             ],
