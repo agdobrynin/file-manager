@@ -9,12 +9,12 @@
     >
         <div v-if="show"
              @click="close"
-             class="cursor-pointer fixed top-2.5 right-2.5 text-white py-2 px-4 rounded-lg shadow-md w-[200px] text-center"
+             class="cursor-pointer fixed top-2.5 right-2.5 text-white py-2 px-4 rounded-lg shadow-md w-[200px]"
              :class="{
                 'bg-emerald-500': typeOfMessage === 'success',
                 'bg-red-500': typeOfMessage === 'error'
             }">
-            <ul v-if="displayMessages && displayMessages.length">
+            <ul v-if="displayMessages && displayMessages.length" :class="[displayMessages.length > 1 ? 'list-disc' : '', 'p-2']">
                 <li v-for="(msg, index) in displayMessages" :key="index">
                     {{ msg }}
                 </li>

@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Models\File;
 use Closure;
-use Illuminate\Support\Str;
 
 class FileUploadRequest extends ParentIdBaseRequest
 {
@@ -51,14 +50,14 @@ class FileUploadRequest extends ParentIdBaseRequest
 
                     $folders = File::existNames($firstLevelFolders->unique()->toArray(), $this->user(), $this->parentFolder);
 
-                    if ($names = $folders->pluck('name')->implode(', ')) {
-                        $fail(Str::plural('Folder', $folders->count()) . ' "' . $names . '" already exist');
+                    foreach ($folders->pluck('name')->toArray() as $index => $folder) {
+                        $this->validator->errors()->add('folder.' . $index, 'Folder "' . $folder . '" already exist');
                     }
 
                     $files = File::existNames($firstLevelFiles->unique()->toArray(), $this->user(), $this->parentFolder);
 
-                    if ($names = $files->pluck('name')->implode(', ')) {
-                        $fail(Str::plural('File', $files->count()) . ' "' . $names . '" already exist');
+                    foreach ($files->pluck('name')->toArray() as $index => $file) {
+                        $this->validator->errors()->add('file.' . $index, 'File "' . $file . '" already exist');
                     }
                 },
             ],
