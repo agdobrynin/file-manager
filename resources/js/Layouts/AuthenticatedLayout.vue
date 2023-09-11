@@ -75,7 +75,14 @@ const uploadFiles = (files) => {
                 );
             },
             onError: errors => {
-                errorMessage(errors);
+                /**
+                 * @type {string|string[]}
+                 */
+                const message = Object.keys(errors).length > 0
+                    ? Object.values(errors)
+                    : 'Error during file upload. Please try again later.';
+
+                errorMessage(message);
             },
             onFinish: () => {
                 fileUploadForm.clearErrors()
