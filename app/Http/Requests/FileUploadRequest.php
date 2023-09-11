@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Helpers\PhpConfig;
 use App\Models\File;
 use Closure;
 use Illuminate\Support\Str;
@@ -28,7 +27,9 @@ class FileUploadRequest extends ParentIdBaseRequest
                 'required',
                 'array',
                 function (string $attribute, array $values, Closure $fail) {
-                    if (($max = PhpConfig::maxUploadFiles()) && $max < count($values)) {
+                    $maxCountFiles = config('upload_files.upload.max_files');
+
+                    if (($max = $maxCountFiles) && $max < count($values)) {
                         $fail('Maximum available ' . $max . ' files for upload.');
                     }
 
