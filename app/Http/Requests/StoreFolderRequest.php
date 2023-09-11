@@ -32,7 +32,7 @@ class StoreFolderRequest extends ParentIdBaseRequest
     {
         return [
             'name.unique' => 'Folder ":input" already exist',
-            'not_regex' => 'Folder name ":input" contain invalid symbols - : * ? < > | \ /'
+            'not_regex' => 'Folder name ":input" contain invalid symbols : * ? < > | \ /'
         ];
     }
 }
