@@ -11,10 +11,17 @@
              @click="close"
              class="cursor-pointer fixed top-2.5 right-2.5 text-white py-2 px-4 rounded-lg shadow-md w-[200px] text-center"
              :class="{
-                'bg-emerald-500': type === 'success',
-                'bg-red-500': type === 'error'
+                'bg-emerald-500': typeOfMessage === 'success',
+                'bg-red-500': typeOfMessage === 'error'
             }">
-            {{ message }}
+            <ul v-if="displayMessages && displayMessages.length">
+                <li v-for="(msg, index) in displayMessages" :key="index">
+                    {{ msg }}
+                </li>
+            </ul>
+            <div v-else>
+                Not found messages...
+            </div>
         </div>
     </transition>
 </template>
@@ -23,32 +30,38 @@
 import { onMounted, ref } from "vue";
 import { emitter, SHOW_NOTIFICATION } from "@/event-bus.js";
 
-const show = ref(false)
-const type = ref('success')
-const message = ref('')
+const show = ref(false);
+const typeOfMessage = ref('success');
+/**
+ * @type {string[]|null}
+ */
+const displayMessages = ref(null);
 
 const close = () => {
     show.value = false;
     type.value = '';
-    message.value = ''
+    displayMessages.value = null
 }
 
 
 onMounted(() => {
-    let timeout;
+    let timeoutPointer;
 
-    emitter.on(SHOW_NOTIFICATION, ({ type: t, message: msg }) => {
+    emitter.on(SHOW_NOTIFICATION, ({ type, message, timeout }) => {
         show.value = true;
-        type.value = t;
-        message.value = msg;
+        typeOfMessage.value = type || 'success';
 
-        if (timeout) {
-            clearTimeout(timeout);
+        if (message) {
+            displayMessages.value = !Array.isArray(message) ? [message] : message;
+        } else {
+            console.warn('Payload without key "messages"');
         }
 
-        timeout = setTimeout(() => {
-            close();
-        }, 5000);
+        if (timeoutPointer) {
+            clearTimeout(timeoutPointer);
+        }
+
+        timeoutPointer = setTimeout(() => close(), timeout || 5000);
     })
 })
 </script>
