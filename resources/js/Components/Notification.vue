@@ -31,15 +31,14 @@ import { onMounted, ref } from "vue";
 import { emitter, SHOW_NOTIFICATION } from "@/event-bus.js";
 
 const show = ref(false);
+
 const typeOfMessage = ref('success');
-/**
- * @type {string[]|null}
- */
+
 const displayMessages = ref(null);
 
 const close = () => {
     show.value = false;
-    type.value = '';
+    typeOfMessage.value = null;
     displayMessages.value = null
 }
 
