@@ -161,4 +161,21 @@ class StoreFolderRequestTest extends TestCase
 
         $this->assertFalse($request->authorize());
     }
+
+    public function test_empty_parameter_parent_folder(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        File::makeRootByUser($user);
+
+        $request = StoreFolderRequest::create('/folder/create', 'POST', ['name' => 'abc']);
+        $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
+
+        $this->assertTrue($request->authorize());
+        $this->assertNull($request->parentFolder);
+
+        $validator = Validator::make($request->validationData(), $request->rules());
+
+        $this->assertTrue($validator->passes());
+    }
 }
