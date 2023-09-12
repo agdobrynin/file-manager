@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,7 +23,7 @@ class FileResource extends JsonResource
             'parentId' => $this->parent_id,
             'isFolder' => $this->is_folder,
             'mime' => $this->mime,
-            'size' => $this->size,
+            'size' => $this->size ? Str::bytesForHumans($this->size) : '',
             'owner' => $this->owner,
             'createdAt' => $this->created_at->diffForHumans(),
             'updatedAt' => $this->updated_at->diffForHumans(),

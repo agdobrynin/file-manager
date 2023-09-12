@@ -19,4 +19,12 @@ class Str
             default => $from ?: null,
         };
     }
+
+    public static function bytesForHumans(int $bytes): string
+    {
+        $base = log($bytes) / log(1024);
+        $units = array(' bytes', ' kB', ' MB', ' GB', ' TB');
+
+        return round(1024 ** ($base - floor($base)), 2) . $units[floor($base)];
+    }
 }
