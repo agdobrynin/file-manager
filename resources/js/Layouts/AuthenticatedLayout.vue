@@ -5,7 +5,7 @@
           @dragover.prevent="onDragOver"
           @dragleave.prevent="onDragLeave"
           class="flex flex-col flex-1 overflow-hidden">
-      <template v-if="!over" class="px-4">
+      <template v-if="!over">
         <div class="flex items-center justify-between w-full">
           <SearchForm/>
           <UserSettingsDropdown/>
