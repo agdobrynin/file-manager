@@ -39,6 +39,7 @@ export const isCalc = (mime) => [
 
 export const isArchive = (mime) =>[
     'application/zip',
+    'application/x-zip-compressed',
 ].includes(mime.toLowerCase());
 
 export const isText = (mime) => [

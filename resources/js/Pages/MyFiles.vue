@@ -7,7 +7,7 @@
         <NavMyFolders :ancestors="ancestors.data || []" @openFolder="openFolder"/>
       </div>
     </div>
-    <div class="mb-4 border p-2 rounded-md">
+    <div class="mb-4 border p-2 rounded-md z-10">
       <CreateNewDropdown/>
     </div>
     <div class="w-full overflow-auto">
@@ -27,8 +27,9 @@
               :class="[item.isFolder ? 'cursor-pointer' : '', 'my-files-table-row']"
               @click="openFolder(item)"
           >
-            <td class="my-files-table-cell">
-              {{ item.name }}
+            <td class="my-files-table-cell flex items-center gap-2">
+              <span><FileIcon :mime-type="item.mime" size="30"/></span>
+              <span>{{ item.name }}</span>
             </td>
             <td class="my-files-table-cell">
               {{ item.owner }}
@@ -55,6 +56,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
 import CreateNewDropdown from "@/Components/CreateNewDropdown.vue";
+import FileIcon from "@/Components/FileIcon.vue";
 
 
 defineProps({
