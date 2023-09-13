@@ -22,6 +22,12 @@
         </div>
       </template>
     </main>
+    <UploadProgress
+        v-if="progress"
+        class="absolute right-0 p-4 bg-white border border-gray-300 rounded-md shadow-2xl m-4 text-center"
+        :percent="progress"
+        :total-files="fileUploadForm.files.length"
+    />
     <Notification/>
   </div>
 </template>
@@ -32,9 +38,10 @@ import UserSettingsDropdown from "@/Components/UserSettingsDropdown.vue";
 import SearchForm from "@/Components/SearchForm.vue";
 import Notification from "@/Components/Notification.vue";
 import { emitter, errorMessage, FILES_CHOOSE, successMessage } from "@/event-bus.js";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useForm, usePage } from "@inertiajs/vue3";
 import { fromEvent } from "file-selector";
+import UploadProgress from "@/Components/UploadProgress.vue";
 
 
 const page = usePage();
@@ -44,6 +51,8 @@ const fileUploadForm = useForm({
   files: [],
   relativePaths: [],
 })
+
+const progress = computed(() => fileUploadForm.progress?.percentage || 0)
 
 const onDragOver = () => over.value = true;
 
@@ -63,7 +72,6 @@ const handleDrop = async (e) => {
  */
 const uploadFiles = (files) => {
   if (files.length) {
-
     const maxUpload = page.props.upload.maxUploadFiles;
 
     if (maxUpload < files.length) {
