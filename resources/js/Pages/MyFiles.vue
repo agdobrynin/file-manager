@@ -4,7 +4,7 @@
   <AuthenticatedLayout>
     <div class="mb-4">
       <div class="overflow-x-auto flex">
-        <NavMyFolders :ancestors="ancestors.data || []" @openFolder="openFolder"/>
+        <NavMyFolders :ancestors="ancestors.data || []" @openFolder="fileItemAction"/>
       </div>
     </div>
     <div class="mb-4 border p-2 rounded-md z-10">
@@ -24,8 +24,8 @@
           <tbody>
           <tr v-for="item of files.data"
               :key="item.id"
-              :class="[item.isFolder ? 'cursor-pointer' : '', 'my-files-table-row']"
-              @click="openFolder(item)"
+              class="cursor-pointer my-files-table-row"
+              @click="fileItemAction(item)"
           >
             <td class="my-files-table-cell flex items-center gap-2">
               <span><FileIcon :mime-type="item.mime" size="30"/></span>
@@ -57,6 +57,7 @@ import { Head, router } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
 import CreateNewDropdown from "@/Components/CreateNewDropdown.vue";
 import FileIcon from "@/Components/FileIcon.vue";
+import { errorMessage } from "@/event-bus.js";
 
 
 defineProps({
@@ -74,9 +75,11 @@ defineProps({
   }
 })
 
-const openFolder = (item) => {
+const fileItemAction = (item) => {
   if (item.isFolder) {
     router.visit(route('my.files', { parentFolder: item.id }))
+  } else {
+    errorMessage('File action not implemented yet')
   }
 };
 </script>
