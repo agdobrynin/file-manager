@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="mb-4 font-medium whitespace-nowrap">Upload {{ totalFiles }} files - {{ percent }}%</div>
-    <progress max="100" :value="percent"/>
+    <progress class="animate-pulse" max="100" :value="percent"/>
   </div>
 </template>
 
