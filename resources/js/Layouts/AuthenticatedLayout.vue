@@ -28,7 +28,7 @@
         :percent="progress"
         :total-files="fileUploadForm.files.length"
     />
-    <Notification/>
+    <Notification class="z-10"/>
   </div>
 </template>
 
