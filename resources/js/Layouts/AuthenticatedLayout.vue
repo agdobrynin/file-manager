@@ -76,11 +76,12 @@ const handleDrop = async (e) => {
 };
 
 /**
- * @param {FileList|File[]} files
+ * @param {FileList|File[]} uploadFiles
  */
-const uploadFiles = (files) => {
-  if (files.length) {
+const uploadFiles = (uploadFiles) => {
+  if (uploadFiles.length) {
     const { maxUploadFiles, maxPostBytes } = page.props.upload;
+    const files = Array.from(uploadFiles);
 
     const totalBytes = files.reduce((acc, file) => acc + file.size, 0);
 
