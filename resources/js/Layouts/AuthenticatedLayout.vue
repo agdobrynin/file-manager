@@ -6,7 +6,7 @@
           @dragleave.prevent="onDragLeave"
           class="flex flex-col flex-1 overflow-hidden">
       <template v-if="!over">
-        <div class="flex items-center justify-between w-full z-50">
+        <div class="flex items-center justify-between w-full z-20">
           <SearchForm/>
           <UserSettingsDropdown/>
         </div>
@@ -28,7 +28,7 @@
         :percent="progress"
         :total-files="fileUploadForm.files.length"
     />
-    <Notification class="z-10"/>
+    <Notification class="z-30"/>
   </div>
 </template>
 
