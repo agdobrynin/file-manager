@@ -49,6 +49,7 @@ import { computed, onMounted, ref } from "vue";
 import { useForm, usePage } from "@inertiajs/vue3";
 import { fromEvent } from "file-selector";
 import UploadProgress from "@/Components/UploadProgress.vue";
+import { bytesToSize } from "@/helpers/helper.js";
 
 
 const page = usePage();
@@ -79,7 +80,15 @@ const handleDrop = async (e) => {
  */
 const uploadFiles = (files) => {
   if (files.length) {
-    const maxUpload = page.props.upload.maxUploadFiles;
+    const { maxUpload, maxPostBytes } = page.props.upload;
+
+    const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+
+    if (maxPostBytes < totalSize) {
+      errorMessage(`Too large upload ${bytesToSize(totalSize)}. Max available ${bytesToSize(maxPostBytes)}.`);
+
+      return;
+    }
 
     if (maxUpload < files.length) {
       errorMessage(`Available maximum upload ${maxUpload} files`);
