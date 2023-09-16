@@ -16,7 +16,7 @@
         <table class="min-w-full">
           <thead class="bg-gray-100 border-b">
           <tr>
-            <th class="px-3">#</th>
+            <th class="px-3 text-left">#</th>
             <th class="my-files-table-head">Name</th>
             <th class="my-files-table-head">Owner</th>
             <th class="my-files-table-head">Last modified</th>
