@@ -70,18 +70,12 @@ import { DocumentPlusIcon, FolderArrowDownIcon, FolderPlusIcon } from "@heroicon
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import CreateFolderModal from "@/Components/CreateFolderModal.vue";
-import { onUnmounted, ref } from "vue";
+import { ref } from "vue";
 import { emitter, FILES_CHOOSE } from "@/event-bus.js";
-import { usePage } from "@inertiajs/vue3";
 
 const createFolderShow = ref(false);
-
-const page = usePage();
-
 /**
  * @param {Event} e
  */
 const uploadFiles = (e) => emitter.emit(FILES_CHOOSE, e.target.files);
-
-onUnmounted(() => emitter.off(FILES_CHOOSE));
 </script>

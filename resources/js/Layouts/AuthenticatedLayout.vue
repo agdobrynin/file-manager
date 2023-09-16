@@ -37,7 +37,14 @@ import Navigation from "@/Components/Navigation.vue";
 import UserSettingsDropdown from "@/Components/UserSettingsDropdown.vue";
 import SearchForm from "@/Components/SearchForm.vue";
 import Notification from "@/Components/Notification.vue";
-import { emitter, errorMessage, FILES_CHOOSE, successMessage } from "@/event-bus.js";
+import {
+  emitter,
+  errorMessage,
+  FILES_CHOOSE,
+  FILES_UPLOADED_FAILED,
+  FILES_UPLOADED_SUCCESS,
+  successMessage
+} from "@/event-bus.js";
 import { computed, onMounted, ref } from "vue";
 import { useForm, usePage } from "@inertiajs/vue3";
 import { fromEvent } from "file-selector";
@@ -89,6 +96,7 @@ const uploadFiles = (files) => {
         successMessage(
             `Upload ${fileUploadForm.files.length} file${fileUploadForm.files.length > 1? 's' : ''}`
         );
+        emitter.emit(FILES_UPLOADED_SUCCESS);
       },
       onError: errors => {
         /**
@@ -99,6 +107,8 @@ const uploadFiles = (files) => {
             : 'Error during file upload. Please try again later.';
 
         errorMessage(message);
+        emitter.emit(FILES_UPLOADED_FAILED);
+        page.props.errors = null;
       },
       onFinish: () => {
         fileUploadForm.clearErrors()

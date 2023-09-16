@@ -19,6 +19,10 @@ class FileUploadRequest extends ParentIdBaseRequest
      */
     public function rules(): array
     {
+        $this->redirect = $this->redirector
+            ->getUrlGenerator()
+            ->route('my.files', ['parentFolder' => $this->parentFolder]);
+
         return [
             self::FILES_KEY . '.*' => [
                 'required',

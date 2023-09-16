@@ -22,6 +22,7 @@ import {
 const props = defineProps({
   mimeType: {
     type: [String, null],
+    default: null,
   },
   size: {
     type: [Number, String],

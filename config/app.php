@@ -185,4 +185,9 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    // Additional config for application
+    'my_files' => [
+        'per_page' => env('MY_FILES_PER_PAGE', 10),
+    ],
+
 ];

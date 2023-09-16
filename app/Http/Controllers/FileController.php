@@ -12,6 +12,7 @@ use App\Jobs\MoveFileToCloud;
 use App\Models\File;
 use App\VO\FileFolderVO;
 use App\VO\UploadFilesVO;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
 use Throwable;
@@ -25,7 +26,11 @@ class FileController extends Controller
 
         $dto = new MyFilesFilterDto(...$request->validated());
 
-        $files = File::myFiles($request->user(), $dto, $parentFolder)->get();
+        /** @var Builder $query */
+        $query = File::myFiles($request->user(), $dto, $parentFolder);
+
+        $files = $query->paginate(config('app.my_files.per_page'))
+            ->withQueryString();
 
         $fileResourceCollection = FileResource::collection($files);
         $ancestors = FileResource::collection([...$parentFolder->ancestors, $parentFolder]);
