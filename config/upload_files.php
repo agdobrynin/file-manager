@@ -5,8 +5,8 @@ use App\Helpers\PhpConfig;
 
 return [
     'upload' => [
-        'max_files' => PhpConfig::maxUploadFiles(),
-        'max_bytes' => PhpConfig::maxUploadFileBytes(),
-        'max_post_bytes' => PhpConfig::maxPostBytes(),
+        'max_files' => PhpConfig::maxUploadFiles() ?: 10,
+        'max_bytes' => PhpConfig::maxUploadFileBytes() ?: 262144,
+        'max_post_bytes' => PhpConfig::maxPostBytes() ?: 262144,
     ]
 ];

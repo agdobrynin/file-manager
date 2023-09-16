@@ -80,18 +80,18 @@ const handleDrop = async (e) => {
  */
 const uploadFiles = (files) => {
   if (files.length) {
-    const { maxUpload, maxPostBytes } = page.props.upload;
+    const { maxUploadFiles, maxPostBytes } = page.props.upload;
 
-    const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+    const totalBytes = files.reduce((acc, file) => acc + file.size, 0);
 
-    if (maxPostBytes < totalSize) {
-      errorMessage(`Too large upload ${bytesToSize(totalSize)}. Max available ${bytesToSize(maxPostBytes)}.`);
+    if (maxPostBytes < totalBytes) {
+      errorMessage(`Too large upload ${bytesToSize(totalBytes)}. Max available ${bytesToSize(maxPostBytes)}.`);
 
       return;
     }
 
-    if (maxUpload < files.length) {
-      errorMessage(`Available maximum upload ${maxUpload} files`);
+    if (maxUploadFiles < files.length) {
+      errorMessage(`Available maximum upload ${maxUploadFiles} files`);
 
       return;
     }
