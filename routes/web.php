@@ -40,6 +40,9 @@ Route::middleware(['auth', 'verified'])->group(static function () {
     Route::post('/file/{parentFolder?}', [FileController::class, 'upload'])
         ->name('file.upload');
 
+    Route::delete('/file/{parentFolder?}', [FileController::class, 'destroy'])
+        ->name('file.destroy');
+
 });
 
 Route::middleware('auth')->group(function () {

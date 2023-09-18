@@ -7,9 +7,16 @@
         <NavMyFolders :ancestors="ancestors.data || []" @openFolder="fileItemAction"/>
       </div>
     </div>
-    <div class="mb-4 border p-2 rounded-md z-10 flex justify-between items-center">
-      <CreateNewDropdown/>
-      <div class="border rounded-md p-2 font-light bg-gray-100">Total items: {{ allFiles.total }}</div>
+    <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-2">
+      <div class="flex flex-wrap gap-2">
+        <CreateNewDropdown/>
+        <DeleteFiles
+            :all-files="checkedAllFiles"
+            :file-ids="checkedFileIds"
+            :parent-folder="parentId"
+            @delete-finish="deleteFinish"/>
+      </div>
+      <div class="border rounded-md p-2 bg-gray-100">Total items: {{ allFiles.total }}</div>
     </div>
     <div class="w-full overflow-auto">
       <div class="bg-white shadow sm:rounded-lg">
@@ -17,6 +24,11 @@
           <thead class="bg-gray-100 border-b">
           <tr>
             <th class="px-3 text-left">#</th>
+            <th>
+              <Checkbox
+                  v-model="checkedAllFiles"
+                  :checked="checkedAllFiles"/>
+            </th>
             <th class="my-files-table-head">Name</th>
             <th class="my-files-table-head">Owner</th>
             <th class="my-files-table-head">Last modified</th>
@@ -27,10 +39,18 @@
           <tr v-for="(item, index) of allFiles.files"
               :key="item.id"
               class="cursor-pointer my-files-table-row"
-              @click="fileItemAction(item)"
+              :class="[checkedAllFiles || isSelectFileItem(item) ? '!bg-indigo-400': '']"
+              @click="doSelectFileItem(item)"
+              @dblclick="fileItemAction(item)"
           >
             <td class="px-3 font-light text-sm text-slate-400">
               {{ index + 1 }}
+            </td>
+            <td>
+              <Checkbox
+                  v-model="checkedFileIds"
+                  :checked="checkedAllFiles || checkedFileIds"
+                  :value="item.id"/>
             </td>
             <td class="my-files-table-cell flex items-center gap-2">
               <div>
@@ -52,7 +72,9 @@
             <td></td>
             <td colspan="4">
               <div class="p-4 flex items-center gap-2 animate-pulse text-indigo-600">
-                <div><FileIcon mime-type="text" size="30" class="animate-spin"/></div>
+                <div>
+                  <FileIcon class="animate-spin" mime-type="text" size="30"/>
+                </div>
                 <div>Please wait. Loading files...</div>
               </div>
             </td>
@@ -75,34 +97,50 @@ import NavMyFolders from "@/Components/NavMyFolders.vue";
 import CreateNewDropdown from "@/Components/CreateNewDropdown.vue";
 import FileIcon from "@/Components/FileIcon.vue";
 import { emitter, errorMessage, FILES_UPLOADED_SUCCESS, FOLDER_CREATE_SUCCESS } from "@/event-bus.js";
-import { onMounted, onUpdated, reactive, ref } from "vue";
-
+import { onMounted, onUpdated, reactive, ref, watch } from "vue";
+import DeleteFiles from "@/Components/DeleteFiles.vue";
+import Checkbox from "@/Components/Checkbox.vue";
 
 const props = defineProps({
-  parentId: {
-    type: [Number, null],
-    default: null,
-  },
-  files: {
-    type: Object,
-    default: {},
-  },
-  ancestors: {
-    type: Object,
-    default: {}
-  }
+  parentId: Number,
+  files: Object,
+  ancestors: Object,
 })
 
-const endOfFilesList = ref(null);
-const fetchFiles = ref(false)
-
 const initUrl = usePage().url;
+
+const endOfFilesList = ref(null);
+const fetchFiles = ref(false);
+const checkedAllFiles = ref(false);
+const checkedFileIds = ref([]);
 
 const allFiles = reactive({
   files: props.files?.data || [],
   next: props.files?.links?.next || null,
   total: props.files?.meta?.total || 0,
 });
+
+watch(
+    checkedAllFiles,
+    (oldVal, newVal) => newVal? checkedFileIds.value = [] : ''
+)
+
+const doSelectFileItem = (item) => {
+  const foundIndex = checkedFileIds.value?.indexOf(item.id);
+
+  if (foundIndex >= 0) {
+    checkedFileIds.value.splice(foundIndex, 1);
+  } else {
+    checkedFileIds.value.push(item.id);
+  }
+};
+
+const isSelectFileItem = (item) => checkedFileIds.value.indexOf(item.id) >= 0;
+
+const deleteFinish = () => {
+  checkedFileIds.value = [];
+  checkedAllFiles.value = false;
+};
 
 const updateAllFiles = (existList = []) => {
   allFiles.files = [...existList, ...(props.files?.data || [])];

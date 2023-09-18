@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\MyFilesFilterDto;
+use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\MyFilesRequest;
 use App\Http\Requests\StoreFolderRequest;
@@ -70,6 +71,13 @@ class FileController extends Controller
         foreach ($files as $file) {
             MoveFileToCloud::dispatch($file);
         }
+
+        return to_route('my.files', ['parentFolder' => $parentFolder]);
+    }
+
+    public function destroy(FilesActionRequest $request): RedirectResponse
+    {
+        $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
 
         return to_route('my.files', ['parentFolder' => $parentFolder]);
     }
