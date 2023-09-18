@@ -38,8 +38,8 @@
           <tbody>
           <tr v-for="(item, index) of allFiles.files"
               :key="item.id"
-              class="cursor-pointer my-files-table-row"
               :class="[checkedAllFiles || isSelectFileItem(item) ? '!bg-indigo-400': '']"
+              class="cursor-pointer my-files-table-row"
               @click="doSelectFileItem(item)"
               @dblclick="fileItemAction(item)"
           >
@@ -140,6 +140,7 @@ const isSelectFileItem = (item) => checkedFileIds.value.indexOf(item.id) >= 0;
 const deleteFinish = () => {
   checkedFileIds.value = [];
   checkedAllFiles.value = false;
+  updateAllFiles();
 };
 
 const updateAllFiles = (existList = []) => {

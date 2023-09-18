@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
+use App\Dto\DestroyFilesDto;
 use App\Dto\MyFilesFilterDto;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FileUploadRequest;
@@ -14,6 +15,7 @@ use App\Models\File;
 use App\VO\FileFolderVO;
 use App\VO\UploadFilesVO;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
 use Throwable;
@@ -78,6 +80,16 @@ class FileController extends Controller
     public function destroy(FilesActionRequest $request): RedirectResponse
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
+        $this->authorize('delete', $parentFolder);
+
+        $dto = new DestroyFilesDto(...$request->validated());
+
+        /** @var Collection $children */
+        $children = $dto->allFiles
+            ? $parentFolder->children()->get()
+            : File::query()->whereIn('id', $dto->fileIds)->get();
+
+        $children->each(fn(File $file) => $file->delete());
 
         return to_route('my.files', ['parentFolder' => $parentFolder]);
     }
