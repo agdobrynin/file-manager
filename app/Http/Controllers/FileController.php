@@ -80,7 +80,6 @@ class FileController extends Controller
     public function destroy(FilesActionRequest $request): RedirectResponse
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
-        $this->authorize('delete', $parentFolder);
 
         $dto = new DestroyFilesDto(...$request->validated());
 
@@ -89,7 +88,10 @@ class FileController extends Controller
             ? $parentFolder->children()->get()
             : File::query()->whereIn('id', $dto->fileIds)->get();
 
-        $children->each(fn(File $file) => $file->delete());
+        $children->each(function (File $file) {
+            $this->authorize('delete', $file);
+            $file->delete();
+        });
 
         return to_route('my.files', ['parentFolder' => $parentFolder]);
     }

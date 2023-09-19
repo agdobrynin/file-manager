@@ -27,7 +27,7 @@ class FilesActionRequest extends ParentIdBaseRequest
                             ->first();
 
                         if (null === $file) {
-                            $fail('Invalid file ID ' . $id);
+                            $fail('Invalid file ID ' . $id . ' for auth user.');
                         }
                     }
                 }
