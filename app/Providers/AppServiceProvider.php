@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Contracts\MoveFileBetweenStorageInterface;
+use App\Contracts\StorageCloudServiceInterface;
+use App\Contracts\StorageLocalServiceInterface;
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Enums\DiskEnum;
 use App\Services\MoveFileBetweenStorage;
@@ -18,18 +20,28 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(UploadTreeFilesServiceInterface::class, function () {
-            $local = new StorageService(Storage::disk(DiskEnum::LOCAL->value), DiskEnum::LOCAL);
+        $this->app->bind(
+            StorageLocalServiceInterface::class,
+            fn() => new StorageService(Storage::disk(DiskEnum::LOCAL->value), DiskEnum::LOCAL)
+        );
 
-            return new UploadTreeFilesService($local);
-        });
+        $this->app->bind(
+            StorageCloudServiceInterface::class,
+            fn() => new StorageService(Storage::disk(DiskEnum::CLOUD->value), DiskEnum::CLOUD)
+        );
 
-        $this->app->bind(MoveFileBetweenStorageInterface::class, function () {
-            $local = new StorageService(Storage::disk(DiskEnum::LOCAL->value), DiskEnum::LOCAL);
-            $cloud = new StorageService(Storage::disk(DiskEnum::CLOUD->value), DiskEnum::CLOUD);
+        $this->app->bind(
+            UploadTreeFilesServiceInterface::class,
+            fn() => new UploadTreeFilesService($this->app->make(StorageLocalServiceInterface::class))
+        );
 
-            return new MoveFileBetweenStorage($local, $cloud);
-        });
+        $this->app->bind(
+            MoveFileBetweenStorageInterface::class,
+            fn() => new MoveFileBetweenStorage(
+                $this->app->make(StorageLocalServiceInterface::class),
+                $this->app->make(StorageCloudServiceInterface::class)
+            )
+        );
     }
 
     /**
