@@ -5,7 +5,7 @@
  * @return {string}
  */
 export function bytesToSize(bytes, factorDigits = 2) {
-    const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte'];
+    const units = ['byte', 'kB', 'Mb', 'Gb', 'Tb'];
 
     const unitIndex = Math.max(0, Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1));
 

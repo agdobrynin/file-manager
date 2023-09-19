@@ -23,8 +23,8 @@
         <table class="min-w-full">
           <thead class="bg-gray-100 border-b">
           <tr>
-            <th class="px-3 text-left">#</th>
-            <th>
+            <th class="w-[40px] px-3 text-left">#</th>
+            <th class="w-[40px]">
               <Checkbox
                   v-model="checkedAllFiles"
                   :checked="checkedAllFiles"/>
@@ -33,12 +33,13 @@
             <th class="my-files-table-head">Owner</th>
             <th class="my-files-table-head">Last modified</th>
             <th class="my-files-table-head">Size</th>
+            <th class="my-files-table-head">Disk</th>
           </tr>
           </thead>
           <tbody>
           <tr v-for="(item, index) of allFiles.files"
               :key="item.id"
-              :class="[checkedAllFiles || isSelectFileItem(item) ? '!bg-indigo-400': '']"
+              :class="[checkedAllFiles || isSelectFileItem(item) ? '!bg-amber-100 hover:!bg-amber-200': '']"
               class="cursor-pointer my-files-table-row"
               @click="doSelectFileItem(item)"
               @dblclick="fileItemAction(item)"
@@ -46,7 +47,7 @@
             <td class="px-3 font-light text-sm text-slate-400">
               {{ index + 1 }}
             </td>
-            <td>
+            <td class="w-[40px] text-center">
               <Checkbox
                   v-model="checkedFileIds"
                   :checked="checkedAllFiles || checkedFileIds"
@@ -65,7 +66,10 @@
               {{ item.updatedAt }}
             </td>
             <td class="my-files-table-cell">
-              {{ item.size }}
+              {{ item.size? bytesToSize(item.size) : '' }}
+            </td>
+            <td class="ps-5">
+              <SvgIcon v-if="!item.isFolder" :path="diskIcon(item)"/>
             </td>
           </tr>
           <tr v-if="fetchFiles">
@@ -91,6 +95,7 @@
 </template>
 
 <script setup>
+import SvgIcon from "vue3-icon";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router, usePage } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
@@ -100,6 +105,8 @@ import { emitter, errorMessage, FILES_UPLOADED_SUCCESS, FOLDER_CREATE_SUCCESS } 
 import { onMounted, onUpdated, reactive, ref, watch } from "vue";
 import DeleteFiles from "@/Components/DeleteFiles.vue";
 import Checkbox from "@/Components/Checkbox.vue";
+import { bytesToSize } from "@/helpers/helper.js";
+import { mdiCloudOutline, mdiHarddisk } from "@mdi/js";
 
 const props = defineProps({
   parentId: Number,
@@ -143,6 +150,8 @@ const deleteFinish = () => {
   updateAllFiles();
 };
 
+const diskIcon = (item) => item.disk === 'cloud'? mdiCloudOutline : mdiHarddisk;
+
 const updateAllFiles = (existList = []) => {
   allFiles.files = [...existList, ...(props.files?.data || [])];
   allFiles.next = props?.files?.links?.next || null;
@@ -163,6 +172,7 @@ const loadFiles = () => {
       method: 'get',
       preserveState: true,
       preserveScroll: true,
+      replace: false,
       only: ['files'],
       onStart: () => fetchFiles.value = true,
       onFinish: () => fetchFiles.value = false,
