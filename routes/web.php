@@ -43,6 +43,8 @@ Route::middleware(['auth', 'verified'])->group(static function () {
     Route::delete('/file/{parentFolder?}', [FileController::class, 'destroy'])
         ->name('file.destroy');
 
+    Route::get('file/{parentFolder}/download', [FileController::class, 'download'])
+        ->name('file.download');
 });
 
 Route::middleware('auth')->group(function () {

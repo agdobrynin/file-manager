@@ -7,14 +7,18 @@
         <NavMyFolders :ancestors="ancestors.data || []" @openFolder="fileItemAction"/>
       </div>
     </div>
-    <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-2">
-      <div class="flex flex-wrap gap-2">
+    <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-4">
+      <div class="flex flex-wrap gap-4">
         <CreateNewDropdown/>
         <DeleteFiles
             :all-files="checkedAllFiles"
             :file-ids="checkedFileIds"
             :parent-folder="parentId"
             @delete-finish="deleteFinish"/>
+          <DownloadFiles
+              :all-files="checkedAllFiles"
+              :file-ids="checkedFileIds"
+              :parent-folder="parentId"/>
       </div>
       <div class="border rounded-md p-2 bg-gray-100">Total items: {{ allFiles.total }}</div>
     </div>
@@ -107,6 +111,7 @@ import DeleteFiles from "@/Components/DeleteFiles.vue";
 import Checkbox from "@/Components/Checkbox.vue";
 import { bytesToSize } from "@/helpers/helper.js";
 import { mdiCloudOutline, mdiHarddisk } from "@mdi/js";
+import DownloadFiles from "@/Components/DownloadFiles.vue";
 
 const props = defineProps({
   parentId: Number,

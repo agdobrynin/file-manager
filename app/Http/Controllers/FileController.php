@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
-use App\Dto\DestroyFilesDto;
+use App\Dto\FilesIdDto;
 use App\Dto\MyFilesFilterDto;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FileUploadRequest;
@@ -81,7 +81,7 @@ class FileController extends Controller
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
 
-        $dto = new DestroyFilesDto(...$request->validated());
+        $dto = new FilesIdDto(...$request->validated());
 
         /** @var Collection $children */
         $children = $dto->allFiles
@@ -94,5 +94,12 @@ class FileController extends Controller
         });
 
         return to_route('my.files', ['parentFolder' => $parentFolder]);
+    }
+
+    public function download(FilesActionRequest $request)
+    {
+        $dto = new FilesIdDto(...$request->validated());
+
+        throw new \LogicException('Not implemented yet.');
     }
 }
