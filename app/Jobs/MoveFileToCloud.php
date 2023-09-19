@@ -21,6 +21,7 @@ class MoveFileToCloud implements ShouldQueue
      */
     public function __construct(private readonly File $file)
     {
+        $this->onQueue('upload');
     }
 
     /**
