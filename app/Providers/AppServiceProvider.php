@@ -7,9 +7,12 @@ use App\Contracts\StorageCloudServiceInterface;
 use App\Contracts\StorageLocalServiceInterface;
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Enums\DiskEnum;
+use App\Jobs\MoveFileToCloud;
 use App\Services\MoveFileBetweenStorage;
 use App\Services\StorageService;
 use App\Services\UploadTreeFilesService;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 
@@ -49,6 +52,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        RateLimiter::for(MoveFileToCloud::class, static function (object $job) {
+            $config = config('upload_files.move_to_cloud');
+            $decayMinutes = $config['decay_minutes'] ?? 1;
+            $maxAttempts = $config['max_attempts'] ?? 6;
+
+            /** @var MoveFileToCloud $job */
+            return Limit::perMinutes($decayMinutes, $maxAttempts)
+                ->by($job->file->created_by);
+        });
     }
 }
