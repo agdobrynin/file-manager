@@ -11,6 +11,6 @@ return [
     ],
     'move_to_cloud' => [
         'decay_minutes' => 1,
-        'max_attempts' => 6,
+        'max_attempts' => 10,
     ],
 ];
