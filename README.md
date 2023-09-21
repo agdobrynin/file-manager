@@ -77,7 +77,7 @@ docker run --rm -u "$(id -u):$(id -g)" \
 4. Запустить воркер (worker) обрабатывающий задачи из очереди сообщений
 
     ```shell
-    ./vendor/bin/sail artisan queue:work --tries=5 --queue=upload,zip,default
+    ./vendor/bin/sail artisan queue:work --queue=upload,zip,default
     ```
    в проекте используется очереди с разными приоритетами.
 

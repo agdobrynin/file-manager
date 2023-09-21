@@ -22,18 +22,16 @@ class MoveFileToCloud implements ShouldQueue
 
     public int $currentRetryCount = 1;
 
-    public readonly int $maxRetries;
-
-    public readonly int $backoffFactor;
-
     /**
      * Create a new job instance.
      */
-    public function __construct(public readonly File $file)
+    public function __construct(
+        public readonly File $file,
+        public readonly int  $maxRetries = 100,
+        public readonly int  $backoffMinutesFactor = 5,
+    )
     {
         $this->onQueue('upload');
-        $this->maxRetries = 100;
-        $this->backoffFactor = 10;
     }
 
     public function middleware(): array
@@ -57,7 +55,9 @@ class MoveFileToCloud implements ShouldQueue
     {
         if (($exception instanceof MaxAttemptsExceededException)
             && $this->currentRetryCount <= $this->maxRetries) {
-            $this->delay(now()->addMinutes(random_int(0, $this->backoffFactor)));
+            $randomMinutes = random_int(1, $this->backoffMinutesFactor > 1 ? $this->backoffMinutesFactor : 2);
+
+            $this->delay(now()->addMinutes($randomMinutes));
             ++$this->currentRetryCount;
 
             dispatch($this);
