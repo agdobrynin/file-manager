@@ -18,12 +18,22 @@ class MoveFileToCloud implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 1;
+
+    public int $currentRetryCount = 1;
+
+    public readonly int $maxRetries;
+
+    public readonly int $backoffFactor;
+
     /**
      * Create a new job instance.
      */
     public function __construct(public readonly File $file)
     {
         $this->onQueue('upload');
+        $this->maxRetries = 100;
+        $this->backoffFactor = 10;
     }
 
     public function middleware(): array
@@ -45,7 +55,11 @@ class MoveFileToCloud implements ShouldQueue
      */
     public function failed(Throwable $exception): void
     {
-        if ($exception instanceof MaxAttemptsExceededException) {
+        if (($exception instanceof MaxAttemptsExceededException)
+            && $this->currentRetryCount <= $this->maxRetries) {
+            $this->delay(now()->addMinutes(random_int(0, $this->backoffFactor)));
+            ++$this->currentRetryCount;
+
             dispatch($this);
         }
     }
