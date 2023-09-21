@@ -53,12 +53,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for(MoveFileToCloud::class, static function (object $job) {
-            $config = config('upload_files.move_to_cloud');
-            $decayMinutes = $config['decay_minutes'] ?? 1;
-            $maxAttempts = $config['max_attempts'] ?? 6;
+            [
+                'decay_minutes' => $decayMinutes,
+                'max_attempts' => $maxAttempts
+            ] = config('upload_files.move_to_cloud');
 
             /** @var MoveFileToCloud $job */
-            return Limit::perMinutes($decayMinutes, $maxAttempts)
+            return Limit::perMinutes($decayMinutes ?? 1, $maxAttempts ?? 6)
                 ->by($job->file->created_by);
         });
     }

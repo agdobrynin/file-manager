@@ -9,6 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\MaxAttemptsExceededException;
 use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
 use Throwable;
@@ -37,5 +38,15 @@ class MoveFileToCloud implements ShouldQueue
     public function handle(MoveFileBetweenStorageInterface $moveFileBetweenStorage): void
     {
         $moveFileBetweenStorage->move($this->file);
+    }
+
+    /**
+     * Handle a job failure.
+     */
+    public function failed(Throwable $exception): void
+    {
+        if ($exception instanceof MaxAttemptsExceededException) {
+            dispatch($this);
+        }
     }
 }
