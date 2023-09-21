@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Contracts\MoveFileBetweenStorageInterface;
 use App\Contracts\StorageServiceInterface;
 use App\Models\File;
+use App\Services\Exceptions\MoveFileBetweenStorageException;
 use Throwable;
 
 readonly class MoveFileBetweenStorage implements MoveFileBetweenStorageInterface
@@ -23,7 +24,8 @@ readonly class MoveFileBetweenStorage implements MoveFileBetweenStorageInterface
 
         throw_unless(
             $this->to->filesystem()->put($model->path, $contents),
-            message: 'Can\'t move file'
+            exception: MoveFileBetweenStorageException::class,
+            message: 'Can\'t move file',
         );
 
         $model->disk = $this->to->disk();
