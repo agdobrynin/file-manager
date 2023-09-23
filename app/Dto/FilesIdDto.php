@@ -5,7 +5,7 @@ namespace App\Dto;
 
 readonly class FilesIdDto
 {
-    public function __construct(public bool $allFiles, public array $fileIds)
+    public function __construct(public bool $all, public ?array $ids = null)
     {
     }
 }

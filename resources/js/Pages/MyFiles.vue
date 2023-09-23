@@ -18,7 +18,8 @@
           <DownloadFiles
               :all-files="checkedAllFiles"
               :file-ids="checkedFileIds"
-              :parent-folder="parentId"/>
+              :parent-folder="parentId"
+              @download-complete="downloadComplete"/>
       </div>
       <div class="border rounded-md p-2 bg-gray-100">Total items: {{ allFiles.total }}</div>
     </div>
@@ -46,7 +47,7 @@
               :class="[checkedAllFiles || isSelectFileItem(item) ? '!bg-amber-100 hover:!bg-amber-200': '']"
               class="cursor-pointer my-files-table-row"
               @click="doSelectFileItem(item)"
-              @dblclick="fileItemAction(item)"
+              @dblclick.prevent="fileItemAction(item)"
           >
             <td class="px-3 font-light text-sm text-slate-400">
               {{ index + 1 }}
@@ -149,6 +150,8 @@ const doSelectFileItem = (item) => {
 
 const isSelectFileItem = (item) => checkedFileIds.value.indexOf(item.id) >= 0;
 
+const downloadComplete = () => console.log('ok');
+
 const deleteFinish = () => {
   checkedFileIds.value = [];
   checkedAllFiles.value = false;
@@ -167,7 +170,10 @@ const fileItemAction = (item) => {
   if (item.isFolder) {
     router.visit(route('my.files', { parentFolder: item.id }))
   } else {
-    errorMessage('File action not implemented yet')
+    // Confirm
+    // checkedAllFiles.value = false;
+    // checkedFileIds.value.push(item.id);
+    errorMessage('File action not implemented yet. ' + item.name);
   }
 };
 
@@ -182,7 +188,7 @@ const loadFiles = () => {
       onStart: () => fetchFiles.value = true,
       onFinish: () => fetchFiles.value = false,
       onSuccess: () => {
-        updateAllFiles(allFiles.files)
+        updateAllFiles(allFiles.files);
         window.history.replaceState({}, usePage().url, initUrl);
       },
     })

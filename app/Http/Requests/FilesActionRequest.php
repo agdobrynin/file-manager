@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 
 class FilesActionRequest extends ParentIdBaseRequest
 {
+    private const ALL_FILES_KEY = 'all';
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -16,9 +18,9 @@ class FilesActionRequest extends ParentIdBaseRequest
     public function rules(): array
     {
         return [
-            'allFiles' => 'nullable|boolean',
-            'fileIds' => [
-                'required_if:allFiles,null,false',
+            self::ALL_FILES_KEY => 'nullable|boolean',
+            'ids' => [
+                'required_if:all,null,false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
                     foreach ($ids as $id) {
@@ -33,5 +35,12 @@ class FilesActionRequest extends ParentIdBaseRequest
                 }
             ]
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            self::ALL_FILES_KEY => filter_var($this->{self::ALL_FILES_KEY}, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+        ]);
     }
 }

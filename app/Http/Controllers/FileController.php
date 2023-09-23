@@ -84,9 +84,9 @@ class FileController extends Controller
         $dto = new FilesIdDto(...$request->validated());
 
         /** @var Collection $children */
-        $children = $dto->allFiles
+        $children = $dto->all
             ? $parentFolder->children()->get()
-            : File::query()->whereIn('id', $dto->fileIds)->get();
+            : File::query()->whereIn('id', $dto->ids)->get();
 
         $children->each(function (File $file) {
             $this->authorize('delete', $file);

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <SecondaryButton :disabled="!fileIds.length && !allFiles" @click="showConfirmDelete = true">
+    <SecondaryButton :disabled="isDisabled || isProgress" @click="showConfirmDelete = true">
       <SvgIcon :path="mdiTrashCanOutline" class="mr-2 h-5 w-5 text-gray-600" type="mdi"/>
       <div>Delete</div>
     </SecondaryButton>
@@ -18,7 +18,7 @@ import SecondaryButton from "@/Components/SecondaryButton.vue";
 import SvgIcon from "vue3-icon";
 import { mdiTrashCanOutline } from "@mdi/js";
 import ConfirmationDialog from "@/Components/ConfirmationDialog.vue";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { errorMessage, successMessage } from "@/event-bus.js";
 
 const props = defineProps({
@@ -27,16 +27,19 @@ const props = defineProps({
   allFiles: Boolean,
 });
 
-const emit = defineEmits(['deleteFinish']);
+const isProgress = ref(false);
+const showConfirmDelete = ref(false);
 
 const page = usePage();
+
+const emit = defineEmits(['deleteFinish']);
 
 const form = useForm({
   fileIds: [],
   allFiles: null,
 });
 
-const showConfirmDelete = ref(false);
+const isDisabled = computed(() => !props.fileIds.length && !props.allFiles)
 
 const doDelete = () => {
   showConfirmDelete.value = false;
@@ -49,7 +52,12 @@ const doDelete = () => {
   }
 
   form.delete(route('file.destroy', { parentFolder: props.parentFolder || null }), {
-    onSuccess: () => successMessage('Selected files have been deleted.'),
+    onStart: () => {
+      isProgress.value = true;
+    },
+    onSuccess: () => {
+        successMessage('Selected files have been deleted.');
+    },
     onError: errors => {
       const message = Object.keys(errors).length > 0
           ? Object.values(errors)
@@ -57,7 +65,10 @@ const doDelete = () => {
 
       errorMessage(message);
     },
-    onFinish: () => emit('deleteFinish'),
+    onFinish: () => {
+        isProgress.value = false;
+        emit('deleteFinish');
+    },
   })
 };
 </script>
