@@ -35,16 +35,16 @@ const page = usePage();
 const emit = defineEmits(['deleteFinish']);
 
 const form = useForm({
-  fileIds: [],
-  allFiles: null,
+  ids: [],
+  all: null,
 });
 
 const isDisabled = computed(() => !props.fileIds.length && !props.allFiles)
 
 const doDelete = () => {
   showConfirmDelete.value = false;
-  form.fileIds = !props.allFiles ? props.fileIds : [];
-  form.allFiles = props.allFiles;
+  form.ids = !props.allFiles ? props.fileIds : [];
+  form.all = props.allFiles;
 
   if (!props.fileIds.length && !props.allFiles) {
     errorMessage('Please select files for deleting.');
