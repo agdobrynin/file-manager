@@ -8,6 +8,13 @@ export const FILES_UPLOADED_SUCCESS = 'FILES_UPLOADED_SUCCESS';
 export const FOLDER_CREATE_SUCCESS = 'FOLDER_CREATE_SUCCESS';
 export const FILES_UPLOADED_FAILED = 'FILES_UPLOADED_FAILED';
 
+export const notificationTypes = {
+    SUCCESS: 'success',
+    INFO: 'info',
+    ERROR: 'error',
+    DEFAULT: 'default',
+}
+
 /**
  * Success notification.
  *
@@ -15,7 +22,17 @@ export const FILES_UPLOADED_FAILED = 'FILES_UPLOADED_FAILED';
  * @param {number} timeout
  */
 export const successMessage = (message, timeout = 6000) => emitter.emit(SHOW_NOTIFICATION, {
-    type: 'success', message, timeout
+    type: notificationTypes.SUCCESS, message, timeout
+});
+
+/**
+ * Success notification.
+ *
+ * @param {string|string[]} message
+ * @param {number} timeout
+ */
+export const infoMessage = (message, timeout = 7000) => emitter.emit(SHOW_NOTIFICATION, {
+    type: notificationTypes.INFO, message, timeout
 });
 
 /**
@@ -25,5 +42,5 @@ export const successMessage = (message, timeout = 6000) => emitter.emit(SHOW_NOT
  * @param {number} timeout
  */
 export const errorMessage = (message, timeout = 10000) => emitter.emit(SHOW_NOTIFICATION, {
-    type: 'error', message, timeout
+    type: notificationTypes.ERROR, message, timeout
 });

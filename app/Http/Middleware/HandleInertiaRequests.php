@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\FlashMessagesEnum;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
@@ -49,7 +50,12 @@ class HandleInertiaRequests extends Middleware
                 'maxUploadFiles' => $maxUploadFiles ?: 100,
                 'maxUploadFileBytes' => $maxUploadFileBytes,
                 'maxPostBytes' => $maxPostBytes,
-            ]
+            ],
+            'flash' => [
+                FlashMessagesEnum::INFO->value => fn () => $request->session()->get(FlashMessagesEnum::INFO->value),
+                FlashMessagesEnum::SUCCESS->value => fn () => $request->session()->get(FlashMessagesEnum::SUCCESS->value),
+                FlashMessagesEnum::ERROR->value => fn () => $request->session()->get(FlashMessagesEnum::ERROR->value),
+            ],
         ]);
     }
 }

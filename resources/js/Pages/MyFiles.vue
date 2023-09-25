@@ -19,7 +19,7 @@
               :all-files="checkedAllFiles"
               :file-ids="checkedFileIds"
               :parent-folder="parentId"
-              @download-complete="downloadComplete"/>
+              @download-start="downloadStart"/>
       </div>
       <div class="border rounded-md p-2 bg-gray-100">Total items: {{ allFiles.total }}</div>
     </div>
@@ -150,7 +150,7 @@ const doSelectFileItem = (item) => {
 
 const isSelectFileItem = (item) => checkedFileIds.value.indexOf(item.id) >= 0;
 
-const downloadComplete = () => console.log('ok');
+const downloadStart = () => console.log('ok');
 
 const deleteFinish = () => {
   checkedFileIds.value = [];
@@ -178,7 +178,7 @@ const fileItemAction = (item) => {
 };
 
 const loadFiles = () => {
-  if (allFiles.next) {
+  if (allFiles.next && fetchFiles.value === false) {
     router.visit(allFiles.next, {
       method: 'get',
       preserveState: true,

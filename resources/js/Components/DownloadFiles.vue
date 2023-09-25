@@ -30,7 +30,7 @@ const isDisable = computed(() => {
     return (!props.fileIds.length && !props.allFiles);
 });
 
-const emits = defineEmits(['downloadComplete'])
+const emits = defineEmits(['downloadStart'])
 
 const download = () => {
     form.all = props.allFiles;
@@ -48,10 +48,7 @@ const download = () => {
         onFinish: () => {
             inProcess.value = false;
         },
-        onSuccess: (r) => {
-            console.log(r);
-            emits('downloadComplete');
-        },
+        onSuccess: () => emits('downloadStart'),
         onError: (errors) => {
             const message = Object.keys(errors).length > 0
                 ? Object.values(errors)

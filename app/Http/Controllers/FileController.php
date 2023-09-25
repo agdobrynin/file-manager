@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\FilesIdDto;
 use App\Dto\MyFilesFilterDto;
+use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\MyFilesRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
+use App\Jobs\MakeDownload;
 use App\Jobs\MoveFileToCloud;
 use App\Models\File;
 use App\VO\FileFolderVO;
@@ -96,10 +98,20 @@ class FileController extends Controller
         return to_route('my.files', ['parentFolder' => $parentFolder]);
     }
 
-    public function download(FilesActionRequest $request)
+    public function download(FilesActionRequest $request): RedirectResponse
     {
         $dto = new FilesIdDto(...$request->validated());
 
-        throw new \LogicException('Not implemented yet.');
+        $files = $dto->all
+            ? $request->parentFolder->children()->get()
+            : File::query()->whereIn('id', $dto->ids)->get();
+
+        MakeDownload::dispatch($files);
+
+        return to_route('my.files', ['parentFolder' => $request->parentFolder])
+            ->with(
+                FlashMessagesEnum::INFO->value,
+                'Process is running. We will notify you when the download is ready.'
+            );
     }
 }

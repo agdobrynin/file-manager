@@ -1,10 +1,10 @@
 <template>
   <div class="h-screen bg-gray-50 flex w-full gap-4">
     <Navigation/>
-    <main @drop.prevent="handleDrop"
+    <main class="flex flex-col flex-1 overflow-hidden"
+          @drop.prevent="handleDrop"
           @dragover.prevent="onDragOver"
-          @dragleave.prevent="onDragLeave"
-          class="flex flex-col flex-1 overflow-hidden">
+          @dragleave.prevent="onDragLeave">
       <template v-if="!over">
         <div class="flex items-center justify-between w-full z-20">
           <SearchForm/>
@@ -24,11 +24,11 @@
     </main>
     <UploadProgress
         v-if="progress"
-        class="absolute right-0 p-4 bg-white border border-gray-300 rounded-md shadow-2xl m-4 text-center"
         :percent="progress"
         :total-files="fileUploadForm.files.length"
+        class="absolute right-0 p-4 bg-white border border-gray-300 rounded-md shadow-2xl m-4 text-center"
     />
-    <Notification class="z-30"/>
+    <Notify class="absolute right-0 top-0 pt-2 pe-4 z-30"/>
   </div>
 </template>
 
@@ -36,13 +36,13 @@
 import Navigation from "@/Components/Navigation.vue";
 import UserSettingsDropdown from "@/Components/UserSettingsDropdown.vue";
 import SearchForm from "@/Components/SearchForm.vue";
-import Notification from "@/Components/Notification.vue";
 import {
   emitter,
   errorMessage,
   FILES_CHOOSE,
   FILES_UPLOADED_FAILED,
   FILES_UPLOADED_SUCCESS,
+  infoMessage,
   successMessage
 } from "@/event-bus.js";
 import { computed, onMounted, ref } from "vue";
@@ -50,6 +50,7 @@ import { useForm, usePage } from "@inertiajs/vue3";
 import { fromEvent } from "file-selector";
 import UploadProgress from "@/Components/UploadProgress.vue";
 import { bytesToSize } from "@/helpers/helper.js";
+import Notify from "@/Components/Notify.vue";
 
 
 const page = usePage();
@@ -128,5 +129,20 @@ const uploadFiles = (uploadFiles) => {
   }
 };
 
-onMounted(() => emitter.on(FILES_CHOOSE, uploadFiles));
+onMounted(() => {
+  emitter.on(FILES_CHOOSE, uploadFiles);
+  const { info, success, error } = page.props.flash;
+
+  if (info) {
+    infoMessage(info);
+  }
+
+  if (success) {
+    successMessage(success);
+  }
+
+  if (error) {
+    errorMessage(error, 5000);
+  }
+});
 </script>

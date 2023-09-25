@@ -23,22 +23,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(
+        $this->app->singleton(
             StorageLocalServiceInterface::class,
             fn() => new StorageService(Storage::disk(DiskEnum::LOCAL->value), DiskEnum::LOCAL)
         );
 
-        $this->app->bind(
+        $this->app->singleton(
             StorageCloudServiceInterface::class,
             fn() => new StorageService(Storage::disk(DiskEnum::CLOUD->value), DiskEnum::CLOUD)
         );
 
-        $this->app->bind(
+        $this->app->singleton(
             UploadTreeFilesServiceInterface::class,
             fn() => new UploadTreeFilesService($this->app->make(StorageLocalServiceInterface::class))
         );
 
-        $this->app->bind(
+        $this->app->singleton(
             MoveFileBetweenStorageInterface::class,
             fn() => new MoveFileBetweenStorage(
                 $this->app->make(StorageLocalServiceInterface::class),
