@@ -11,7 +11,7 @@ use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\MyFilesRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
-use App\Jobs\MakeDownload;
+use App\Jobs\MakeArchiveFilesJob;
 use App\Jobs\MoveFileToCloud;
 use App\Models\File;
 use App\VO\FileFolderVO;
@@ -106,7 +106,7 @@ class FileController extends Controller
             ? $request->parentFolder->children()->get()
             : File::query()->whereIn('id', $dto->ids)->get();
 
-        MakeDownload::dispatch($files);
+        MakeArchiveFilesJob::dispatch($files);
 
         return to_route('my.files', ['parentFolder' => $request->parentFolder])
             ->with(

@@ -14,7 +14,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Throwable;
 
-class MakeDownload implements ShouldQueue, ShouldBeUnique
+class MakeArchiveFilesJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
