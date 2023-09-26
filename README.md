@@ -54,7 +54,7 @@ docker run --rm -u "$(id -u):$(id -g)" \
 ./vendor/bin/sail up -d
 ```
 
-доступные команды по остановке или пересборке контейнеров можно узнать на странице
+доступные команды по остановке или реконструкции (rebuild) контейнеров можно узнать на странице
 [Laravel Sail](https://laravel.com/docs/10.x/sail)
 или выполните команду `./vendor/bin/sail` для получения краткой справки о доступных командах.
 
@@ -62,10 +62,6 @@ docker run --rm -u "$(id -u):$(id -g)" \
    ```shell
    ./vendor/bin/sail artisan key:generate
    ```
-* Настроить storage link для загруженных файлов
-    ```shell
-    ./vendor/bin/sail artisan storage:link
-    ```
 
 * Выполнить миграции и заполнить таблицы тестовыми данными
    ```shell
@@ -81,7 +77,7 @@ docker run --rm -u "$(id -u):$(id -g)" \
 * Запустить воркер (worker) обрабатывающий задачи из очереди сообщений
 
     ```shell
-    ./vendor/bin/sail artisan queue:work --queue=upload,zip,default
+    ./vendor/bin/sail artisan queue:work --queue=upload,default
     ```
    в проекте используется очереди с разными приоритетами.
 

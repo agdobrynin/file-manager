@@ -5,21 +5,21 @@ namespace App\Http\Controllers;
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\FilesIdDto;
 use App\Dto\MyFilesFilterDto;
-use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\MyFilesRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
-use App\Jobs\MakeArchiveFilesJob;
 use App\Jobs\MoveFileToCloud;
 use App\Models\File;
+use App\Services\MakeArchiveFiles;
 use App\VO\FileFolderVO;
 use App\VO\UploadFilesVO;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
 class FileController extends Controller
@@ -98,7 +98,10 @@ class FileController extends Controller
         return to_route('my.files', ['parentFolder' => $parentFolder]);
     }
 
-    public function download(FilesActionRequest $request): RedirectResponse
+    /**
+     * @throws Throwable
+     */
+    public function download(FilesActionRequest $request, MakeArchiveFiles $downloadFiles): BinaryFileResponse
     {
         $dto = new FilesIdDto(...$request->validated());
 
@@ -106,12 +109,9 @@ class FileController extends Controller
             ? $request->parentFolder->children()->get()
             : File::query()->whereIn('id', $dto->ids)->get();
 
-        MakeArchiveFilesJob::dispatch($files);
+        $dto = $downloadFiles->handle($files);
 
-        return to_route('my.files', ['parentFolder' => $request->parentFolder])
-            ->with(
-                FlashMessagesEnum::INFO->value,
-                'Process is running. We will notify you when the download is ready.'
-            );
+        return \response()->download($dto->path, $dto->fileName)
+            ->deleteFileAfterSend();
     }
 }

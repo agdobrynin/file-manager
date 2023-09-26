@@ -36,12 +36,6 @@ return [
             'throw' => true,
         ],
 
-        \App\Enums\DiskEnum::ZIP->value => [
-            'driver' => 'local',
-            'root' => storage_path('app/zip'),
-            'throw' => true,
-        ],
-
         \App\Enums\DiskEnum::CLOUD->value => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

@@ -5,13 +5,12 @@ namespace App\Services;
 
 use App\Contracts\StorageCloudServiceInterface;
 use App\Contracts\StorageLocalServiceInterface;
-use App\Contracts\StorageZipServiceInterface;
 use App\Enums\DiskEnum;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 
-readonly class StorageService implements StorageCloudServiceInterface, StorageLocalServiceInterface, StorageZipServiceInterface
+readonly class StorageService implements StorageCloudServiceInterface, StorageLocalServiceInterface
 {
     public function __construct(private Filesystem $filesystem, private DiskEnum $diskEnum)
     {

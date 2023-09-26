@@ -6,7 +6,6 @@ namespace App\Services;
 use App\Contracts\StorageCloudServiceInterface;
 use App\Contracts\StorageLocalServiceInterface;
 use App\Contracts\StorageServiceInterface;
-use App\Contracts\StorageZipServiceInterface;
 use App\Dto\DownloadFileDto;
 use App\Enums\DiskEnum;
 use App\Models\File;
@@ -21,7 +20,6 @@ readonly class MakeArchiveFiles
     public function __construct(
         private StorageCloudServiceInterface $cloudService,
         private StorageLocalServiceInterface $localService,
-        private StorageZipServiceInterface   $storageZipService,
         private ZipArchive                   $archive
     )
     {
@@ -34,7 +32,7 @@ readonly class MakeArchiveFiles
     public function handle(Collection $files): DownloadFileDto
     {
         $fileName = Str::random(32) . '.zip';
-        $filePath = $this->storageZipService->filesystem()->path($fileName);
+        $filePath = $this->localService->filesystem()->path($fileName);
 
         throw_unless(
             $this->archive->open($filePath, ZipArchive::CREATE | ZipArchive::OVERWRITE),
@@ -55,7 +53,7 @@ readonly class MakeArchiveFiles
         foreach ($files as $file) {
             if ($file->isFolder() && $file->children()->count()) {
                 $this->addToZip($file->children()->get(), $ancestors . $file->name . DIRECTORY_SEPARATOR);
-            } else {
+            } else if (!$file->isFolder()) {
                 $filePath = $ancestors . $file->name;
 
                 $this->archive->addFromString($filePath, $this->getContent($file));

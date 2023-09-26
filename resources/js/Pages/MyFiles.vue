@@ -19,7 +19,7 @@
               :all-files="checkedAllFiles"
               :file-ids="checkedFileIds"
               :parent-folder="parentId"
-              @download-start="downloadStart"/>
+              @download-complete="downloadComplete"/>
       </div>
       <div class="border rounded-md p-2 bg-gray-100">Total items: {{ allFiles.total }}</div>
     </div>
@@ -54,6 +54,7 @@
             </td>
             <td class="w-[40px] text-center">
               <Checkbox
+                  :disabled="checkedAllFiles"
                   v-model="checkedFileIds"
                   :checked="checkedAllFiles || checkedFileIds"
                   :value="item.id"/>
@@ -150,7 +151,10 @@ const doSelectFileItem = (item) => {
 
 const isSelectFileItem = (item) => checkedFileIds.value.indexOf(item.id) >= 0;
 
-const downloadStart = () => console.log('ok');
+const downloadComplete = () => {
+  checkedFileIds.value = [];
+  checkedAllFiles.value = false;
+}
 
 const deleteFinish = () => {
   checkedFileIds.value = [];

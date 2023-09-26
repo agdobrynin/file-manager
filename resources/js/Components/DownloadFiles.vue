@@ -9,8 +9,8 @@
 import { mdiFileDownload } from "@mdi/js";
 import SvgIcon from "vue3-icon";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
-import { useForm } from "@inertiajs/vue3";
-import { computed, ref } from "vue";
+import { computed, reactive, ref } from "vue";
+import axios from "axios";
 import { errorMessage } from "@/event-bus.js";
 
 const props = defineProps({
@@ -20,17 +20,16 @@ const props = defineProps({
 });
 
 const inProcess = ref(false);
+const link = ref();
 
-const form = useForm({
+const form = reactive({
     ids: [],
     all: false,
 });
 
-const isDisable = computed(() => {
-    return (!props.fileIds.length && !props.allFiles);
-});
+const isDisable = computed(() => (!props.fileIds.length && !props.allFiles));
 
-const emits = defineEmits(['downloadStart'])
+const emits = defineEmits(['downloadComplete'])
 
 const download = () => {
     form.all = props.allFiles;
@@ -41,21 +40,38 @@ const download = () => {
         form.ids = props.fileIds;
     }
 
-    form.get(route('file.download', { parentFolder: props.parentFolder }), {
-        onStart: () => {
-            inProcess.value = true;
-        },
-        onFinish: () => {
-            inProcess.value = false;
-        },
-        onSuccess: () => emits('downloadStart'),
-        onError: (errors) => {
-            const message = Object.keys(errors).length > 0
-                ? Object.values(errors)
-                : 'Download: something wrong 😞';
+  const url = route('file.download', { parentFolder: props.parentFolder, ...form });
 
-            errorMessage(message);
+  inProcess.value = true;
+
+  axios.get(url, { responseType: "blob" })
+      .then((response) => {
+        const fileName = response.headers['content-disposition']?.match(/filename=(.+)/)[1] || 'file.zip';
+        const data = window.URL.createObjectURL(new Blob([response.data]));
+
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = data;
+        link.click();
+
+        link.remove();
+        emits('downloadComplete')
+      })
+      .catch(async (reason) => {
+        const text = await reason.response.data.text()
+        let message = reason.message;
+
+        try {
+          const { errors = {} } = JSON.parse(text);
+
+          message = Object.keys(errors).length > 0
+              ? Object.values(errors).flat()
+              : reason.message;
+        } catch (e) {
         }
-    });
+
+        errorMessage(message);
+      })
+      .finally(() => inProcess.value = false)
 };
 </script>

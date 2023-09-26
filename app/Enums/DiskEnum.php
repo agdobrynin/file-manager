@@ -7,5 +7,4 @@ enum DiskEnum: string
 {
     case CLOUD = 'cloud';
     case LOCAL = 'local';
-    case ZIP = 'zip';
 }
