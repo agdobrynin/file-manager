@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\File;
-use App\Services\MakeDownloadFiles;
+use App\Services\MakeArchiveFiles;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Throwable;
 
 class MakeDownload implements ShouldQueue, ShouldBeUnique
 {
@@ -27,9 +28,11 @@ class MakeDownload implements ShouldQueue, ShouldBeUnique
 
     /**
      * Execute the job.
+     * @throws Throwable
      */
-    public function handle(MakeDownloadFiles $downloadFiles): void
+    public function handle(MakeArchiveFiles $downloadFiles): void
     {
         $dto = $downloadFiles->handle($this->files);
+        // TODO make notification to user (db, laravel echo)
     }
 }

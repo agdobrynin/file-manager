@@ -58,23 +58,27 @@ docker run --rm -u "$(id -u):$(id -g)" \
 [Laravel Sail](https://laravel.com/docs/10.x/sail)
 или выполните команду `./vendor/bin/sail` для получения краткой справки о доступных командах.
 
-1. Сгенерировать application key
+* Сгенерировать application key
    ```shell
    ./vendor/bin/sail artisan key:generate
    ```
+* Настроить storage link для загруженных файлов
+    ```shell
+    ./vendor/bin/sail artisan storage:link
+    ```
 
-2. Выполнить миграции и заполнить таблицы тестовыми данными
+* Выполнить миграции и заполнить таблицы тестовыми данными
    ```shell
    ./vendor/bin/sail artisan migrate --seed
    ```
-3. Собрать фронт
+* Собрать фронт
     ```shell
     ./vendor/bin/sail npm install
     ```
     ```shell
     ./vendor/bin/sail npm run build
     ```
-4. Запустить воркер (worker) обрабатывающий задачи из очереди сообщений
+* Запустить воркер (worker) обрабатывающий задачи из очереди сообщений
 
     ```shell
     ./vendor/bin/sail artisan queue:work --queue=upload,zip,default

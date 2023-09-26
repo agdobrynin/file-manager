@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Contracts\MoveFileBetweenStorageInterface;
 use App\Contracts\StorageCloudServiceInterface;
 use App\Contracts\StorageLocalServiceInterface;
+use App\Contracts\StorageZipServiceInterface;
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Enums\DiskEnum;
 use App\Jobs\MoveFileToCloud;
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(
             StorageCloudServiceInterface::class,
             fn() => new StorageService(Storage::disk(DiskEnum::CLOUD->value), DiskEnum::CLOUD)
+        );
+
+        $this->app->singleton(
+            StorageZipServiceInterface::class,
+            fn() => new StorageService(Storage::disk(DiskEnum::ZIP->value), DiskEnum::ZIP)
         );
 
         $this->app->singleton(
