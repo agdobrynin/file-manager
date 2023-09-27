@@ -61,7 +61,7 @@ const download = () => {
         })
         .catch(async (reason) => {
             const text = await reason.response.data.text()
-            let responseErrors = reason.message;
+            let responseErrors;
 
             try {
                 const {errors = {}, message} = JSON.parse(text);
@@ -74,10 +74,11 @@ const download = () => {
                     if (Array.isArray(responseErrors)) {
                         responseErrors.push(message);
                     } else {
-                        responseErrors = [responseErrors, message];
+                        responseErrors = message;
                     }
                 }
             } catch (e) {
+                responseErrors = reason.message;
             }
 
             errorMessage(responseErrors);
