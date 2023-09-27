@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\FileTrashController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -31,20 +32,27 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
-    Route::get('/my-files/{parentFolder?}', [FileController::class, 'myFiles'])
-        ->name('my.files');
+    Route::controller(FileController::class)
+        ->prefix('/file')
+        ->name('file.')
+        ->group(function () {
+            Route::get('/index/{parentFolder?}', 'index')->name('index');
+            Route::post('/create/{parentFolder?}', 'create')->name('create');
+            Route::post('/upload/{parentFolder?}', 'upload')->name('upload');
+            Route::delete('/destroy/{parentFolder?}', 'destroy')->name('destroy');
+            Route::get('/download/{parentFolder}', 'download')->name('download');
+        });
 
-    Route::post('/folder/create/{parentFolder?}', [FileController::class, 'createFolder'])
-        ->name('folder.create');
+    Route::controller(FileTrashController::class)
+        ->prefix('/trash')
+        ->name('trash.')
+        ->group(function () {
+            Route::get('/', 'index')
+                ->name('index');
 
-    Route::post('/file/{parentFolder?}', [FileController::class, 'upload'])
-        ->name('file.upload');
-
-    Route::delete('/file/{parentFolder?}', [FileController::class, 'destroy'])
-        ->name('file.destroy');
-
-    Route::get('file/{parentFolder}/download', [FileController::class, 'download'])
-        ->name('file.download');
+            Route::delete('/', 'destroy')
+                ->name('destroy');
+        });
 });
 
 Route::middleware('auth')->group(function () {

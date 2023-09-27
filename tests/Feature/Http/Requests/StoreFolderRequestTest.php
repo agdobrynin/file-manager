@@ -97,7 +97,7 @@ class StoreFolderRequestTest extends TestCase
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
 
-        $request = StoreFolderRequest::create('/folder/create/' . $root->id, 'POST');
+        $request = StoreFolderRequest::create('/file/create/' . $root->id, 'POST');
         $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
 
         $this->assertTrue($request->authorize());
@@ -118,7 +118,7 @@ class StoreFolderRequestTest extends TestCase
         $folder = File::make((new FileFolderVO(name: 'Папка 1'))->toArray());
         $root->appendNode($folder);
 
-        $request = StoreFolderRequest::create('/folder/create/' . $root->id, 'POST');
+        $request = StoreFolderRequest::create('/file/create/' . $root->id, 'POST');
         $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
         $request->authorize();
 
@@ -143,7 +143,7 @@ class StoreFolderRequestTest extends TestCase
         $file = File::make($fileVO->toArray());
         $root->appendNode($file);
 
-        $request = StoreFolderRequest::create('/folder/create/' . $file->id, 'POST');
+        $request = StoreFolderRequest::create('/file/create/' . $file->id, 'POST');
         $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
 
         $this->assertFalse($request->authorize());
@@ -154,7 +154,7 @@ class StoreFolderRequestTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $request = StoreFolderRequest::create('/folder/create/10000000000', 'POST');
+        $request = StoreFolderRequest::create('/file/create/10000000000', 'POST');
         $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
 
         $this->expectException(ModelNotFoundException::class);
@@ -168,7 +168,7 @@ class StoreFolderRequestTest extends TestCase
         $this->actingAs($user);
         File::makeRootByUser($user);
 
-        $request = StoreFolderRequest::create('/folder/create', 'POST', ['name' => 'abc']);
+        $request = StoreFolderRequest::create('/file/create', 'POST', ['name' => 'abc']);
         $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
 
         $this->assertTrue($request->authorize());

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
@@ -24,7 +25,7 @@ use Throwable;
 
 class FileController extends Controller
 {
-    public function myFiles(MyFilesRequest $request): Response
+    public function index(MyFilesRequest $request): Response
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $this->authorize('view', $parentFolder);
@@ -48,7 +49,7 @@ class FileController extends Controller
         ]);
     }
 
-    public function createFolder(StoreFolderRequest $request): RedirectResponse
+    public function create(StoreFolderRequest $request): RedirectResponse
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $this->authorize('create', $parentFolder);
@@ -58,7 +59,7 @@ class FileController extends Controller
 
         $file->appendToNode($parentFolder)->save();
 
-        return to_route('my.files', ['parentFolder' => $parentFolder]);
+        return to_route('file.index', ['parentFolder' => $parentFolder]);
     }
 
     /**
@@ -76,7 +77,7 @@ class FileController extends Controller
             MoveFileToCloud::dispatch($file);
         }
 
-        return to_route('my.files', ['parentFolder' => $parentFolder]);
+        return to_route('file.index', ['parentFolder' => $parentFolder]);
     }
 
     public function destroy(FilesActionRequest $request): RedirectResponse
@@ -95,7 +96,7 @@ class FileController extends Controller
             $file->delete();
         });
 
-        return to_route('my.files', ['parentFolder' => $parentFolder]);
+        return to_route('file.index', ['parentFolder' => $parentFolder]);
     }
 
     /**

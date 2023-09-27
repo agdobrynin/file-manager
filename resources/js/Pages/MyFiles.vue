@@ -32,9 +32,9 @@
                         <th class="w-[40px] px-3 text-left">#</th>
                         <th class="w-[40px]">
                             <Checkbox
-                                :disabled="!allFiles.total"
                                 v-model="checkedAllFiles"
-                                :checked="checkedAllFiles"/>
+                                :checked="checkedAllFiles"
+                                :disabled="!allFiles.total"/>
                         </th>
                         <th class="my-files-table-head">Name</th>
                         <th class="my-files-table-head">Owner</th>
@@ -176,7 +176,7 @@ const updateAllFiles = (existList = []) => {
 
 const fileItemAction = (item) => {
     if (item.isFolder) {
-        router.visit(route('my.files', {parentFolder: item.id}));
+        router.visit(route('file.index', { parentFolder: item.id }));
     } else {
         clearSelected();
         nextTick(() => {

@@ -69,7 +69,7 @@ const closeModal = () => {
 const createFolder = () => {
     const name = form.name;
 
-    form.post(route('folder.create', { parentFolder: page.props.parentId || null }), {
+    form.post(route('file.create', { parentFolder: page.props.parentId || null }), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();

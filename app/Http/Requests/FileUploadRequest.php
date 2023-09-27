@@ -21,7 +21,7 @@ class FileUploadRequest extends ParentIdBaseRequest
     {
         $this->redirect = $this->redirector
             ->getUrlGenerator()
-            ->route('my.files', ['parentFolder' => $this->parentFolder]);
+            ->route('file.index', ['parentFolder' => $this->parentFolder]);
 
         return [
             self::FILES_KEY . '.*' => [
