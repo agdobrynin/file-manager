@@ -20,7 +20,7 @@ class FilesActionRequest extends ParentIdBaseRequest
         return [
             self::ALL_FILES_KEY => 'nullable|boolean',
             'ids' => [
-                'required_if:all,null,false',
+                'required_if:' . self::ALL_FILES_KEY . ',null,false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
                     foreach ($ids as $id) {
