@@ -36,7 +36,7 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         ->prefix('/file')
         ->name('file.')
         ->group(function () {
-            Route::get('/index/{parentFolder?}', 'index')->name('index');
+            Route::get('/{parentFolder?}', 'index')->name('index');
             Route::post('/create/{parentFolder?}', 'create')->name('create');
             Route::post('/upload/{parentFolder?}', 'upload')->name('upload');
             Route::delete('/destroy/{parentFolder?}', 'destroy')->name('destroy');
