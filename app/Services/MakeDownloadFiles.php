@@ -46,18 +46,17 @@ readonly class MakeDownloadFiles
             );
 
             if (!$file->isFolder()) {
-                $fileName = Str::random(32);
+                $storageFileName = Str::random(32);
 
-                throw_unless($this->localService->filesystem()->put($fileName, $this->getContent($file)));
+                throw_unless($this->localService->filesystem()->put($storageFileName, $this->getContent($file)));
 
-                $path = $this->localService->filesystem()->path($fileName);
+                $path = $this->localService->filesystem()->path($storageFileName);
 
                 return new DownloadFileDto($file->name, $path);
             }
         }
 
-        $fileName = Str::random(32) . '.zip';
-        $filePath = $this->localService->filesystem()->path($fileName);
+        $filePath = $this->localService->filesystem()->path(Str::random(32) . '.zip');
 
         throw_unless(
             $this->archive->open($filePath, ZipArchive::CREATE | ZipArchive::OVERWRITE),
@@ -67,7 +66,29 @@ readonly class MakeDownloadFiles
         $this->addToZip($files);
         $this->archive->close();
 
-        return new DownloadFileDto($fileName, $filePath);
+        /** @var File $file */
+        $file = $files->first();
+
+        if ($files->count() === 1 && $file->isFolder()) {
+            $realFileName = $file->name;
+        } elseif (!$file->parent->isRoot()) {
+            $realFileName = $file->parent->name;
+        } else {
+            $realFileName = $file->user->name;
+        }
+
+        return new DownloadFileDto($realFileName . '.zip', $filePath);
+    }
+
+    private function getContent(File $file): string
+    {
+        /** @var StorageServiceInterface $storage */
+        $storage = match ($file->disk) {
+            DiskEnum::LOCAL => $this->localService,
+            DiskEnum::CLOUD => $this->cloudService,
+        };
+
+        return $storage->filesystem()->get($file->path);
     }
 
     /**
@@ -84,16 +105,5 @@ readonly class MakeDownloadFiles
                 $this->archive->addFromString($filePath, $this->getContent($file));
             }
         }
-    }
-
-    private function getContent(File $file): string
-    {
-        /** @var StorageServiceInterface $storage */
-        $storage = match ($file->disk) {
-            DiskEnum::LOCAL => $this->localService,
-            DiskEnum::CLOUD => $this->cloudService,
-        };
-
-        return $storage->filesystem()->get($file->path);
     }
 }
