@@ -13,6 +13,7 @@ use App\Services\Exceptions\DownloadEmptyFolderException;
 use App\Services\Exceptions\OpenArchiveException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 use ZipArchive;
 
@@ -28,10 +29,12 @@ readonly class MakeDownloadFiles
 
     /**
      * @param Collection<File> $files
-     * @throws Throwable|OpenArchiveException
+     * @throws Throwable|OpenArchiveException|DownloadEmptyFolderException|RuntimeException
      */
     public function handle(Collection $files): DownloadFileDto
     {
+        throw_if($files->isEmpty(), message: 'No files for download');
+
         if ($files->count() === 1) {
             /** @var File $file */
             $file = $files->first();
