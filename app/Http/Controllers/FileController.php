@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\FilesIdDto;
-use App\Dto\MyFilesFilterDto;
+use App\Dto\FilesListFilterDto;
 use App\Http\Requests\FilesActionRequest;
+use App\Http\Requests\FilesListRequest;
 use App\Http\Requests\FileUploadRequest;
-use App\Http\Requests\MyFilesRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
 use App\Jobs\MoveFileToCloud;
@@ -25,15 +25,15 @@ use Throwable;
 
 class FileController extends Controller
 {
-    public function index(MyFilesRequest $request): Response
+    public function index(FilesListRequest $request): Response
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $this->authorize('view', $parentFolder);
 
-        $dto = new MyFilesFilterDto(...$request->validated());
+        $dto = new FilesListFilterDto(...$request->validated());
 
         /** @var Builder $query */
-        $query = File::myFiles($request->user(), $dto, $parentFolder);
+        $query = File::filesList($request->user(), $dto, $parentFolder);
 
         $files = $query->paginate(config('app.my_files.per_page'))
             ->withQueryString();

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Dto\MyFilesFilterDto;
+use App\Dto\FilesListFilterDto;
 use App\Enums\DiskEnum;
 use App\Traits\HasCreatorAndUpdater;
 use Illuminate\Database\Eloquent\Builder;
@@ -98,7 +98,7 @@ class File extends Model
         return (bool)$this->is_folder;
     }
 
-    public function scopeMyFiles(Builder $builder, User $user, MyFilesFilterDto $dto, File $folder): Builder
+    public function scopeFilesList(Builder $builder, User $user, FilesListFilterDto $dto, File $folder): Builder
     {
         if ($dto->search) {
             $builder->where('name', 'like', "%$dto->search%");
@@ -108,7 +108,22 @@ class File extends Model
 
         return $builder->where('created_by', '=', $user->getAuthIdentifier())
             ->orderBy('is_folder', 'desc')
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('files.id', 'desc');
+    }
+
+    public function scopeFilesInTrash(Builder $builder, User $user, FilesListFilterDto $dto): Builder
+    {
+        $builder->onlyTrashed();
+
+        if ($dto->search) {
+            $builder->where('name', 'like', "%$dto->search%");
+        }
+
+        return $builder->where('created_by', '=', $user->getAuthIdentifier())
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('deleted_at', 'desc')
+            ->orderBy('files.id', 'desc');
     }
 
     protected function owner(): Attribute

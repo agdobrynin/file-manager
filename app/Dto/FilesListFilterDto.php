@@ -2,7 +2,7 @@
 
 namespace App\Dto;
 
-readonly class MyFilesFilterDto
+readonly class FilesListFilterDto
 {
     public function __construct(public ?string $search = null)
     {
