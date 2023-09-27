@@ -71,10 +71,10 @@ readonly class MakeDownloadFiles
 
         if ($files->count() === 1 && $file->isFolder()) {
             $realFileName = $file->name;
-        } elseif (!$file->parent->isRoot()) {
-            $realFileName = $file->parent->name;
         } else {
-            $realFileName = $file->user->name;
+            $realFileName = $file->parent->isRoot()
+                ? $file->user->name
+                : $file->parent->name;
         }
 
         return new DownloadFileDto($realFileName . '.zip', $filePath);
