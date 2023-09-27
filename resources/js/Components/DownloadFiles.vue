@@ -1,6 +1,10 @@
 <template>
     <SecondaryButton :disabled="isDisable || inProcess" @click="download">
-        <SvgIcon :path="mdiFileDownload" class="mr-2 h-5 w-5 text-gray-600" type="mdi"/>
+        <SvgIcon
+            :path="mdiFileDownload"
+            :class="{'animate-ping' : inProcess}"
+            class="mr-2 h-5 w-5 text-gray-600"
+            type="mdi"/>
         <div>Download</div>
     </SecondaryButton>
 </template>
