@@ -12,6 +12,7 @@ import SecondaryButton from "@/Components/SecondaryButton.vue";
 import { computed, reactive, ref } from "vue";
 import axios from "axios";
 import { errorMessage } from "@/event-bus.js";
+import { parse } from "content-disposition-attachment";
 
 const props = defineProps({
     parentFolder: Number,
@@ -40,38 +41,51 @@ const download = () => {
         form.ids = props.fileIds;
     }
 
-  const url = route('file.download', { parentFolder: props.parentFolder, ...form });
+    const url = route('file.download', {parentFolder: props.parentFolder, ...form});
 
-  inProcess.value = true;
+    inProcess.value = true;
 
-  axios.get(url, { responseType: "blob" })
-      .then((response) => {
-        const fileName = response.headers['content-disposition']?.match(/filename=(.+)/)[1] || 'file.zip';
-        const data = window.URL.createObjectURL(new Blob([response.data]));
+    axios.get(url, {responseType: 'blob'})
+        .then((response) => {
+            const {filename = 'file.zip'} = parse(response.headers['content-disposition'])
 
-        const link = document.createElement('a');
-        link.download = fileName;
-        link.href = data;
-        link.click();
+            const data = window.URL.createObjectURL(new Blob([response.data]));
 
-        link.remove();
-        emits('downloadComplete')
-      })
-      .catch(async (reason) => {
-        const text = await reason.response.data.text()
-        let message = reason.message;
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = data;
+            link.click();
 
-        try {
-          const { errors = {} } = JSON.parse(text);
+            link.remove();
+            emits('downloadComplete')
+        })
+        .catch(async (reason) => {
+            const text = await reason.response.data.text()
+            let responseErrors = reason.message;
 
-          message = Object.keys(errors).length > 0
-              ? Object.values(errors).flat()
-              : reason.message;
-        } catch (e) {
-        }
+            try {
+                const {errors = {}, message} = JSON.parse(text);
 
-        errorMessage(message);
-      })
-      .finally(() => inProcess.value = false)
+                if (Object.keys(errors).length > 0) {
+                    responseErrors = Object.values(errors).flat();
+                }
+
+                if (message) {
+                    if (Array.isArray(responseErrors)) {
+                        responseErrors.push(message);
+                    } else {
+                        responseErrors = [responseErrors, message];
+                    }
+                }
+            } catch (e) {
+            }
+
+            errorMessage(responseErrors);
+        })
+        .finally(() => inProcess.value = false)
 };
+
+defineExpose({
+    download,
+});
 </script>
