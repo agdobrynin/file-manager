@@ -47,11 +47,8 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         ->prefix('/trash')
         ->name('trash.')
         ->group(function () {
-            Route::get('/', 'index')
-                ->name('index');
-
-            Route::delete('/', 'destroy')
-                ->name('destroy');
+            Route::get('/', 'index')->name('index');
+            Route::delete('/', 'destroy')->name('destroy');
         });
 });
 
