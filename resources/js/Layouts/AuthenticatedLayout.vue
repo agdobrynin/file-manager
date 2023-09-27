@@ -6,7 +6,7 @@
           @dragover.prevent="onDragOver"
           @dragleave.prevent="onDragLeave">
       <template v-if="!over">
-        <div class="flex items-center justify-between w-full z-20">
+        <div class="flex items-center justify-between w-full z-20 px-2">
           <SearchForm/>
           <UserSettingsDropdown/>
         </div>
@@ -37,13 +37,13 @@ import Navigation from "@/Components/Navigation.vue";
 import UserSettingsDropdown from "@/Components/UserSettingsDropdown.vue";
 import SearchForm from "@/Components/SearchForm.vue";
 import {
-  emitter,
-  errorMessage,
-  FILES_CHOOSE,
-  FILES_UPLOADED_FAILED,
-  FILES_UPLOADED_SUCCESS,
-  infoMessage,
-  successMessage
+    emitter,
+    errorMessage,
+    FILES_CHOOSE,
+    FILES_UPLOADED_FAILED,
+    FILES_UPLOADED_SUCCESS,
+    infoMessage,
+    successMessage
 } from "@/event-bus.js";
 import { computed, onMounted, ref } from "vue";
 import { useForm, usePage } from "@inertiajs/vue3";
