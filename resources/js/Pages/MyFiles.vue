@@ -96,8 +96,8 @@
                 <div v-if="allFiles.total === 0" class="py-8 text-center text-sm text-gray-400">
                     There is no data in this folder
                 </div>
+                <div ref="endOfFilesList"></div>
             </div>
-            <div ref="endOfFilesList"></div>
         </div>
     </AuthenticatedLayout>
 </template>
