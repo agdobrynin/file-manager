@@ -9,13 +9,14 @@ use App\Contracts\StorageServiceInterface;
 use App\Dto\DownloadFileDto;
 use App\Enums\DiskEnum;
 use App\Models\File;
+use App\Services\Exceptions\DownloadEmptyFolderException;
 use App\Services\Exceptions\OpenArchiveException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Throwable;
 use ZipArchive;
 
-readonly class MakeArchiveFiles
+readonly class MakeDownloadFiles
 {
     public function __construct(
         private StorageCloudServiceInterface $cloudService,
@@ -31,6 +32,27 @@ readonly class MakeArchiveFiles
      */
     public function handle(Collection $files): DownloadFileDto
     {
+        if ($files->count() === 1) {
+            /** @var File $file */
+            $file = $files->first();
+
+            throw_if(
+                $file->isFolder() && $file->children()->count() === 0,
+                DownloadEmptyFolderException::class,
+                message: 'Folder "' . $files->first()->name . '" is empty',
+            );
+
+            if (!$file->isFolder()) {
+                $fileName = Str::random(32);
+
+                throw_unless($this->localService->filesystem()->put($fileName, $this->getContent($file)));
+
+                $path = $this->localService->filesystem()->path($fileName);
+
+                return new DownloadFileDto($file->name, $path);
+            }
+        }
+
         $fileName = Str::random(32) . '.zip';
         $filePath = $this->localService->filesystem()->path($fileName);
 

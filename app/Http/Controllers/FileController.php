@@ -12,7 +12,7 @@ use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
 use App\Jobs\MoveFileToCloud;
 use App\Models\File;
-use App\Services\MakeArchiveFiles;
+use App\Services\MakeDownloadFiles;
 use App\VO\FileFolderVO;
 use App\VO\UploadFilesVO;
 use Illuminate\Database\Eloquent\Builder;
@@ -101,7 +101,7 @@ class FileController extends Controller
     /**
      * @throws Throwable
      */
-    public function download(FilesActionRequest $request, MakeArchiveFiles $downloadFiles): BinaryFileResponse
+    public function download(FilesActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
     {
         $dto = new FilesIdDto(...$request->validated());
 
