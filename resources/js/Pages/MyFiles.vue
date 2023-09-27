@@ -32,6 +32,7 @@
                         <th class="w-[40px] px-3 text-left">#</th>
                         <th class="w-[40px]">
                             <Checkbox
+                                :disabled="!allFiles.total"
                                 v-model="checkedAllFiles"
                                 :checked="checkedAllFiles"/>
                         </th>
