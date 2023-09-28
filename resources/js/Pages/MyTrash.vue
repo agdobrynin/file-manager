@@ -8,7 +8,7 @@
         <FilesTable
             v-model="selectedFileIds"
             :display-deleted-at="true"
-            :display-last-modified="true"
+            :display-last-modified="false"
             :display-owner="false"
             :display-path="true"
             :fetch-files="fetchFiles"
