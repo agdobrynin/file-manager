@@ -93,7 +93,7 @@ class FileController extends Controller
 
         $children->each(function (File $file) {
             $this->authorize('delete', $file);
-            $file->delete();
+            $file->deleteQuietly();
         });
 
         return to_route('file.index', ['parentFolder' => $parentFolder]);
@@ -110,9 +110,9 @@ class FileController extends Controller
             ? $request->parentFolder->children()->get()
             : File::query()->whereIn('id', $dto->ids)->get();
 
-        $dto = $downloadFiles->handle($files);
+        $downloadDto = $downloadFiles->handle($files);
 
-        return \response()->download($dto->path, $dto->fileName)
+        return \response()->download($downloadDto->path, $downloadDto->fileName)
             ->deleteFileAfterSend();
     }
 }
