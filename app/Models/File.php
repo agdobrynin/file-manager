@@ -24,6 +24,7 @@ class File extends Model
         'name',
         'disk',
         'path',
+        'storage_path',
         'is_folder',
         'mime',
         'size',
@@ -77,8 +78,12 @@ class File extends Model
         parent::boot();
 
         static::creating(static function (File $model) {
-            if (!$model->isRoot() && $model->is_folder) {
-                $model->path = ($model->parent->path ? $model->parent->path . '/' : '') . $model->name;
+            if (!$model->isRoot()) {
+                $separator = str_ends_with($model->parent->path ?? '', DIRECTORY_SEPARATOR)
+                    ? ''
+                    : DIRECTORY_SEPARATOR;
+
+                $model->path = $model->parent->path . $separator . $model->name;
             }
         });
     }

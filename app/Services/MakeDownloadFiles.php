@@ -50,16 +50,16 @@ readonly class MakeDownloadFiles
 
                 throw_unless($this->localService->filesystem()->put($storageFileName, $this->getContent($file)));
 
-                $path = $this->localService->filesystem()->path($storageFileName);
+                $storagePath = $this->localService->filesystem()->path($storageFileName);
 
-                return new DownloadFileDto($file->name, $path);
+                return new DownloadFileDto($file->name, $storagePath);
             }
         }
 
-        $filePath = $this->localService->filesystem()->path(Str::random(32) . '.zip');
+        $storagePath = $this->localService->filesystem()->path(Str::random(32) . '.zip');
 
         throw_unless(
-            $this->archive->open($filePath, ZipArchive::CREATE | ZipArchive::OVERWRITE),
+            $this->archive->open($storagePath, ZipArchive::CREATE | ZipArchive::OVERWRITE),
             OpenArchiveException::class
         );
 
@@ -77,7 +77,7 @@ readonly class MakeDownloadFiles
                 : $file->parent->name;
         }
 
-        return new DownloadFileDto($realFileName . '.zip', $filePath);
+        return new DownloadFileDto($realFileName . '.zip', $storagePath);
     }
 
     private function getContent(File $file): string
@@ -88,7 +88,7 @@ readonly class MakeDownloadFiles
             DiskEnum::CLOUD => $this->cloudService,
         };
 
-        return $storage->filesystem()->get($file->path);
+        return $storage->filesystem()->get($file->storage_path);
     }
 
     /**

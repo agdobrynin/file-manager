@@ -112,7 +112,7 @@ class FileController extends Controller
 
         $downloadDto = $downloadFiles->handle($files);
 
-        return \response()->download($downloadDto->path, $downloadDto->fileName)
+        return \response()->download($downloadDto->storagePath, $downloadDto->fileName)
             ->deleteFileAfterSend();
     }
 }
