@@ -53,6 +53,7 @@ const doLoadFiles = () => {
         router.visit(String(nextPage.value),
             {
                 preserveState: true,
+                only: ['files'],
                 onStart: function () {
                     fetchFiles.value = true;
                 },
