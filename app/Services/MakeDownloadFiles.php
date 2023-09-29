@@ -3,11 +3,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\StorageCloudServiceInterface;
+use App\Contracts\StorageByModelServiceInterface;
 use App\Contracts\StorageLocalServiceInterface;
-use App\Contracts\StorageServiceInterface;
 use App\Dto\DownloadFileDto;
-use App\Enums\DiskEnum;
 use App\Models\File;
 use App\Services\Exceptions\DownloadEmptyFolderException;
 use App\Services\Exceptions\OpenArchiveException;
@@ -20,9 +18,9 @@ use ZipArchive;
 readonly class MakeDownloadFiles
 {
     public function __construct(
-        private StorageCloudServiceInterface $cloudService,
+        private ZipArchive                     $archive,
         private StorageLocalServiceInterface $localService,
-        private ZipArchive                   $archive
+        private StorageByModelServiceInterface $storageByModelService,
     )
     {
     }
@@ -82,13 +80,10 @@ readonly class MakeDownloadFiles
 
     private function getContent(File $file): string
     {
-        /** @var StorageServiceInterface $storage */
-        $storage = match ($file->disk) {
-            DiskEnum::LOCAL => $this->localService,
-            DiskEnum::CLOUD => $this->cloudService,
-        };
-
-        return $storage->filesystem()->get($file->storage_path);
+        return $this->storageByModelService
+            ->resolveStorage($file)
+            ->filesystem()
+            ->get($file->storage_path);
     }
 
     /**
