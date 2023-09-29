@@ -71,6 +71,24 @@ class FileTrashController extends Controller
 
     public function destroy(FilesActionTrashRequest $request): RedirectResponse
     {
+        $dto = new FilesIdDto(...$request->validated());
+        $children = $this->children($dto, $request->user());
+
+        $destroyedCount = 0;
+        $policyException = [];
+
+        foreach ($children as $file) {
+            try {
+                $this->authorize('forceDelete', $file);
+                // check is folder.
+                // get storage, storage_path and dispatch job delete from storage
+                // $file->forceDelete();
+            } catch (AuthorizationException $exception) {
+                $policyException[] = $exception->getMessage();
+            }
+        }
+
+        $response = to_route('trash.index');
 
         if ($policyException) {
             $response->with(FlashMessagesEnum::WARNING->value, $policyException);
