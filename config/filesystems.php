@@ -32,7 +32,7 @@ return [
 
         \App\Enums\DiskEnum::LOCAL->value => [
             'driver' => 'local',
-            'root' => storage_path('app'),
+            'root' => storage_path('app/file-manager'),
             'throw' => true,
         ],
 
