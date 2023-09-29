@@ -24,20 +24,18 @@
             </div>
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
-        <div class="w-full overflow-auto">
-            <FilesTable
-                ref="tableEl"
-                v-model="selectedFileIds"
-                :display-last-modified="true"
-                :display-owner="true"
-                :fetch-files="filesFetching"
-                :files="filesList"
-                :select-all-files-symbol="SELECTED_ALL_FILES_SYMBOL"
-                class="w-full overflow-auto"
-                @item-double-click="fileItemAction"
-                @can-load="emitter.emit(EVENT_LOAD_FILES_NEXT_PAGE)"
-            />
-        </div>
+        <FilesTable
+            ref="tableEl"
+            v-model="selectedFileIds"
+            :display-last-modified="true"
+            :display-owner="true"
+            :fetch-files="filesFetching"
+            :files="filesList"
+            :select-all-files-symbol="SELECTED_ALL_FILES_SYMBOL"
+            class="w-full overflow-auto"
+            @item-double-click="fileItemAction"
+            @can-load="emitter.emit(EVENT_LOAD_FILES_NEXT_PAGE)"
+        />
     </AuthenticatedLayout>
 </template>
 
