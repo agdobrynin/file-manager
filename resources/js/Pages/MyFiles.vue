@@ -62,7 +62,6 @@ const props = defineProps({
 })
 
 const selectedFileIds = ref([]);
-const allFiles = ref(props.files?.data || []);
 const downloadComponent = ref(null);
 const tableEl = ref(null);
 
@@ -78,7 +77,7 @@ watchEffect(() => {
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles(props.files);
 
 const updateAllFiles = () => {
-    filesReset(props.files)
+    filesReset(props.files);
     nextTick(() => tableEl.value?.scrollTop());
 };
 
