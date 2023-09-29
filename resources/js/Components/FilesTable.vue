@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white shadow sm:rounded-lg">
+    <div class="bg-white shadow sm:rounded-lg" ref="topEl">
         <table class="min-w-full">
             <thead class="bg-gray-100 border-b">
             <tr>
@@ -66,9 +66,9 @@
             </tbody>
         </table>
         <div v-if="fetchFiles">
-            <div class="p-4 flex items-center gap-2 animate-pulse text-indigo-600">
+            <div class="ms-16 p-4 flex items-center gap-2 text-indigo-600">
                 <div>
-                    <FileIcon class="animate-spin" mime-type="text" size="30"/>
+                    <FileIcon class="animate-ping" mime-type="text" size="30"/>
                 </div>
                 <div>Please wait. Loading files...</div>
             </div>
@@ -150,6 +150,7 @@ const emit = defineEmits([
 ]);
 
 const endOfFilesList = ref(null);
+const topEl = ref(null);
 
 /**
  * @var {WritableComputedRef<string[]|number[]>} value
@@ -168,7 +169,7 @@ const clickItem = (item) => {
         const index = value.value.indexOf(item.id);
 
         if (index >= 0) {
-            value.value = value.value.slice(index, 1);
+            value.value = value.value.filter((id) => id !== item.id);
         } else {
             value.value.push(item.id);
         }
@@ -188,6 +189,8 @@ const observer = new IntersectionObserver(
     }
 )
 
+const scrollTop = () => topEl.value?.scrollIntoView({ behavior: 'smooth' });
+
 onUpdated(() => {
     observer.observe(endOfFilesList.value);
 })
@@ -195,4 +198,8 @@ onUpdated(() => {
 onMounted(() => {
     observer.observe(endOfFilesList.value);
 });
+
+defineExpose({
+    scrollTop,
+})
 </script>
