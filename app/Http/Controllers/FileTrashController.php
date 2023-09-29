@@ -3,12 +3,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\FilesDestroyServiceInterface;
+use App\Dto\DestroyFileFromStorageDto;
 use App\Dto\FilesIdDto;
 use App\Dto\FilesListFilterDto;
 use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FilesActionTrashRequest;
 use App\Http\Requests\FilesListRequest;
 use App\Http\Resources\FileResource;
+use App\Jobs\DeleteFileFromStorageJob;
 use App\Models\File;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -41,7 +44,7 @@ class FileTrashController extends Controller
     public function restore(FilesActionTrashRequest $request): RedirectResponse
     {
         $dto = new FilesIdDto(...$request->validated());
-        $children = $this->children($dto, $request->user());
+        $children = $this->filesInTrashById($dto, $request->user());
 
         $policyException = [];
         $restoredCount = 0;
@@ -69,41 +72,27 @@ class FileTrashController extends Controller
             );
     }
 
-    public function destroy(FilesActionTrashRequest $request): RedirectResponse
+    public function destroy(
+        FilesActionTrashRequest      $request,
+        FilesDestroyServiceInterface $filesDestroy
+    ): RedirectResponse
     {
         $dto = new FilesIdDto(...$request->validated());
-        $children = $this->children($dto, $request->user());
+        $children = $this->filesInTrashById($dto, $request->user());
 
-        $destroyedCount = 0;
-        $policyException = [];
+        $destroyedCollection = $filesDestroy->destroy($children)
+            ->each(fn(DestroyFileFromStorageDto $destroyDto) => DeleteFileFromStorageJob::dispatch($destroyDto));
 
-        foreach ($children as $file) {
-            try {
-                $this->authorize('forceDelete', $file);
-                // check is folder.
-                // get storage, storage_path and dispatch job delete from storage
-                // $file->forceDelete();
-            } catch (AuthorizationException $exception) {
-                $policyException[] = $exception->getMessage();
-            }
-        }
-
-        $response = to_route('trash.index');
-
-        if ($policyException) {
-            $response->with(FlashMessagesEnum::WARNING->value, $policyException);
-        }
-
-        return $response->with(
+        return to_route('trash.index')->with(
             FlashMessagesEnum::SUCCESS->value,
-            $destroyedCount . Str::plural(' file', $destroyedCount) . ' destroyed successfully'
+            $destroyedCollection->count() . Str::plural(' file', $destroyedCollection->count()) . ' destroyed successfully'
         );
     }
 
     /**
      * @return Collection<File>
      */
-    protected function children(FilesIdDto $dto, User $user): Collection
+    protected function filesInTrashById(FilesIdDto $dto, User $user): Collection
     {
         /** @var Builder $query */
         $query = File::filesInTrash($user);

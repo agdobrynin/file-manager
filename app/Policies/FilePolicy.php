@@ -65,16 +65,4 @@ class FilePolicy
 
         return Response::allow();
     }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, File $file): Response
-    {
-        if (!$file->isOwnedByUser($user)) {
-            return Response::deny('You are not owner file ' . $file->path);
-        }
-
-        return Response::allow();
-    }
 }

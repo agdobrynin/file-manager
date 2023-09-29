@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\FilesDestroyServiceInterface;
 use App\Contracts\MoveFileBetweenStorageInterface;
 use App\Contracts\StorageByModelServiceInterface;
 use App\Contracts\StorageCloudServiceInterface;
@@ -9,6 +10,7 @@ use App\Contracts\StorageLocalServiceInterface;
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Enums\DiskEnum;
 use App\Jobs\MoveFileToCloud;
+use App\Services\FilesDestroyService;
 use App\Services\MoveFileBetweenStorage;
 use App\Services\StorageByModelService;
 use App\Services\StorageService;
@@ -48,7 +50,15 @@ class AppServiceProvider extends ServiceProvider
             )
         );
 
-        $this->app->singleton(StorageByModelServiceInterface::class, StorageByModelService::class);
+        $this->app->singleton(
+            StorageByModelServiceInterface::class,
+            StorageByModelService::class
+        );
+
+        $this->app->singleton(
+            FilesDestroyServiceInterface::class,
+            FilesDestroyService::class
+        );
     }
 
     /**

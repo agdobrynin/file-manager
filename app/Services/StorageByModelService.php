@@ -18,9 +18,11 @@ final readonly class StorageByModelService implements StorageByModelServiceInter
     {
     }
 
-    public function resolveStorage(Model $file): StorageServiceInterface
+    public function resolveStorage(DiskEnum|Model $file): StorageServiceInterface
     {
-        return match ($file->disk) {
+        $disk = $file instanceof Model ? $file->disk : $file;
+
+        return match ($disk) {
             DiskEnum::LOCAL => $this->localService,
             DiskEnum::CLOUD => $this->cloudService,
         };
