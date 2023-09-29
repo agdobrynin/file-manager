@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { onUnmounted, ref } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 import { emitter } from "@/event-bus.js";
 
@@ -16,7 +16,7 @@ export function useDoLoadFiles(initFiles) {
         next.value = files?.links?.next || null;
         filesTotal.value = files?.meta?.total || 0;
     }
-    
+
     function fetchNextPage() {
         if (next.value && !filesFetching.value) {
             router.visit(String(next.value),
@@ -39,6 +39,10 @@ export function useDoLoadFiles(initFiles) {
     }
     
     emitter.on(EVENT_LOAD_FILES_NEXT_PAGE, fetchNextPage);
+    
+    onUnmounted(() => {
+        filesReset();
+    });
     
     return {
         filesFetching,
