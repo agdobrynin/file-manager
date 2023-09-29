@@ -1,8 +1,8 @@
 <template>
   <Modal :show="show">
     <div class="p-6">
-      <h2 class="text-2xl mb-2 font-semibold">{{ title }}</h2>
-      <p>{{ message }}</p>
+      <h2 class="mb-2 font-semibold">{{ title }}</h2>
+      <slot/>
       <div class="mt-6 flex justify-end">
         <SecondaryButton @click="$emit('cancel')">
           {{ cancelTitle }}
@@ -28,10 +28,6 @@ defineProps({
   title: {
     type: String,
     default: "Please Confirm"
-  },
-  message: {
-    type: String,
-    required: true,
   },
   cancelTitle: {
     type: String,
