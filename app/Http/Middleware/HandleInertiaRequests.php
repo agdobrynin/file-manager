@@ -55,6 +55,7 @@ class HandleInertiaRequests extends Middleware
                 FlashMessagesEnum::INFO->value => fn () => $request->session()->get(FlashMessagesEnum::INFO->value),
                 FlashMessagesEnum::SUCCESS->value => fn () => $request->session()->get(FlashMessagesEnum::SUCCESS->value),
                 FlashMessagesEnum::ERROR->value => fn () => $request->session()->get(FlashMessagesEnum::ERROR->value),
+                FlashMessagesEnum::WARNING->value => fn () => $request->session()->get(FlashMessagesEnum::WARNING->value),
             ],
         ]);
     }

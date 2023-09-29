@@ -8,4 +8,5 @@ enum FlashMessagesEnum: string
     case INFO = 'info';
     case SUCCESS = 'success';
     case ERROR = 'error';
+    case WARNING = 'warning';
 }

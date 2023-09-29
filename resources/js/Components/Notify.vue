@@ -14,6 +14,7 @@
                 'border-indigo-800 bg-indigo-500': item.type === notificationTypes.INFO,
                 'border-red-700 bg-red-500': item.type === notificationTypes.ERROR,
                 'border-green-700 bg-green-500': item.type === notificationTypes.SUCCESS,
+                'border-orange-700 bg-orange-500': item.type === notificationTypes.WARNING,
                 'border-slate-700 bg-slate-500': item.type === notificationTypes.DEFAULT,
             }"
            class="cursor-pointer border rounded-md text-white drop-shadow-lg p-2"
