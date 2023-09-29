@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Contracts\MoveFileBetweenStorageInterface;
+use App\Contracts\StorageByModelServiceInterface;
 use App\Contracts\StorageCloudServiceInterface;
 use App\Contracts\StorageLocalServiceInterface;
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Enums\DiskEnum;
 use App\Jobs\MoveFileToCloud;
 use App\Services\MoveFileBetweenStorage;
+use App\Services\StorageByModelService;
 use App\Services\StorageService;
 use App\Services\UploadTreeFilesService;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -45,6 +47,8 @@ class AppServiceProvider extends ServiceProvider
                 $this->app->make(StorageCloudServiceInterface::class)
             )
         );
+
+        $this->app->singleton(StorageByModelServiceInterface::class, StorageByModelService::class);
     }
 
     /**
