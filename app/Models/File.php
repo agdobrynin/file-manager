@@ -117,11 +117,11 @@ class File extends Model
             ->orderBy('files.id', 'desc');
     }
 
-    public function scopeFilesInTrash(Builder $builder, User $user, FilesListFilterDto $dto): Builder
+    public function scopeFilesInTrash(Builder $builder, User $user, ?FilesListFilterDto $dto = null): Builder
     {
         $builder->onlyTrashed();
 
-        if ($dto->search) {
+        if ($dto && $dto->search) {
             $builder->where('name', 'like', "%$dto->search%");
         }
 
