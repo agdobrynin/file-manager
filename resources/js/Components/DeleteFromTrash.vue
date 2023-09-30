@@ -47,7 +47,6 @@ const props = defineProps({
 });
 
 const showConfirmDialog = ref(false);
-
 const deleteForever = () => {
     showConfirmDialog.value = false;
 

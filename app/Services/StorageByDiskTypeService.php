@@ -18,7 +18,7 @@ final readonly class StorageByDiskTypeService implements StorageByDiskTypeServic
     {
     }
 
-    public function resolveStorage(DiskEnum $diskEnum): StorageServiceInterface
+    public function resolve(DiskEnum $diskEnum): StorageServiceInterface
     {
         return match ($diskEnum) {
             DiskEnum::LOCAL => $this->localService,
