@@ -48,8 +48,8 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         ->name('trash.')
         ->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('/restore', 'restore')->name('restore');
-            Route::get('/destroy', 'destroy')->name('destroy');
+            Route::post('/restore', 'restore')->name('restore');
+            Route::delete('/destroy', 'destroy')->name('destroy');
         });
 });
 

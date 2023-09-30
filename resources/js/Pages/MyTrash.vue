@@ -4,8 +4,8 @@
     <AuthenticatedLayout class="relative">
         <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-4">
             <div class="flex flex-wrap gap-4">
-                <DeleteFromTrash :all="selectAllFiles" :ids="selectedFileIds"/>
-                <RestoreFiles :all="selectAllFiles" :ids="selectedFileIds"/>
+                <DeleteFromTrash :all="selectAllFiles" :ids="selectedFileIds" @success="reset"/>
+                <RestoreFiles :all="selectAllFiles" :ids="selectedFileIds" @success="reset"/>
             </div>
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
@@ -42,7 +42,7 @@ const props = defineProps({
 
 const selectedFileIds = ref([]);
 
-const { filesFetching, filesList, filesTotal } = useDoLoadFiles(props.files);
+const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles(props.files);
 
 const selectAllFiles = computed(() => selectedFileIds.value.indexOf(SELECTED_ALL_FILES_SYMBOL) >= 0);
 
@@ -52,4 +52,9 @@ watchEffect(() => {
         selectedFileIds.value = [ SELECTED_ALL_FILES_SYMBOL ];
     }
 });
+
+const reset = () => {
+    filesReset(props.files);
+    selectedFileIds.value = [];
+};
 </script>

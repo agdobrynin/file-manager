@@ -27,8 +27,10 @@ const props = defineProps({
     }
 })
 
+const emit =defineEmits(['success']);
+
 const restore = () => {
-    router.get(route('trash.restore'),
+    router.post(route('trash.restore'),
         {
             all: props.all,
             ids: !props.all ? props.ids : [],
@@ -40,6 +42,7 @@ const restore = () => {
                     : 'Something wrong';
                 errorMessage(displayErrors);
             },
+            onSuccess: () => emit('success'),
         });
 }
 </script>

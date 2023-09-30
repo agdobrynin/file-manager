@@ -48,22 +48,24 @@ const props = defineProps({
 
 const showConfirmDialog = ref(false);
 
+const emit = defineEmits([ 'success' ]);
+
 const deleteForever = () => {
     showConfirmDialog.value = false;
 
-
-    router.get(route('trash.destroy'),
+    router.delete(route('trash.destroy'),
         {
-            all: props.all ? '1' : '0',
-            ids: props.all ? [] : props.ids
-        },
-        {
+            data: {
+                all: props.all ? '1' : '0',
+                ids: props.all ? [] : props.ids
+            },
             onError: (errors) => {
                 const displayErrors = Object.keys(errors).length
                     ? Object.values(errors)
                     : 'Something wrong';
                 errorMessage(displayErrors);
             },
+            onSuccess: () => emit('success'),
         });
 };
 </script>
