@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\FilesIdDto;
-use App\Dto\MyFilesFilterDto;
+use App\Dto\FilesListFilterDto;
 use App\Http\Requests\FilesActionRequest;
+use App\Http\Requests\FilesListRequest;
 use App\Http\Requests\FileUploadRequest;
-use App\Http\Requests\MyFilesRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
 use App\Jobs\MoveFileToCloud;
@@ -25,15 +25,15 @@ use Throwable;
 
 class FileController extends Controller
 {
-    public function index(MyFilesRequest $request): Response
+    public function index(FilesListRequest $request): Response
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $this->authorize('view', $parentFolder);
 
-        $dto = new MyFilesFilterDto(...$request->validated());
+        $dto = new FilesListFilterDto(...$request->validated());
 
         /** @var Builder $query */
-        $query = File::myFiles($request->user(), $dto, $parentFolder);
+        $query = File::filesList($request->user(), $dto, $parentFolder);
 
         $files = $query->paginate(config('app.my_files.per_page'))
             ->withQueryString();
@@ -83,17 +83,12 @@ class FileController extends Controller
     public function destroy(FilesActionRequest $request): RedirectResponse
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
-
         $dto = new FilesIdDto(...$request->validated());
-
-        /** @var Collection $children */
-        $children = $dto->all
-            ? $parentFolder->children()->get()
-            : File::query()->whereIn('id', $dto->ids)->get();
+        $children = $this->children($dto, $parentFolder);
 
         $children->each(function (File $file) {
             $this->authorize('delete', $file);
-            $file->delete();
+            $file->deleteQuietly();
         });
 
         return to_route('file.index', ['parentFolder' => $parentFolder]);
@@ -104,15 +99,20 @@ class FileController extends Controller
      */
     public function download(FilesActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
     {
+        $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $dto = new FilesIdDto(...$request->validated());
+        $files = $this->children($dto, $parentFolder);
 
-        $files = $dto->all
-            ? $request->parentFolder->children()->get()
-            : File::query()->whereIn('id', $dto->ids)->get();
+        $downloadDto = $downloadFiles->handle($files);
 
-        $dto = $downloadFiles->handle($files);
-
-        return \response()->download($dto->path, $dto->fileName)
+        return \response()->download($downloadDto->storagePath, $downloadDto->fileName)
             ->deleteFileAfterSend();
+    }
+
+    private function children(FilesIdDto $dto, File $parentFolder): Collection
+    {
+        return $dto->all
+            ? $parentFolder->children()->get()
+            : File::query()->whereIn('id', $dto->ids)->get();
     }
 }

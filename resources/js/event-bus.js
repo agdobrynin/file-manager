@@ -12,6 +12,7 @@ export const notificationTypes = {
     SUCCESS: 'success',
     INFO: 'info',
     ERROR: 'error',
+    WARNING: 'warning',
     DEFAULT: 'default',
 }
 
@@ -43,4 +44,14 @@ export const infoMessage = (message, timeout = 7000) => emitter.emit(SHOW_NOTIFI
  */
 export const errorMessage = (message, timeout = 10000) => emitter.emit(SHOW_NOTIFICATION, {
     type: notificationTypes.ERROR, message, timeout
+});
+
+/**
+ * Warning notification.
+ *
+ * @param {string|string[]} message
+ * @param {number} timeout
+ */
+export const warningMessage = (message, timeout = 5000) => emitter.emit(SHOW_NOTIFICATION, {
+    type: notificationTypes.WARNING, message, timeout
 });

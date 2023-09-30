@@ -20,10 +20,10 @@ readonly class MoveFileBetweenStorage implements MoveFileBetweenStorageInterface
      */
     public function move(File $model): File
     {
-        $contents = $this->from->filesystem()->get($model->path);
+        $contents = $this->from->filesystem()->get($model->storage_path);
 
         throw_unless(
-            $this->to->filesystem()->put($model->path, $contents),
+            $this->to->filesystem()->put($model->storage_path, $contents),
             exception: MoveFileBetweenStorageException::class,
             message: 'Can\'t move file',
         );
@@ -31,12 +31,13 @@ readonly class MoveFileBetweenStorage implements MoveFileBetweenStorageInterface
         $model->disk = $this->to->disk();
         $model->saveQuietly();
 
-        $this->from->filesystem()->delete($model->path);
+        $this->from->filesystem()->delete($model->storage_path);
 
-        $directory = dirname($model->path);
-
-        if (0 === count($this->from->filesystem()->files($directory, true))) {
-            $this->from->filesystem()->deleteDirectory($directory);
+        // Remove all empty directory in from storage
+        foreach (collect($this->from->filesystem()->allDirectories())->reverse() as $directory) {
+            if (0 === count($this->from->filesystem()->allFiles($directory))) {
+                $this->from->filesystem()->deleteDirectory($directory);
+            }
         }
 
         return $model;

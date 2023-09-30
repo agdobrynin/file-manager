@@ -43,7 +43,8 @@ import {
     FILES_UPLOADED_FAILED,
     FILES_UPLOADED_SUCCESS,
     infoMessage,
-    successMessage
+    successMessage,
+    warningMessage
 } from "@/event-bus.js";
 import { computed, onMounted, ref } from "vue";
 import { useForm, usePage } from "@inertiajs/vue3";
@@ -131,7 +132,7 @@ const uploadFiles = (uploadFiles) => {
 
 onMounted(() => {
   emitter.on(FILES_CHOOSE, uploadFiles);
-  const { info, success, error } = page.props.flash;
+    const { info, success, error, warning } = page.props.flash;
 
   if (info) {
     infoMessage(info);
@@ -144,5 +145,9 @@ onMounted(() => {
   if (error) {
     errorMessage(error, 5000);
   }
+
+    if (warning) {
+        warningMessage(warning);
+    }
 });
 </script>

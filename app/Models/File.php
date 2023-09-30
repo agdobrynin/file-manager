@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Dto\MyFilesFilterDto;
+use App\Dto\FilesListFilterDto;
 use App\Enums\DiskEnum;
 use App\Traits\HasCreatorAndUpdater;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,6 +24,7 @@ class File extends Model
         'name',
         'disk',
         'path',
+        'storage_path',
         'is_folder',
         'mime',
         'size',
@@ -77,8 +78,12 @@ class File extends Model
         parent::boot();
 
         static::creating(static function (File $model) {
-            if (!$model->isRoot() && $model->is_folder) {
-                $model->path = ($model->parent->path ? $model->parent->path . '/' : '') . $model->name;
+            if (!$model->isRoot()) {
+                $separator = str_ends_with($model->parent->path ?? '', DIRECTORY_SEPARATOR)
+                    ? ''
+                    : DIRECTORY_SEPARATOR;
+
+                $model->path = $model->parent->path . $separator . $model->name;
             }
         });
     }
@@ -98,7 +103,7 @@ class File extends Model
         return (bool)$this->is_folder;
     }
 
-    public function scopeMyFiles(Builder $builder, User $user, MyFilesFilterDto $dto, File $folder): Builder
+    public function scopeFilesList(Builder $builder, User $user, FilesListFilterDto $dto, File $folder): Builder
     {
         if ($dto->search) {
             $builder->where('name', 'like', "%$dto->search%");
@@ -108,7 +113,22 @@ class File extends Model
 
         return $builder->where('created_by', '=', $user->getAuthIdentifier())
             ->orderBy('is_folder', 'desc')
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('files.id', 'desc');
+    }
+
+    public function scopeFilesInTrash(Builder $builder, User $user, ?FilesListFilterDto $dto = null): Builder
+    {
+        $builder->onlyTrashed();
+
+        if ($dto && $dto->search) {
+            $builder->where('name', 'like', "%$dto->search%");
+        }
+
+        return $builder->where('created_by', '=', $user->getAuthIdentifier())
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('deleted_at', 'desc')
+            ->orderBy('files.id', 'desc');
     }
 
     protected function owner(): Attribute

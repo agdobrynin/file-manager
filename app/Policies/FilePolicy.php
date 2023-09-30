@@ -51,16 +51,18 @@ class FilePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, File $file): bool
+    public function restore(User $user, File $file): Response
     {
-        return $file->isOwnedByUser($user);
-    }
+        if (!$file->isOwnedByUser($user)) {
+            return Response::deny('You are not owner file ' . $file->path);
+        }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, File $file): bool
-    {
-        return $file->isOwnedByUser($user);
+        // Check exist file
+        // TODO may be diff ability for force restore? like as "restoreForce"
+        if (File::query()->where('path', $file->path)->first()) {
+            return Response::deny('File ' . $file->name . ' already exists on your disk at path ' . $file->path);
+        }
+
+        return Response::allow();
     }
 }

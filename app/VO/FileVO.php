@@ -15,6 +15,7 @@ readonly class FileVO implements ModelAttributeInterface
         public int      $size,
         public DiskEnum $disk,
         public ?string  $path,
+        public ?string  $storagePath,
     )
     {
     }
@@ -28,6 +29,7 @@ readonly class FileVO implements ModelAttributeInterface
             'size' => $this->size,
             'disk' => $this->disk,
             'path' => $this->path,
+            'storage_path' => $this->storagePath,
         ];
     }
 }

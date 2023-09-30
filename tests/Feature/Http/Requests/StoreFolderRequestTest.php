@@ -139,6 +139,7 @@ class StoreFolderRequestTest extends TestCase
             size: 1000,
             disk: DiskEnum::LOCAL,
             path: 'path',
+            storagePath: 'path',
         );
         $file = File::make($fileVO->toArray());
         $root->appendNode($file);

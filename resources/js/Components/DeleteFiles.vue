@@ -8,10 +8,11 @@
             <div>Delete</div>
         </SecondaryButton>
         <ConfirmationDialog
-            :show="showConfirmDelete" message="Delete selected files?"
+            :show="showConfirmDelete"
             @cancel="showConfirmDelete = false"
-            @confirm="doDelete"
-        />
+            @confirm="doDelete">
+            <p class="text-2xl">Delete selected files?</p>
+        </ConfirmationDialog>
     </div>
 </template>
 

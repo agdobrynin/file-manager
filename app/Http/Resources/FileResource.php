@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Helpers\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -29,6 +28,7 @@ class FileResource extends JsonResource
             'updatedAt' => $this->updated_at->diffForHumans(),
             'createdBy' => $this->created_by,
             'updatedBy' => $this->updated_by,
+            'deletedAt' => $this->deleted_at ? $this->deleted_at->diffForHumans() : null,
         ];
     }
 }

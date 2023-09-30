@@ -11,6 +11,7 @@ use App\VO\FileVO;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Throwable;
 
 readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
 {
@@ -22,9 +23,12 @@ readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
      * @param Model $parentFolder
      * @param array<string, UploadedFile[]|File[]|string> $files Binary tree with files and folders.
      * @return Collection<Model>
+     * @throws Throwable
      */
     public function upload(Model $parentFolder, array $files): Collection
     {
+        throw_unless($parentFolder->isFolder(), message: 'Parent element must be is folder');
+
         return $this->make($parentFolder, $files, collect());
     }
 
@@ -32,18 +36,25 @@ readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
     {
         foreach ($files as $key => $item) {
             if ($item instanceof UploadedFile || $item instanceof File) {
-                $destinationDirectory = 'files' .
-                    DIRECTORY_SEPARATOR . $parentFolder->created_by .
-                    DIRECTORY_SEPARATOR . $parentFolder->path;
+                $separator = str_starts_with($parentFolder->path ?? '/', DIRECTORY_SEPARATOR)
+                    ? ''
+                    : DIRECTORY_SEPARATOR;
 
-                $path = $this->storageService->upload($item, $destinationDirectory);
+                $destinationDirectoryStorage = 'files' .
+                    DIRECTORY_SEPARATOR .
+                    $parentFolder->created_by .
+                    $separator .
+                    $parentFolder->path;
+
+                $storagePath = $this->storageService->upload($item, $destinationDirectoryStorage);
 
                 $fileVO = new FileVO(
                     name: $item->getClientOriginalName(),
                     mime: $item->getClientMimeType(),
                     size: $item->getSize(),
                     disk: $this->storageService->disk(),
-                    path: $path,
+                    path: null,
+                    storagePath: $storagePath,
                 );
 
                 /** @var Model $file */
