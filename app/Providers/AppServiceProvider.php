@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\FilesDestroyServiceInterface;
 use App\Contracts\MoveFileBetweenStorageInterface;
-use App\Contracts\StorageByModelServiceInterface;
+use App\Contracts\StorageByDiskTypeServiceInterface;
 use App\Contracts\StorageCloudServiceInterface;
 use App\Contracts\StorageLocalServiceInterface;
 use App\Contracts\UploadTreeFilesServiceInterface;
@@ -12,7 +12,7 @@ use App\Enums\DiskEnum;
 use App\Jobs\MoveFileToCloud;
 use App\Services\FilesDestroyService;
 use App\Services\MoveFileBetweenStorage;
-use App\Services\StorageByModelService;
+use App\Services\StorageByDiskTypeService;
 use App\Services\StorageService;
 use App\Services\UploadTreeFilesService;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -51,8 +51,8 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
-            StorageByModelServiceInterface::class,
-            StorageByModelService::class
+            StorageByDiskTypeServiceInterface::class,
+            StorageByDiskTypeService::class
         );
 
         $this->app->singleton(

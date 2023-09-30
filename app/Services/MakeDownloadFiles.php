@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\StorageByModelServiceInterface;
+use App\Contracts\StorageByDiskTypeServiceInterface;
 use App\Contracts\StorageLocalServiceInterface;
 use App\Dto\DownloadFileDto;
 use App\Models\File;
@@ -18,9 +18,9 @@ use ZipArchive;
 readonly class MakeDownloadFiles
 {
     public function __construct(
-        private ZipArchive                     $archive,
-        private StorageLocalServiceInterface $localService,
-        private StorageByModelServiceInterface $storageByModelService,
+        private ZipArchive                        $archive,
+        private StorageLocalServiceInterface      $localService,
+        private StorageByDiskTypeServiceInterface $storageByModelService,
     )
     {
     }
@@ -81,7 +81,7 @@ readonly class MakeDownloadFiles
     private function getContent(File $file): string
     {
         return $this->storageByModelService
-            ->resolveStorage($file)
+            ->resolveStorage($file->disk)
             ->filesystem()
             ->get($file->storage_path);
     }

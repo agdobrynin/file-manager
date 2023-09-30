@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Contracts\StorageByModelServiceInterface;
+use App\Contracts\StorageByDiskTypeServiceInterface;
 use App\Dto\DestroyFileFromStorageDto;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,7 +23,7 @@ class DeleteFileFromStorageJob implements ShouldQueue
     {
     }
 
-    public function handle(StorageByModelServiceInterface $storageByModelService): void
+    public function handle(StorageByDiskTypeServiceInterface $storageByModelService): void
     {
         $storageByModelService->resolveStorage($this->dto->disk)
             ->filesystem()
