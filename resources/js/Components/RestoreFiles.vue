@@ -1,5 +1,6 @@
 <template>
     <SecondaryButton
+        class="text-white bg-green-600 hover:bg-green-500 border-none"
         :disabled="!ids.length && !all"
         @click="restore">
         <SvgIcon
