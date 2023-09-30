@@ -1,15 +1,15 @@
 <template>
     <DangerButton
         :disabled="!ids.length && !all"
-        @click="showConfirmDelete = true">
+        @click="showConfirmDialog = true">
         <SvgIcon
             :path="mdiTrashCanOutline"
             class="mr-2 h-5 w-5"/>
         Delete forever
     </DangerButton>
     <ConfirmationDialog
-        :show="showConfirmDelete"
-        @cancel="showConfirmDelete = false"
+        :show="showConfirmDialog"
+        @cancel="showConfirmDialog = false"
         @confirm="deleteForever">
         <div class="inline-flex items-center text-red-800 gap-4 mt-5">
             <div>
@@ -46,10 +46,10 @@ const props = defineProps({
     }
 });
 
-const showConfirmDelete = ref(false);
+const showConfirmDialog = ref(false);
 
 const deleteForever = () => {
-    showConfirmDelete.value = false;
+    showConfirmDialog.value = false;
 
 
     router.get(route('trash.destroy'),
