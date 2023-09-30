@@ -83,13 +83,8 @@ class FileController extends Controller
     public function destroy(FilesActionRequest $request): RedirectResponse
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
-
         $dto = new FilesIdDto(...$request->validated());
-
-        /** @var Collection $children */
-        $children = $dto->all
-            ? $parentFolder->children()->get()
-            : File::query()->whereIn('id', $dto->ids)->get();
+        $children = $this->children($dto, $parentFolder);
 
         $children->each(function (File $file) {
             $this->authorize('delete', $file);
@@ -104,15 +99,20 @@ class FileController extends Controller
      */
     public function download(FilesActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
     {
+        $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $dto = new FilesIdDto(...$request->validated());
-
-        $files = $dto->all
-            ? $request->parentFolder->children()->get()
-            : File::query()->whereIn('id', $dto->ids)->get();
+        $files = $this->children($dto, $parentFolder);
 
         $downloadDto = $downloadFiles->handle($files);
 
         return \response()->download($downloadDto->storagePath, $downloadDto->fileName)
             ->deleteFileAfterSend();
+    }
+
+    private function children(FilesIdDto $dto, File $parentFolder): Collection
+    {
+        return $dto->all
+            ? $parentFolder->children()->get()
+            : File::query()->whereIn('id', $dto->ids)->get();
     }
 }
