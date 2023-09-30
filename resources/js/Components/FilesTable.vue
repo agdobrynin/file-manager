@@ -178,11 +178,7 @@ const clickItem = (item) => {
 
 const observer = new IntersectionObserver(
     async (entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                emit('canLoad');
-            }
-        })
+        entries.forEach(entry => entry.isIntersecting && emit('canLoad'))
     },
     {
         rootMargin: '-250px 0px 0px 0px'

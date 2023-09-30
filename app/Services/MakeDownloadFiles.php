@@ -81,7 +81,7 @@ readonly class MakeDownloadFiles
     private function getContent(File $file): string
     {
         return $this->storageByModelService
-            ->resolveStorage($file->disk)
+            ->resolve($file->disk)
             ->filesystem()
             ->get($file->storage_path);
     }

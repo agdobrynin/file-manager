@@ -7,5 +7,5 @@ use App\Enums\DiskEnum;
 
 interface StorageByDiskTypeServiceInterface
 {
-    public function resolveStorage(DiskEnum $diskEnum): StorageServiceInterface;
+    public function resolve(DiskEnum $diskEnum): StorageServiceInterface;
 }
