@@ -113,7 +113,7 @@ class FileController extends Controller
             ->deleteFileAfterSend();
     }
 
-    public function favorite(FilesActionRequest $request): void
+    public function favorite(FilesActionRequest $request): RedirectResponse
     {
         $dto = new FilesIdDto(...$request->validated());
 
@@ -126,6 +126,9 @@ class FileController extends Controller
                 $favorite->delete();
             }
         }
+
+        // TODO add flash message and catch flash on front.
+        return back();
     }
 
     private function children(FilesIdDto $dto, File $parentFolder): Collection
