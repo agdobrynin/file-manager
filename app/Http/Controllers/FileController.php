@@ -4,21 +4,27 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
+use App\Dto\FavoriteIdDto;
 use App\Dto\FilesIdDto;
 use App\Dto\FilesListFilterDto;
+use App\Http\Requests\FavoriteRequest;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FilesListRequest;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\StoreFolderRequest;
+use App\Http\Resources\FileAncestorsResource;
 use App\Http\Resources\FileResource;
 use App\Jobs\MoveFileToCloud;
 use App\Models\File;
+use App\Models\FileFavorite;
 use App\Services\MakeDownloadFiles;
+use App\VO\FileFavoriteVO;
 use App\VO\FileFolderVO;
 use App\VO\UploadFilesVO;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
@@ -39,7 +45,7 @@ class FileController extends Controller
             ->withQueryString();
 
         $fileResourceCollection = FileResource::collection($files);
-        $ancestors = FileResource::collection([...$parentFolder->ancestors, $parentFolder]);
+        $ancestors = FileAncestorsResource::collection([...$parentFolder->ancestors, $parentFolder]);
 
         return inertia(
             'MyFiles', [
@@ -105,8 +111,22 @@ class FileController extends Controller
 
         $downloadDto = $downloadFiles->handle($files);
 
-        return \response()->download($downloadDto->storagePath, $downloadDto->fileName)
-            ->deleteFileAfterSend();
+        return \response()->download($downloadDto->storagePath, $downloadDto->fileName)->deleteFileAfterSend();
+    }
+
+    public function favorite(FavoriteRequest $request): RedirectResponse
+    {
+        $dto = new FavoriteIdDto(...$request->validated());
+
+        $favorite = new FileFavoriteVO($dto->id, Auth::id());
+        $favorite = FileFavorite::firstOrCreate($favorite->toArray());
+
+        if (false === $favorite->wasRecentlyCreated) {
+            $favorite->delete();
+        }
+
+        // TODO add flash message and catch flash on front.
+        return back();
     }
 
     private function children(FilesIdDto $dto, File $parentFolder): Collection

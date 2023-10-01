@@ -35,6 +35,7 @@
             class="w-full overflow-auto"
             @item-double-click="fileItemAction"
             @can-load="emitter.emit(EVENT_LOAD_FILES_NEXT_PAGE)"
+            @item-favorite-click="favoriteAction"
         />
     </AuthenticatedLayout>
 </template>
@@ -48,7 +49,7 @@ import { computed, nextTick, onMounted, ref, watchEffect } from "vue";
 import DeleteFiles from "@/Components/DeleteFiles.vue";
 import DownloadFiles from "@/Components/DownloadFiles.vue";
 import FilesTable from "@/Components/FilesTable.vue";
-import { emitter, FILES_UPLOADED_SUCCESS, FOLDER_CREATE_SUCCESS } from "@/event-bus.js";
+import { emitter, errorMessage, FILES_UPLOADED_SUCCESS, FOLDER_CREATE_SUCCESS } from "@/event-bus.js";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
 
 const SELECTED_ALL_FILES_SYMBOL = 'all';
@@ -97,6 +98,25 @@ const fileItemAction = (item) => {
         });
     }
 };
+
+const favoriteAction = (item) => {
+    router.patch(route('file.favorite'),
+        {
+            id: item.id
+        },
+        {
+            only: [ 'errors' ],
+            onSuccess: () => {
+                item.isFavorite = !item.isFavorite;
+            },
+            onError: (errors) => {
+                const message = Object.keys(errors).length
+                    ? Object.values(errors).flat()
+                    : 'Something wrong 🧨';
+                errorMessage(message);
+            },
+        });
+}
 
 onMounted(() => {
     emitter.on(FILES_UPLOADED_SUCCESS, () => updateAllFiles());

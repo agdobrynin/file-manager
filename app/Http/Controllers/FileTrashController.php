@@ -10,7 +10,7 @@ use App\Dto\FilesListFilterDto;
 use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FilesActionTrashRequest;
 use App\Http\Requests\FilesListRequest;
-use App\Http\Resources\FileResource;
+use App\Http\Resources\FileInTrashResource;
 use App\Jobs\DeleteFileFromStorageJob;
 use App\Models\File;
 use App\Models\User;
@@ -34,7 +34,7 @@ class FileTrashController extends Controller
         $files = $query->paginate(config('app.my_files.per_page'))
             ->withQueryString();
 
-        $fileResourceCollection = FileResource::collection($files);
+        $fileResourceCollection = FileInTrashResource::collection($files);
 
         return inertia('MyTrash', [
             'files' => $fileResourceCollection,

@@ -15,6 +15,7 @@ use App\Services\MoveFileBetweenStorage;
 use App\Services\StorageByDiskTypeService;
 use App\Services\StorageService;
 use App\Services\UploadTreeFilesService;
+use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
@@ -59,6 +60,10 @@ class AppServiceProvider extends ServiceProvider
             FilesDestroyServiceInterface::class,
             FilesDestroyService::class
         );
+
+        if ($this->app->isLocal()) {
+            $this->app->register(IdeHelperServiceProvider::class);
+        }
     }
 
     /**

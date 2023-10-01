@@ -12,10 +12,102 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Kalnoy\Nestedset\NodeTrait;
 
+/**
+ * App\Models\File
+ *
+ * @property int $id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string $name
+ * @property DiskEnum $disk
+ * @property string|null $path
+ * @property string|null $storage_path
+ * @property int $_lft
+ * @property int $_rgt
+ * @property int|null $parent_id
+ * @property bool $is_folder
+ * @property string|null $mime
+ * @property int|null $size
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int $created_by
+ * @property int $updated_by
+ * @property-read \Kalnoy\Nestedset\Collection<int, File> $children
+ * @property-read int|null $children_count
+ * @property-read \App\Models\FileFavorite|null $favorite
+ * @property-read File|null $parent
+ * @property-read \App\Models\User|null $user
+ * @method static \Kalnoy\Nestedset\Collection<int, static> all($columns = ['*'])
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File ancestorsAndSelf($id, array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File ancestorsOf($id, array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File applyNestedSetScope(?string $table = null)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File countErrors()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File d()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File defaultOrder(string $dir = 'asc')
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File descendantsAndSelf($id, array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File descendantsOf($id, array $columns = [], $andSelf = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File filesInTrash(\App\Models\User $user, ?\App\Dto\FilesListFilterDto $dto = null)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File filesList(\App\Models\User $user, \App\Dto\FilesListFilterDto $dto, \App\Models\File $folder)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File fixSubtree($root)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File fixTree($root = null)
+ * @method static \Kalnoy\Nestedset\Collection<int, static> get($columns = ['*'])
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File getNodeData($id, $required = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File getPlainNodeData($id, $required = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File getTotalErrors()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File hasChildren()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File hasParent()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File isBroken()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File leaves(array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File makeGap(int $cut, int $height)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File moveNode($key, $position)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File newModelQuery()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File newQuery()
+ * @method static Builder|File onlyTrashed()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File orWhereAncestorOf(bool $id, bool $andSelf = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File orWhereDescendantOf($id)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File orWhereNodeBetween($values)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File orWhereNotDescendantOf($id)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File query()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File rebuildSubtree($root, array $data, $delete = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File rebuildTree(array $data, $delete = false, $root = null)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File reversed()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File root(array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereAncestorOf($id, $andSelf = false, $boolean = 'and')
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereAncestorOrSelf($id)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereCreatedAt($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereCreatedBy($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereDeletedAt($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereDescendantOf($id, $boolean = 'and', $not = false, $andSelf = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereDescendantOrSelf(string $id, string $boolean = 'and', string $not = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereDisk($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereId($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereIsAfter($id, $boolean = 'and')
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereIsBefore($id, $boolean = 'and')
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereIsFolder($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereIsLeaf()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereIsRoot()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereLft($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereMime($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereName($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereNodeBetween($values, $boolean = 'and', $not = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereNotDescendantOf($id)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereParentId($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File wherePath($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereRgt($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereSize($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereStoragePath($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereUpdatedAt($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File whereUpdatedBy($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File withDepth(string $as = 'depth')
+ * @method static Builder|File withTrashed()
+ * @method static \Kalnoy\Nestedset\QueryBuilder|File withoutRoot()
+ * @method static Builder|File withoutTrashed()
+ * @mixin \Eloquent
+ */
 class File extends Model
 {
     use HasFactory, NodeTrait, SoftDeletes, HasCreatorAndUpdater;
@@ -93,6 +185,12 @@ class File extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function favorite(): HasOne
+    {
+        return $this->hasOne(FileFavorite::class)
+            ->where('file_favorites.user_id', Auth::id());
+    }
+
     public function isOwnedByUser(?User $user): bool
     {
         return $this->created_by === $user?->getAuthIdentifier();
@@ -112,6 +210,7 @@ class File extends Model
         }
 
         return $builder->where('created_by', '=', $user->getAuthIdentifier())
+            ->with(['favorite'])
             ->orderBy('is_folder', 'desc')
             ->orderBy('created_at', 'desc')
             ->orderBy('files.id', 'desc');
