@@ -41,6 +41,7 @@ Route::middleware(['auth', 'verified'])->group(static function () {
             Route::post('/upload/{parentFolder?}', 'upload')->name('upload');
             Route::delete('/destroy/{parentFolder?}', 'destroy')->name('destroy');
             Route::get('/download/{parentFolder}', 'download')->name('download');
+            Route::patch('/favorite', 'favorite')->name('favorite');
         });
 
     Route::controller(FileTrashController::class)

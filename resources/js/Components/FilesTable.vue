@@ -1,21 +1,27 @@
 <template>
     <div class="bg-white shadow sm:rounded-lg" ref="topEl">
-        <table class="min-w-full">
+        <table class="table table-fixed min-w-full">
             <thead class="bg-gray-100 border-b">
             <tr>
-                <th class="w-[40px] px-3 text-left">#</th>
-                <th class="w-[40px]">
+                <th class="px-3">
+                    <div class="block w-[30px] text-right">#</div>
+                </th>
+                <th>
+                    <div class="block w-[50px]"></div>
                     <Checkbox
                         v-model="value"
                         :checked="value"
                         :disabled="!files.length"
                         :value="selectAllFilesSymbol"/>
                 </th>
+                <th v-if="displayFavorite">
+                    <div class="block w-[30px]"></div>
+                </th>
                 <th class="my-files-table-head">Name</th>
                 <th v-if="displayOwner" class="my-files-table-head">Owner</th>
                 <th v-if="displayPath" class="my-files-table-head">Path</th>
                 <th v-if="displayDeletedAt" class="my-files-table-head">Deleted</th>
-                <th v-if="displayLastModified" class="my-files-table-head">Last modified</th>
+                <th v-if="displayLastModified" class="my-files-table-head whitespace-nowrap">Last modified</th>
                 <th class="my-files-table-head">Size</th>
                 <th class="my-files-table-head">Disk</th>
             </tr>
@@ -28,17 +34,23 @@
                 @click.stop="clickItem(item)"
                 @dblclick.prevent="$emit('itemDoubleClick', item)"
             >
-                <td class="px-3 font-light text-sm text-slate-400">
+                <td class="px-3 font-light text-sm text-slate-400 text-right">
                     {{ index + 1 }}
                 </td>
-                <td class="w-[40px] text-center">
+                <td class="text-center">
                     <Checkbox
                         v-model="value"
                         :checked="!!all || value"
                         :disabled="all"
                         :value="item.id"/>
                 </td>
-                <td class="my-files-table-cell flex items-center gap-2">
+                <td v-if="displayFavorite"
+                    class="text-yellow-500 text-center"
+                    @click.prevent.stop="$emit('itemFavoriteClick', item)">
+                    <SvgIcon v-if="item.isFavorite" :path="mdiStar" class="mx-auto w-7 h-7 hover:animate-pulse"/>
+                    <SvgIcon v-else :path="mdiStarOutline" class="mx-auto w-7 h-7 hover:animate-pulse"/>
+                </td>
+                <td class="my-files-table-cell flex items-center gap-2 ps-2">
                     <div>
                         <FileIcon :mime-type="item.mime" size="30"/>
                     </div>
@@ -85,7 +97,7 @@ import { bytesToSize } from "@/helpers/helper.js";
 import SvgIcon from "vue3-icon";
 import FileIcon from "@/Components/FileIcon.vue";
 import Checkbox from "@/Components/Checkbox.vue";
-import { mdiCloudOutline, mdiHarddisk } from "@mdi/js";
+import { mdiCloudOutline, mdiHarddisk, mdiStar, mdiStarOutline } from "@mdi/js";
 import { computed, onMounted, onUpdated, ref } from "vue";
 
 /**
@@ -96,6 +108,7 @@ import { computed, onMounted, onUpdated, ref } from "vue";
  * @property {number} createdBy
  * @property {string} disk
  * @property {boolean} isFolder
+ * @property {boolean} isFavorite
  * @property {string} mime Mime type
  * @property {string} name File name
  * @property {string} owner Name if owner
@@ -118,6 +131,10 @@ const props = defineProps({
     modelValue: Array,
     files: Array,
     fetchFiles: Boolean,
+    displayFavorite: {
+        type: Boolean,
+        default: true,
+    },
     displayOwner: {
         type: Boolean,
         default: true,
@@ -146,7 +163,8 @@ const props = defineProps({
 const emit = defineEmits([
     'update:modelValue',
     'itemDoubleClick',
-    'canLoad'
+    'canLoad',
+    'itemFavoriteClick'
 ]);
 
 const endOfFilesList = ref(null);

@@ -10,15 +10,19 @@ use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FilesListRequest;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\StoreFolderRequest;
+use App\Http\Resources\FileAncestorsResource;
 use App\Http\Resources\FileResource;
 use App\Jobs\MoveFileToCloud;
 use App\Models\File;
+use App\Models\FileFavorite;
 use App\Services\MakeDownloadFiles;
+use App\VO\FileFavoriteVO;
 use App\VO\FileFolderVO;
 use App\VO\UploadFilesVO;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
@@ -39,7 +43,7 @@ class FileController extends Controller
             ->withQueryString();
 
         $fileResourceCollection = FileResource::collection($files);
-        $ancestors = FileResource::collection([...$parentFolder->ancestors, $parentFolder]);
+        $ancestors = FileAncestorsResource::collection([...$parentFolder->ancestors, $parentFolder]);
 
         return inertia(
             'MyFiles', [
@@ -107,6 +111,21 @@ class FileController extends Controller
 
         return \response()->download($downloadDto->storagePath, $downloadDto->fileName)
             ->deleteFileAfterSend();
+    }
+
+    public function favorite(FilesActionRequest $request): void
+    {
+        $dto = new FilesIdDto(...$request->validated());
+
+        foreach ($dto->ids as $id) {
+            $favorite = new FileFavoriteVO($id, Auth::id());
+            /** @var FileFavorite $favorite */
+            $favorite = FileFavorite::firstOrCreate($favorite->toArray());
+
+            if (false === $favorite->wasRecentlyCreated) {
+                $favorite->delete();
+            }
+        }
     }
 
     private function children(FilesIdDto $dto, File $parentFolder): Collection

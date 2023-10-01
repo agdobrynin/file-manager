@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Kalnoy\Nestedset\NodeTrait;
@@ -93,6 +94,12 @@ class File extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function favorite(): HasOne
+    {
+        return $this->hasOne(FileFavorite::class)
+            ->where('file_favorites.user_id', Auth::id());
+    }
+
     public function isOwnedByUser(?User $user): bool
     {
         return $this->created_by === $user?->getAuthIdentifier();
@@ -112,6 +119,7 @@ class File extends Model
         }
 
         return $builder->where('created_by', '=', $user->getAuthIdentifier())
+            ->with(['favorite'])
             ->orderBy('is_folder', 'desc')
             ->orderBy('created_at', 'desc')
             ->orderBy('files.id', 'desc');

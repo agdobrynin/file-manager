@@ -11,6 +11,7 @@
         </div>
         <FilesTable
             v-model="selectedFileIds"
+            :display-favorite="false"
             :display-deleted-at="true"
             :display-last-modified="false"
             :display-owner="false"
