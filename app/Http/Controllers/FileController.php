@@ -4,8 +4,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
+use App\Dto\FavoriteIdsDto;
 use App\Dto\FilesIdDto;
 use App\Dto\FilesListFilterDto;
+use App\Http\Requests\FavoriteRequest;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FilesListRequest;
 use App\Http\Requests\FileUploadRequest;
@@ -113,9 +115,9 @@ class FileController extends Controller
             ->deleteFileAfterSend();
     }
 
-    public function favorite(FilesActionRequest $request): RedirectResponse
+    public function favorite(FavoriteRequest $request): RedirectResponse
     {
-        $dto = new FilesIdDto(...$request->validated());
+        $dto = new FavoriteIdsDto(...$request->validated());
 
         foreach ($dto->ids as $id) {
             $favorite = new FileFavoriteVO($id, Auth::id());
