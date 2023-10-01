@@ -119,7 +119,6 @@ class FileController extends Controller
         $dto = new FavoriteIdDto(...$request->validated());
 
         $favorite = new FileFavoriteVO($dto->id, Auth::id());
-        /** @var FileFavorite $favorite */
         $favorite = FileFavorite::firstOrCreate($favorite->toArray());
 
         if (false === $favorite->wasRecentlyCreated) {
