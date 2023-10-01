@@ -105,7 +105,7 @@ const favoriteAction = (item) => {
             id: item.id
         },
         {
-            only: [ 'errors' ],
+            only: [ 'errors', 'flash' ],
             onSuccess: () => {
                 item.isFavorite = !item.isFavorite;
             },

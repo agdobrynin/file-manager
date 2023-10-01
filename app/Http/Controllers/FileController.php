@@ -7,6 +7,7 @@ use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\FavoriteIdDto;
 use App\Dto\FilesIdDto;
 use App\Dto\FilesListFilterDto;
+use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FavoriteRequest;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FilesListRequest;
@@ -120,13 +121,14 @@ class FileController extends Controller
 
         $favorite = new FileFavoriteVO($dto->id, Auth::id());
         $favorite = FileFavorite::firstOrCreate($favorite->toArray());
+        $flash = [FlashMessagesEnum::SUCCESS->value, 'File added to favorites'];
 
         if (false === $favorite->wasRecentlyCreated) {
             $favorite->delete();
+            $flash = [FlashMessagesEnum::INFO->value, 'File delete from favorites'];
         }
 
-        // TODO add flash message and catch flash on front.
-        return back();
+        return back()->with(...$flash);
     }
 
     private function children(FilesIdDto $dto, File $parentFolder): Collection
