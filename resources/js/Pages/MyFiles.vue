@@ -27,7 +27,7 @@
         </div>
         <FilesTable
             ref="tableEl"
-            v-model="selectedFileIds"
+            v-model:selected-files="selectedFileIds"
             v-model:select-all="selectAll"
             :display-last-modified="true"
             :display-owner="true"

@@ -10,7 +10,7 @@
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
         <FilesTable
-            v-model="selectedFileIds"
+            v-model:selected-files="selectedFileIds"
             v-model:select-all="selectAllFiles"
             :display-deleted-at="true"
             :display-favorite="false"

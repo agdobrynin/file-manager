@@ -29,7 +29,7 @@
             <tbody>
             <tr v-for="(item, index) of files"
                 :key="item.id"
-                :class="[selectAllValue || value.includes(item.id) ? '!bg-amber-100 hover:!bg-amber-200': '']"
+                :class="[selectAllValue || selectedFilesValue.includes(item.id) ? '!bg-amber-100 hover:!bg-amber-200': '']"
                 class="cursor-pointer my-files-table-row"
                 @click.stop="clickItem(item)"
                 @dblclick.prevent="$emit('itemDoubleClick', item)"
@@ -39,8 +39,8 @@
                 </td>
                 <td class="text-center">
                     <Checkbox
-                        v-model="value"
-                        :checked="!!selectAllValue || value"
+                        v-model="selectedFilesValue"
+                        :checked="!!selectAllValue || selectedFilesValue"
                         :disabled="selectAllValue"
                         :value="item.id"/>
                 </td>
@@ -121,7 +121,7 @@ import SvgIcon from "vue3-icon";
  */
 const props = defineProps({
     // model for list of selected items
-    modelValue: Array,
+    selectedFiles: Array,
     // model for top checkbox select all
     selectAll: Boolean,
 
@@ -150,7 +150,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits([
-    'update:modelValue',
     'itemDoubleClick',
     'canLoad',
     'itemFavoriteClick',
@@ -161,19 +160,16 @@ const emit = defineEmits([
 const endOfFilesList = ref(null);
 const topEl = ref(null);
 
-/**
- * @var {WritableComputedRef<string[]|number[]>} value
- */
-const value = computed({
-    get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value),
+const selectedFilesValue = computed({
+    get: () => props.selectedFiles,
+    set: (value) => emit('update:selectedFiles', value),
 });
 
 const selectAllValue = computed({
     get: () => props.selectAll,
     set: (val) => {
         if (val) {
-            value.value = [];
+            selectedFilesValue.value = [];
         }
 
         emit('update:selectAll', val);
@@ -184,12 +180,12 @@ const diskIcon = (item) => item.disk === 'cloud' ? mdiCloudOutline : mdiHarddisk
 
 const clickItem = (item) => {
     if (!selectAllValue.value) {
-        const index = value.value.indexOf(item.id);
+        const index = selectedFilesValue.value.indexOf(item.id);
 
         if (index >= 0) {
-            value.value = value.value.filter((id) => id !== item.id);
+            selectedFilesValue.value = selectedFilesValue.value.filter((id) => id !== item.id);
         } else {
-            value.value.push(item.id);
+            selectedFilesValue.value.push(item.id);
         }
     }
 };
