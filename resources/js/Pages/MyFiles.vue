@@ -11,13 +11,13 @@
             <div class="flex flex-wrap gap-4 items-center">
                 <CreateNewDropdown/>
                 <DeleteFiles
-                    :all-files="selectedAllFiles"
+                    :all-files="selectAll"
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
                     @delete-finish="deleteFinish"/>
                 <DownloadFiles
                     ref="downloadComponent"
-                    :all-files="selectedAllFiles"
+                    :all-files="selectAll"
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
                     @download-complete="downloadComplete"/>
@@ -28,11 +28,11 @@
         <FilesTable
             ref="tableEl"
             v-model="selectedFileIds"
+            v-model:select-all="selectAll"
             :display-last-modified="true"
             :display-owner="true"
             :fetch-files="filesFetching"
             :files="filesList"
-            :select-all-files-symbol="SELECTED_ALL_FILES_SYMBOL"
             class="w-full overflow-auto"
             @item-double-click="fileItemAction"
             @can-load="emitter.emit(EVENT_LOAD_FILES_NEXT_PAGE)"
@@ -46,15 +46,13 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
 import CreateNewDropdown from "@/Components/CreateNewDropdown.vue";
-import { computed, nextTick, onMounted, ref, watchEffect } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import DeleteFiles from "@/Components/DeleteFiles.vue";
 import DownloadFiles from "@/Components/DownloadFiles.vue";
 import FilesTable from "@/Components/FilesTable.vue";
 import { emitter, errorMessage, FILES_UPLOADED_SUCCESS, FOLDER_CREATE_SUCCESS } from "@/event-bus.js";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
 import OnlyFavorites from "@/Components/OnlyFavorites.vue";
-
-const SELECTED_ALL_FILES_SYMBOL = 'all';
 
 const props = defineProps({
     parentId: Number,
@@ -63,18 +61,10 @@ const props = defineProps({
 })
 
 const selectedFileIds = ref([]);
+const selectAll = ref(false);
 const downloadComponent = ref(null);
 const tableEl = ref(null);
 const onlyFavoritesValue = ref(false);
-
-const selectedAllFiles = computed(() => selectedFileIds.value.indexOf(SELECTED_ALL_FILES_SYMBOL) >= 0);
-
-watchEffect(() => {
-    if (selectedFileIds.value.length > 1
-        && selectedFileIds.value.indexOf(SELECTED_ALL_FILES_SYMBOL) >= 0) {
-        selectedFileIds.value = [ SELECTED_ALL_FILES_SYMBOL ];
-    }
-})
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles(props.files);
 

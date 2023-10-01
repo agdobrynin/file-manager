@@ -9,10 +9,10 @@
                 <th>
                     <div class="block w-[50px]"></div>
                     <Checkbox
-                        v-model="value"
-                        :checked="value"
+                        v-model="selectAllValue"
+                        :checked="selectAllValue"
                         :disabled="!files.length"
-                        :value="selectAllFilesSymbol"/>
+                    />
                 </th>
                 <th v-if="displayFavorite">
                     <div class="block w-[30px]"></div>
@@ -29,7 +29,7 @@
             <tbody>
             <tr v-for="(item, index) of files"
                 :key="item.id"
-                :class="[all || value.includes(item.id) ? '!bg-amber-100 hover:!bg-amber-200': '']"
+                :class="[selectAllValue || value.includes(item.id) ? '!bg-amber-100 hover:!bg-amber-200': '']"
                 class="cursor-pointer my-files-table-row"
                 @click.stop="clickItem(item)"
                 @dblclick.prevent="$emit('itemDoubleClick', item)"
@@ -40,8 +40,8 @@
                 <td class="text-center">
                     <Checkbox
                         v-model="value"
-                        :checked="!!all || value"
-                        :disabled="all"
+                        :checked="!!selectAllValue || value"
+                        :disabled="selectAllValue"
                         :value="item.id"/>
                 </td>
                 <td v-if="displayFavorite"
@@ -93,12 +93,12 @@
 </template>
 
 <script setup>
-import { bytesToSize } from "@/helpers/helper.js";
-import SvgIcon from "vue3-icon";
-import FileIcon from "@/Components/FileIcon.vue";
 import Checkbox from "@/Components/Checkbox.vue";
+import FileIcon from "@/Components/FileIcon.vue";
+import { bytesToSize } from "@/helpers/helper.js";
 import { mdiCloudOutline, mdiHarddisk, mdiStar, mdiStarOutline } from "@mdi/js";
 import { computed, onMounted, onUpdated, ref } from "vue";
+import SvgIcon from "vue3-icon";
 
 /**
  * @typedef file
@@ -119,16 +119,12 @@ import { computed, onMounted, onUpdated, ref } from "vue";
  * @property {string} updatedBy
  * @property {string|null} deletedAt
  */
-/**
- * @var {Prettify<Readonly<ExtractPropTypes<{
- *      modelValue: ArrayConstructor|file[],
- *      fetchFile: boolean,
- *      selectAllFilesSymbol: string,
- *      modelValue: string[]|number[]
- *  }>>>} props
- */
 const props = defineProps({
+    // model for list of selected items
     modelValue: Array,
+    // model for top checkbox select all
+    selectAll: Boolean,
+
     files: Array,
     fetchFiles: Boolean,
     displayFavorite: {
@@ -151,20 +147,15 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    selectAllFilesSymbol: {
-        type: String,
-        default: '*',
-        validator(value) {
-            return value.length > 1;
-        }
-    }
 });
 
 const emit = defineEmits([
     'update:modelValue',
     'itemDoubleClick',
     'canLoad',
-    'itemFavoriteClick'
+    'itemFavoriteClick',
+    'update:selectedFiles',
+    'update:selectAll',
 ]);
 
 const endOfFilesList = ref(null);
@@ -178,12 +169,21 @@ const value = computed({
     set: (value) => emit('update:modelValue', value),
 });
 
-const all = computed(() => !!value.value.find((v) => v === props.selectAllFilesSymbol));
+const selectAllValue = computed({
+    get: () => props.selectAll,
+    set: (val) => {
+        if (val) {
+            value.value = [];
+        }
+
+        emit('update:selectAll', val);
+    }
+});
 
 const diskIcon = (item) => item.disk === 'cloud' ? mdiCloudOutline : mdiHarddisk;
 
 const clickItem = (item) => {
-    if (!all.value) {
+    if (!selectAllValue.value) {
         const index = value.value.indexOf(item.id);
 
         if (index >= 0) {
