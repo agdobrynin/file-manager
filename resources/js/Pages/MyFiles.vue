@@ -102,7 +102,7 @@ const fileItemAction = (item) => {
 const favoriteAction = (item) => {
     router.patch(route('file.favorite'),
         {
-            ids: [ item.id ]
+            id: item.id
         },
         {
             only: [ 'errors' ],

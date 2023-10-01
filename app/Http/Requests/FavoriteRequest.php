@@ -24,18 +24,16 @@ class FavoriteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ids' => [
+            'id' => [
                 'required',
-                'array',
-                function (string $attribute, array $ids, $fail) {
-                    foreach ($ids as $id) {
-                        $file = File::query()->where('id', $id)
-                            ->where('created_by', Auth::id())
-                            ->first();
+                'integer',
+                function (string $attribute, int $id, $fail) {
+                    $file = File::query()->where('id', $id)
+                        ->where('created_by', Auth::id())
+                        ->first();
 
-                        if (null === $file) {
-                            $fail('Invalid file ID ' . $id . ' for auth user.');
-                        }
+                    if (null === $file) {
+                        $fail('Invalid file ID ' . $id . ' for auth user.');
                     }
                 }
             ]

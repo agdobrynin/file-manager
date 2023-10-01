@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
-use App\Dto\FavoriteIdsDto;
+use App\Dto\FavoriteIdDto;
 use App\Dto\FilesIdDto;
 use App\Dto\FilesListFilterDto;
 use App\Http\Requests\FavoriteRequest;
@@ -111,22 +111,19 @@ class FileController extends Controller
 
         $downloadDto = $downloadFiles->handle($files);
 
-        return \response()->download($downloadDto->storagePath, $downloadDto->fileName)
-            ->deleteFileAfterSend();
+        return \response()->download($downloadDto->storagePath, $downloadDto->fileName)->deleteFileAfterSend();
     }
 
     public function favorite(FavoriteRequest $request): RedirectResponse
     {
-        $dto = new FavoriteIdsDto(...$request->validated());
+        $dto = new FavoriteIdDto(...$request->validated());
 
-        foreach ($dto->ids as $id) {
-            $favorite = new FileFavoriteVO($id, Auth::id());
-            /** @var FileFavorite $favorite */
-            $favorite = FileFavorite::firstOrCreate($favorite->toArray());
+        $favorite = new FileFavoriteVO($dto->id, Auth::id());
+        /** @var FileFavorite $favorite */
+        $favorite = FileFavorite::firstOrCreate($favorite->toArray());
 
-            if (false === $favorite->wasRecentlyCreated) {
-                $favorite->delete();
-            }
+        if (false === $favorite->wasRecentlyCreated) {
+            $favorite->delete();
         }
 
         // TODO add flash message and catch flash on front.
