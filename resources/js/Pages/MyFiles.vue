@@ -8,7 +8,7 @@
             </div>
         </div>
         <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex flex-wrap gap-4">
+            <div class="flex flex-wrap gap-4 items-center">
                 <CreateNewDropdown/>
                 <DeleteFiles
                     :all-files="selectedAllFiles"
@@ -21,6 +21,7 @@
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
                     @download-complete="downloadComplete"/>
+                <OnlyFavorites v-model="onlyFavoritesValue"/>
             </div>
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
@@ -51,6 +52,7 @@ import DownloadFiles from "@/Components/DownloadFiles.vue";
 import FilesTable from "@/Components/FilesTable.vue";
 import { emitter, errorMessage, FILES_UPLOADED_SUCCESS, FOLDER_CREATE_SUCCESS } from "@/event-bus.js";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
+import OnlyFavorites from "@/Components/OnlyFavorites.vue";
 
 const SELECTED_ALL_FILES_SYMBOL = 'all';
 
@@ -63,6 +65,7 @@ const props = defineProps({
 const selectedFileIds = ref([]);
 const downloadComponent = ref(null);
 const tableEl = ref(null);
+const onlyFavoritesValue = ref(false);
 
 const selectedAllFiles = computed(() => selectedFileIds.value.indexOf(SELECTED_ALL_FILES_SYMBOL) >= 0);
 
@@ -107,7 +110,7 @@ const favoriteAction = (item) => {
         {
             only: [ 'errors', 'flash' ],
             onSuccess: () => {
-                item.isFavorite = !item.isFavorite;
+                item.isFavorite = ! item.isFavorite;
             },
             onError: (errors) => {
                 const message = Object.keys(errors).length
