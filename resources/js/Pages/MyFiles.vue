@@ -21,14 +21,17 @@
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
                     @download-complete="downloadComplete"/>
-                <OnlyFavorites v-model="onlyFavoritesValue"/>
+                <OnlyFavorites
+                    v-model="onlyFavoritesCurrentState"
+                    @update:model-value="doChangeSearchFavorites"
+                />
             </div>
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
         <FilesTable
             ref="tableEl"
-            v-model:selected-files="selectedFileIds"
             v-model:select-all="selectAll"
+            v-model:selected-files="selectedFileIds"
             :display-last-modified="true"
             :display-owner="true"
             :fetch-files="filesFetching"
@@ -54,17 +57,42 @@ import { emitter, errorMessage, FILES_UPLOADED_SUCCESS, FOLDER_CREATE_SUCCESS } 
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
 import OnlyFavorites from "@/Components/OnlyFavorites.vue";
 
+/**
+ * Build params for function route('file.index').
+ *
+ * @typedef {{
+ *      parentFolder: number,
+ *      onlyFavorites?: boolean,
+ * }} requestParams
+ */
+
 const props = defineProps({
     parentId: Number,
     files: Object,
     ancestors: Object,
-})
+});
+
+const onlyFavoritesQueryStringKey = 'onlyFavorites';
 
 const selectedFileIds = ref([]);
 const selectAll = ref(false);
 const downloadComponent = ref(null);
 const tableEl = ref(null);
-const onlyFavoritesValue = ref(false);
+const onlyFavoritesCurrentState = ref(false);
+
+/**
+ * @param {number} parentFolderId
+ * @return {requestParams}
+ */
+const indexRequestParams = (parentFolderId = props.parentId) => {
+    const params = { parentFolder: parentFolderId };
+
+    if (onlyFavoritesCurrentState.value) {
+        params[onlyFavoritesQueryStringKey] = 1;
+    }
+
+    return params;
+};
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles(props.files);
 
@@ -82,7 +110,7 @@ const deleteFinish = () => {
 
 const fileItemAction = (item) => {
     if (item.isFolder) {
-        router.visit(route('file.index', { parentFolder: item.id }));
+        router.visit(route('file.index', indexRequestParams(item.id)));
     } else {
         selectedFileIds.value = [];
         nextTick(() => {
@@ -109,10 +137,15 @@ const favoriteAction = (item) => {
                 errorMessage(message);
             },
         });
-}
+};
+
+const doChangeSearchFavorites = () => router.get(route('file.index', indexRequestParams()));
 
 onMounted(() => {
     emitter.on(FILES_UPLOADED_SUCCESS, () => updateAllFiles());
     emitter.on(FOLDER_CREATE_SUCCESS, () => updateAllFiles());
+
+    const urlParams = new URLSearchParams(window.location.search);
+    onlyFavoritesCurrentState.value = urlParams.get(onlyFavoritesQueryStringKey) === '1';
 });
 </script>

@@ -51,7 +51,7 @@ use Kalnoy\Nestedset\NodeTrait;
  * @method static \Kalnoy\Nestedset\QueryBuilder|File descendantsAndSelf($id, array $columns = [])
  * @method static \Kalnoy\Nestedset\QueryBuilder|File descendantsOf($id, array $columns = [], $andSelf = false)
  * @method static \Kalnoy\Nestedset\QueryBuilder|File filesInTrash(\App\Models\User $user, ?\App\Dto\FilesListFilterDto $dto = null)
- * @method static \Kalnoy\Nestedset\QueryBuilder|File filesList(\App\Models\User $user, \App\Dto\FilesListFilterDto $dto, \App\Models\File $folder)
+ * @method static \Kalnoy\Nestedset\QueryBuilder filesList(\App\Models\User $user, \App\Dto\FilesListFilterDto $dto, \App\Models\File $folder)
  * @method static \Kalnoy\Nestedset\QueryBuilder|File fixSubtree($root)
  * @method static \Kalnoy\Nestedset\QueryBuilder|File fixTree($root = null)
  * @method static \Kalnoy\Nestedset\Collection<int, static> get($columns = ['*'])
@@ -187,8 +187,7 @@ class File extends Model
 
     public function favorite(): HasOne
     {
-        return $this->hasOne(FileFavorite::class)
-            ->where('file_favorites.user_id', Auth::id());
+        return $this->hasOne(FileFavorite::class);
     }
 
     public function isOwnedByUser(?User $user): bool
@@ -206,7 +205,8 @@ class File extends Model
         if ($dto->search) {
             $builder->where('name', 'like', "%$dto->search%");
         } else {
-            $builder->where('parent_id', $folder->id);
+            $builder->where('parent_id', $folder->id)
+                ->when($dto->onlyFavorites, fn() => $builder->whereHas('favorite'));
         }
 
         return $builder->where('created_by', '=', $user->getAuthIdentifier())
