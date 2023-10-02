@@ -129,6 +129,10 @@ const favoriteAction = (item) => {
             only: [ 'errors', 'flash' ],
             onSuccess: () => {
                 item.isFavorite = ! item.isFavorite;
+
+                if (onlyFavoritesCurrentState.value && !item.isFavorite) {
+                    filesList.value = filesList.value.filter((file) => file.id !== item.id);
+                }
             },
             onError: (errors) => {
                 const message = Object.keys(errors).length
