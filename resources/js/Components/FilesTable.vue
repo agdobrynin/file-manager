@@ -9,10 +9,10 @@
                 <th>
                     <div class="block w-[50px]"></div>
                     <Checkbox
-                        v-model="value"
-                        :checked="value"
+                        v-model="selectAllValue"
+                        :checked="selectAllValue"
                         :disabled="!files.length"
-                        :value="selectAllFilesSymbol"/>
+                    />
                 </th>
                 <th v-if="displayFavorite">
                     <div class="block w-[30px]"></div>
@@ -29,7 +29,7 @@
             <tbody>
             <tr v-for="(item, index) of files"
                 :key="item.id"
-                :class="[all || value.includes(item.id) ? '!bg-amber-100 hover:!bg-amber-200': '']"
+                :class="[selectAllValue || selectedFilesValue.includes(item.id) ? '!bg-amber-100 hover:!bg-amber-200': '']"
                 class="cursor-pointer my-files-table-row"
                 @click.stop="clickItem(item)"
                 @dblclick.prevent="$emit('itemDoubleClick', item)"
@@ -39,9 +39,9 @@
                 </td>
                 <td class="text-center">
                     <Checkbox
-                        v-model="value"
-                        :checked="!!all || value"
-                        :disabled="all"
+                        v-model="selectedFilesValue"
+                        :checked="!!selectAllValue || selectedFilesValue"
+                        :disabled="selectAllValue"
                         :value="item.id"/>
                 </td>
                 <td v-if="displayFavorite"
@@ -93,12 +93,12 @@
 </template>
 
 <script setup>
-import { bytesToSize } from "@/helpers/helper.js";
-import SvgIcon from "vue3-icon";
-import FileIcon from "@/Components/FileIcon.vue";
 import Checkbox from "@/Components/Checkbox.vue";
+import FileIcon from "@/Components/FileIcon.vue";
+import { bytesToSize } from "@/helpers/helper.js";
 import { mdiCloudOutline, mdiHarddisk, mdiStar, mdiStarOutline } from "@mdi/js";
 import { computed, onMounted, onUpdated, ref } from "vue";
+import SvgIcon from "vue3-icon";
 
 /**
  * @typedef file
@@ -119,16 +119,12 @@ import { computed, onMounted, onUpdated, ref } from "vue";
  * @property {string} updatedBy
  * @property {string|null} deletedAt
  */
-/**
- * @var {Prettify<Readonly<ExtractPropTypes<{
- *      modelValue: ArrayConstructor|file[],
- *      fetchFile: boolean,
- *      selectAllFilesSymbol: string,
- *      modelValue: string[]|number[]
- *  }>>>} props
- */
 const props = defineProps({
-    modelValue: Array,
+    // model for list of selected items
+    selectedFiles: Array,
+    // model for top checkbox select all
+    selectAll: Boolean,
+
     files: Array,
     fetchFiles: Boolean,
     displayFavorite: {
@@ -151,45 +147,45 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    selectAllFilesSymbol: {
-        type: String,
-        default: '*',
-        validator(value) {
-            return value.length > 1;
-        }
-    }
 });
 
 const emit = defineEmits([
-    'update:modelValue',
     'itemDoubleClick',
     'canLoad',
-    'itemFavoriteClick'
+    'itemFavoriteClick',
+    'update:selectedFiles',
+    'update:selectAll',
 ]);
 
 const endOfFilesList = ref(null);
 const topEl = ref(null);
 
-/**
- * @var {WritableComputedRef<string[]|number[]>} value
- */
-const value = computed({
-    get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value),
+const selectedFilesValue = computed({
+    get: () => props.selectedFiles,
+    set: (value) => emit('update:selectedFiles', value),
 });
 
-const all = computed(() => !!value.value.find((v) => v === props.selectAllFilesSymbol));
+const selectAllValue = computed({
+    get: () => props.selectAll,
+    set: (val) => {
+        if (val) {
+            selectedFilesValue.value = [];
+        }
+
+        emit('update:selectAll', val);
+    }
+});
 
 const diskIcon = (item) => item.disk === 'cloud' ? mdiCloudOutline : mdiHarddisk;
 
 const clickItem = (item) => {
-    if (!all.value) {
-        const index = value.value.indexOf(item.id);
+    if (!selectAllValue.value) {
+        const index = selectedFilesValue.value.indexOf(item.id);
 
         if (index >= 0) {
-            value.value = value.value.filter((id) => id !== item.id);
+            selectedFilesValue.value = selectedFilesValue.value.filter((id) => id !== item.id);
         } else {
-            value.value.push(item.id);
+            selectedFilesValue.value.push(item.id);
         }
     }
 };
