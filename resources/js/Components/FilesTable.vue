@@ -3,20 +3,17 @@
         <table class="table table-fixed min-w-full">
             <thead class="bg-gray-100 border-b">
             <tr>
-                <th class="px-3">
-                    <div class="block w-[30px] text-right">#</div>
+                <th class="px-3 w-[30px]">
+                    #
                 </th>
-                <th>
-                    <div class="block w-[50px]"></div>
+                <th class="w-[50px]">
                     <Checkbox
                         v-model="selectAllValue"
                         :checked="selectAllValue"
                         :disabled="!files.length"
                     />
                 </th>
-                <th v-if="displayFavorite">
-                    <div class="block w-[30px]"></div>
-                </th>
+                <th v-if="displayFavorite" class="w-[30px]">&nbsp;</th>
                 <th class="my-files-table-head">Name</th>
                 <th v-if="displayOwner" class="my-files-table-head">Owner</th>
                 <th v-if="displayPath" class="my-files-table-head">Path</th>
