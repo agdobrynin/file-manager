@@ -132,6 +132,7 @@ const favoriteAction = (item) => {
 
                 if (onlyFavoritesCurrentState.value && !item.isFavorite) {
                     filesList.value = filesList.value.filter((file) => file.id !== item.id);
+                    filesTotal.value--;
                 }
             },
             onError: (errors) => {
