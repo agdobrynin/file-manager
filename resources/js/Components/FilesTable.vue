@@ -10,7 +10,7 @@
                     <Checkbox
                         v-model="selectAllValue"
                         :checked="selectAllValue"
-                        :disabled="!files.length"
+                        :disabled="!files.length || disableSelectAll"
                     />
                 </th>
                 <th v-if="displayFavorite" class="w-[30px]">&nbsp;</th>
@@ -124,6 +124,10 @@ const props = defineProps({
 
     files: Array,
     fetchFiles: Boolean,
+    disableSelectAll: {
+        type: Boolean,
+        default: false,
+    },
     displayFavorite: {
         type: Boolean,
         default: true,
