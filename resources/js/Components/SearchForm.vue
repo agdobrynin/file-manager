@@ -18,28 +18,49 @@
 
 <script setup>
 import TextInput from "@/Components/TextInput.vue";
+import { debounce } from "@/helpers/helper.js";
 import { mdiClose } from "@mdi/js";
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import SvgIcon from "vue3-icon";
+
+/**
+ * @type {Function | undefined}
+ */
+let debounceFunc;
 
 const props = defineProps({
     modelValue: String,
     placeholder: String,
+    delay: Number,
 });
 
 const emit = defineEmits([ 'update:modelValue', 'onClear' ]);
+
+const delayValue = computed(() => parseInt(props.delay) || null);
 
 const value = computed({
     get() {
         return props.modelValue;
     },
     set(value) {
-        emit('update:modelValue', value);
+        if (debounceFunc) {
+            debounceFunc(value);
+        } else {
+            emit('update:modelValue', value);
+        }
     }
 });
 
 const onClear = () => {
-    value.value = '';
+    emit('update:modelValue', '');
     emit('onClear');
 };
+
+onMounted(() => {
+    if (delayValue.value > 0) {
+        debounceFunc =  debounce(function (val) {
+            emit('update:modelValue', val);
+        }, delayValue.value)
+    }
+})
 </script>

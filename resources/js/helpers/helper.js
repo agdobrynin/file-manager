@@ -11,3 +11,24 @@ export function bytesToSize(bytes, factorDigits = 2) {
     
     return `${(bytes / (1024 ** unitIndex)).toFixed(factorDigits)} ${units[unitIndex]}`;
 }
+
+/**
+ * @param {Function} fn
+ * @param {Number} wait
+ * @return {(function(...[*]): void)|*}
+ */
+export function debounce(fn, wait) {
+    let timer;
+    
+    return function (...args) {
+        if (timer) {
+            clearTimeout(timer);
+        }
+        
+        const context = this;
+        
+        timer = setTimeout(() => {
+            fn.apply(context, args);
+        }, wait);
+    }
+}

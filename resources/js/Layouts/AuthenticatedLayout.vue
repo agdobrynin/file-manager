@@ -7,7 +7,12 @@
               @dragleave.prevent="onDragLeave">
             <template v-if="!over">
                 <div class="flex items-center justify-between w-full z-20 px-2">
-                    <SearchForm/>
+                    <SearchForm
+                        v-model="search"
+                        :delay="500"
+                        placeholder="Search files and folders"
+                        @on-clear="onClearSearch"
+                    />
                     <UserSettingsDropdown/>
                 </div>
                 <div class="flex-1 flex flex-col overflow-hidden px-1.5">
@@ -34,9 +39,12 @@
 
 <script setup>
 import Navigation from "@/Components/Navigation.vue";
-import UserSettingsDropdown from "@/Components/UserSettingsDropdown.vue";
+import Notify from "@/Components/Notify.vue";
 import SearchForm from "@/Components/SearchForm.vue";
+import UploadProgress from "@/Components/UploadProgress.vue";
+import UserSettingsDropdown from "@/Components/UserSettingsDropdown.vue";
 import {
+    DO_SEARCH_FILE,
     emitter,
     errorMessage,
     FILES_CHOOSE,
@@ -46,23 +54,31 @@ import {
     successMessage,
     warningMessage
 } from "@/event-bus.js";
-import { computed, onMounted, ref, watchEffect } from "vue";
+import { bytesToSize } from "@/helpers/helper.js";
 import { useForm, usePage } from "@inertiajs/vue3";
 import { fromEvent } from "file-selector";
-import UploadProgress from "@/Components/UploadProgress.vue";
-import { bytesToSize } from "@/helpers/helper.js";
-import Notify from "@/Components/Notify.vue";
+import { computed, onMounted, ref, watch, watchEffect } from "vue";
 
+const initSearch = (new URLSearchParams(window.location.search)).get('search');
 
 const page = usePage();
 const over = ref(false);
+const search = ref(initSearch || '');
 
 const fileUploadForm = useForm({
     files: [],
     relativePaths: [],
 })
 
-const progress = computed(() => fileUploadForm.progress?.percentage || 0)
+const progress = computed(() => fileUploadForm.progress?.percentage || 0);
+
+watch(search, (value) => {
+    emitter.emit(DO_SEARCH_FILE, value);
+});
+
+const onClearSearch = () => {
+    emitter.emit(DO_SEARCH_FILE, search.value);
+};
 
 const onDragOver = () => over.value = true;
 
@@ -98,7 +114,6 @@ const uploadFiles = (uploadFiles) => {
 
             return;
         }
-
 
         fileUploadForm.files = [ ...files ];
         fileUploadForm.relativePaths = [ ...files ].map((file) => file.path?.replace(/^\//, '') || file.webkitRelativePath || file.name);
