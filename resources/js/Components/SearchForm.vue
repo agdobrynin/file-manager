@@ -1,18 +1,20 @@
 <template>
-    <div class="w-full h-[80px] flex items-center relative">
-        <SvgIcon
-            v-if="value.length"
-            :path="mdiClose"
-            class="absolute top-0 right-3 flex h-full items-center cursor-pointer text-gray-600"
-            @click="onClear"
-        />
-        <TextInput
-            v-model="value"
-            :placeholder="placeholder"
-            autocomplete="off"
-            class="block w-full mr-2 pr-7"
-            type="text"
-        />
+    <div class="w-full h-[80px] flex items-center">
+        <div class="relative w-full">
+            <SvgIcon
+                v-if="value.length"
+                :path="mdiClose"
+                class="absolute top-0 right-3 flex h-full cursor-pointer text-gray-400 hover:text-gray-700"
+                @click="onClear"
+            />
+            <TextInput
+                v-model="value"
+                :placeholder="placeholder"
+                autocomplete="off"
+                class="block w-full mr-2 pr-7"
+                type="text"
+            />
+        </div>
     </div>
 </template>
 
@@ -58,7 +60,7 @@ const onClear = () => {
 
 onMounted(() => {
     if (delayValue.value > 0) {
-        debounceFunc =  debounce(function (val) {
+        debounceFunc = debounce(function (val) {
             emit('update:modelValue', val);
         }, delayValue.value)
     }
