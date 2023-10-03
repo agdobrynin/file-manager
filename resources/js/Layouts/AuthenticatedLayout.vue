@@ -9,8 +9,10 @@
                 <div class="flex items-center justify-between w-full z-20 px-2">
                     <SearchForm
                         v-model="search"
+                        :class="{'opacity-30' : disabledSearch}"
                         :delay="500"
-                        placeholder="Search files and folders"
+                        :disabled="disabledSearch"
+                        :placeholder="`${!disabledSearch ? 'Search files and folders' : ''}`"
                         @on-clear="onClearSearch"
                     />
                     <UserSettingsDropdown/>
@@ -67,6 +69,7 @@ const page = usePage();
 const over = ref(false);
 const search = ref(initSearch || '');
 const emitSearch = ref(true);
+const disabledSearch = ref(true);
 
 const fileUploadForm = useForm({
     files: [],
@@ -180,6 +183,10 @@ onMounted(() => {
     emitter.on(FILES_CHOOSE, uploadFiles);
 
     router.on('navigate', function (ev) {
+        if ([ 'MyFiles', 'MyTrash' ].includes(ev.detail.page.component)) {
+            disabledSearch.value = false;
+        }
+
         const params = new URLSearchParams(ev.detail.page.url.split('?')[1]);
 
         if ( ! params.has(SEARCH_PARAM_KEY) && search.value) {

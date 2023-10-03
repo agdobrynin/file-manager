@@ -11,6 +11,7 @@
                 v-model="value"
                 name="search_files"
                 :placeholder="placeholder"
+                :disabled="disabled"
                 autocomplete="off"
                 class="block w-full mr-2 pr-7"
                 type="text"
@@ -35,6 +36,10 @@ const props = defineProps({
     modelValue: String,
     placeholder: String,
     delay: Number,
+    disabled: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const emit = defineEmits([ 'update:modelValue', 'onClear' ]);
