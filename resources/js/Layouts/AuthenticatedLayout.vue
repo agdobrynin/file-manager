@@ -55,7 +55,7 @@ import {
     warningMessage
 } from "@/event-bus.js";
 import { bytesToSize } from "@/helpers/helper.js";
-import { useForm, usePage } from "@inertiajs/vue3";
+import { router, useForm, usePage } from "@inertiajs/vue3";
 import { fromEvent } from "file-selector";
 import { computed, onMounted, ref, watch, watchEffect } from "vue";
 
@@ -64,6 +64,7 @@ const initSearch = (new URLSearchParams(window.location.search)).get('search');
 const page = usePage();
 const over = ref(false);
 const search = ref(initSearch || '');
+const emitSearch = ref(true);
 
 const fileUploadForm = useForm({
     files: [],
@@ -72,13 +73,19 @@ const fileUploadForm = useForm({
 
 const progress = computed(() => fileUploadForm.progress?.percentage || 0);
 
+const doEmitSearch = (value) => emitter.emit(DO_SEARCH_FILE, value);
+
 watch(search, (value) => {
-    emitter.emit(DO_SEARCH_FILE, value);
+    if (emitSearch.value) {
+        doEmitSearch(value);
+    }
 });
 
 const onClearSearch = () => {
-    emitter.emit(DO_SEARCH_FILE, search.value);
-};
+    if (emitSearch.value) {
+        doEmitSearch(search.value);
+    }
+}
 
 const onDragOver = () => over.value = true;
 
@@ -169,5 +176,19 @@ watchEffect(() => {
 
 onMounted(() => {
     emitter.on(FILES_CHOOSE, uploadFiles);
+
+    router.on('navigate', function (ev) {
+        const params = new URLSearchParams(ev.detail.page.url.split('?')[1]);
+
+        if ( ! params.has('search') && search.value) {
+            const promise = new Promise((resolve) => {
+                resolve();
+            });
+
+            promise.then(() => emitSearch.value = false)
+                .then(() => search.value = '')
+                .then(() => emitSearch.value = true);
+        }
+    })
 });
 </script>
