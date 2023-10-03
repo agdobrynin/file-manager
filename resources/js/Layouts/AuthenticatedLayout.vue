@@ -59,7 +59,9 @@ import { router, useForm, usePage } from "@inertiajs/vue3";
 import { fromEvent } from "file-selector";
 import { computed, onMounted, ref, watch, watchEffect } from "vue";
 
-const initSearch = (new URLSearchParams(window.location.search)).get('search');
+const SEARCH_PARAM_KEY = 'search';
+
+const initSearch = (new URLSearchParams(window.location.search)).get(SEARCH_PARAM_KEY);
 
 const page = usePage();
 const over = ref(false);
@@ -180,7 +182,7 @@ onMounted(() => {
     router.on('navigate', function (ev) {
         const params = new URLSearchParams(ev.detail.page.url.split('?')[1]);
 
-        if ( ! params.has('search') && search.value) {
+        if ( ! params.has(SEARCH_PARAM_KEY) && search.value) {
             const promise = new Promise((resolve) => {
                 resolve();
             });
