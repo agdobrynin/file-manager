@@ -11,6 +11,7 @@
                         v-model="selectAllValue"
                         :checked="selectAllValue"
                         :disabled="!files.length || disableSelectAll"
+                        name="select_all_files"
                     />
                 </th>
                 <th v-if="displayFavorite" class="w-[30px]">&nbsp;</th>
@@ -39,7 +40,9 @@
                         v-model="selectedFilesValue"
                         :checked="!!selectAllValue || selectedFilesValue"
                         :disabled="selectAllValue"
-                        :value="item.id"/>
+                        :value="item.id"
+                        name="file_id[]"
+                    />
                 </td>
                 <td v-if="displayFavorite"
                     class="text-yellow-500 text-center"

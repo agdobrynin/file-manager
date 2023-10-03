@@ -9,6 +9,7 @@
             />
             <TextInput
                 v-model="value"
+                name="search_files"
                 :placeholder="placeholder"
                 autocomplete="off"
                 class="block w-full mr-2 pr-7"
