@@ -205,11 +205,12 @@ class File extends Model
         if ($dto->search) {
             $builder->where('name', 'like', "%$dto->search%");
         } else {
-            $builder->where('parent_id', $folder->id)
-                ->when($dto->onlyFavorites, fn() => $builder->whereHas('favorite'));
+            $builder->where('parent_id', $folder->id);
         }
 
-        return $builder->where('created_by', '=', $user->getAuthIdentifier())
+        return $builder->whereNotNull('parent_id')
+            ->when($dto->onlyFavorites, fn() => $builder->whereHas('favorite'))
+            ->where('created_by', '=', $user->getAuthIdentifier())
             ->with(['favorite'])
             ->orderBy('is_folder', 'desc')
             ->orderBy('created_at', 'desc')

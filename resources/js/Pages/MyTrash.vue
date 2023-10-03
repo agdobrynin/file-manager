@@ -10,8 +10,9 @@
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
         <FilesTable
-            v-model:selected-files="selectedFileIds"
             v-model:select-all="selectAllFiles"
+            v-model:selected-files="selectedFileIds"
+            :disable-select-all="disableSelectAll"
             :display-deleted-at="true"
             :display-favorite="false"
             :display-last-modified="false"
@@ -26,12 +27,12 @@
 </template>
 
 <script setup>
-import { Head } from "@inertiajs/vue3";
+import { Head, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import FilesTable from "@/Components/FilesTable.vue";
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
-import { emitter } from "@/event-bus.js";
+import { DO_SEARCH_FILE, emitter } from "@/event-bus.js";
 import RestoreFiles from "@/Components/RestoreFiles.vue";
 import DeleteFromTrash from "@/Components/DeleteFromTrash.vue";
 
@@ -41,11 +42,41 @@ const props = defineProps({
 
 const selectedFileIds = ref([]);
 const selectAllFiles = ref(false);
+const searchString = ref('');
+const disableSelectAll = ref(false);
+
+watch(searchString, (value) => {
+    disableSelectAll.value = !! value;
+    selectAllFiles.value = false;
+    selectedFileIds.value = [];
+});
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles(props.files);
+
+const doSearch = () => {
+    const params = { search: searchString.value };
+
+    router.visit(route('trash.index', params), {
+        replace: true,
+        preserveState: true,
+        onSuccess: () => filesReset(props.files),
+    });
+};
 
 const reset = () => {
     filesReset(props.files);
     selectedFileIds.value = [];
+    selectAllFiles.value = false;
 };
+
+onMounted(() => {
+    emitter.on(DO_SEARCH_FILE, (search) => {
+        searchString.value = search;
+        doSearch();
+    });
+});
+
+onUnmounted(() => {
+    emitter.off(DO_SEARCH_FILE);
+});
 </script>

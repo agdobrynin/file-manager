@@ -7,6 +7,7 @@ export const FILES_CHOOSE = 'FILES_CHOOSE';
 export const FILES_UPLOADED_SUCCESS = 'FILES_UPLOADED_SUCCESS';
 export const FOLDER_CREATE_SUCCESS = 'FOLDER_CREATE_SUCCESS';
 export const FILES_UPLOADED_FAILED = 'FILES_UPLOADED_FAILED';
+export const DO_SEARCH_FILE = 'DO_SEARCH_FILE';
 
 export const notificationTypes = {
     SUCCESS: 'success',

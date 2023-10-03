@@ -17,6 +17,7 @@ class FileInTrashResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'mime' => $this->mime,
             'disk' => $this->disk,
             'path' => $this->path,
             'parentId' => $this->parent_id,

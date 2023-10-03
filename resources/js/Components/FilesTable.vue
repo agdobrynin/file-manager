@@ -1,6 +1,6 @@
 <template>
-    <div class="bg-white shadow sm:rounded-lg" ref="topEl">
-        <table class="table table-fixed min-w-full">
+    <div class="bg-white shadow sm:rounded-lg">
+        <table class="table table-fixed min-w-full" id="files-table-main-table" ref="topEl">
             <thead class="bg-gray-100 border-b">
             <tr>
                 <th class="px-3 w-[30px]">
@@ -10,7 +10,7 @@
                     <Checkbox
                         v-model="selectAllValue"
                         :checked="selectAllValue"
-                        :disabled="!files.length"
+                        :disabled="!files.length || disableSelectAll"
                     />
                 </th>
                 <th v-if="displayFavorite" class="w-[30px]">&nbsp;</th>
@@ -124,6 +124,10 @@ const props = defineProps({
 
     files: Array,
     fetchFiles: Boolean,
+    disableSelectAll: {
+        type: Boolean,
+        default: false,
+    },
     displayFavorite: {
         type: Boolean,
         default: true,
@@ -196,7 +200,7 @@ const observer = new IntersectionObserver(
     }
 )
 
-const scrollTop = () => topEl.value?.scrollIntoView({ behavior: 'smooth' });
+const scrollFilesTableTop = () => topEl.value?.scrollIntoView({ behavior: 'smooth' });
 
 onUpdated(() => {
     observer.observe(endOfFilesList.value);
@@ -207,6 +211,6 @@ onMounted(() => {
 });
 
 defineExpose({
-    scrollTop,
+    scrollFilesTableTop,
 })
 </script>
