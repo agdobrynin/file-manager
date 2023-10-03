@@ -11,13 +11,13 @@
             <div class="flex flex-wrap gap-4 items-center">
                 <CreateNewDropdown/>
                 <DeleteFiles
-                    :all-files="selectAll"
+                    :all-files="selectAllFiles"
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
                     @delete-finish="deleteFinish"/>
                 <DownloadFiles
                     ref="downloadComponent"
-                    :all-files="selectAll"
+                    :all-files="selectAllFiles"
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
                     @download-complete="downloadComplete"/>
@@ -30,8 +30,9 @@
         </div>
         <FilesTable
             ref="tableEl"
-            v-model:select-all="selectAll"
+            v-model:select-all="selectAllFiles"
             v-model:selected-files="selectedFileIds"
+            :disable-select-all="disableSelectAll"
             :display-last-modified="true"
             :display-owner="false"
             :display-path="!!searchString"
@@ -50,7 +51,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
 import CreateNewDropdown from "@/Components/CreateNewDropdown.vue";
-import { nextTick, onMounted, onUnmounted, ref } from "vue";
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import DeleteFiles from "@/Components/DeleteFiles.vue";
 import DownloadFiles from "@/Components/DownloadFiles.vue";
 import FilesTable from "@/Components/FilesTable.vue";
@@ -79,11 +80,18 @@ const searchQueryStringKey = 'search';
 const parentFolderRouteKey = 'parentFolder';
 
 const selectedFileIds = ref([]);
-const selectAll = ref(false);
+const disableSelectAll = ref(false);
+const selectAllFiles = ref(false);
 const downloadComponent = ref(null);
 const tableEl = ref(null);
 const onlyFavoritesCurrentState = ref(false);
 const searchString = ref('');
+
+watch(searchString, (value) => {
+    disableSelectAll.value = !! value;
+    selectAllFiles.value = false;
+    selectedFileIds.value = [];
+});
 
 /**
  * @param {Number|null} parentFolderId
@@ -118,6 +126,7 @@ const downloadComplete = () => selectedFileIds.value = [];
 
 const deleteFinish = () => {
     selectedFileIds.value = [];
+    selectAllFiles.value = false;
     updateAllFiles();
 };
 
