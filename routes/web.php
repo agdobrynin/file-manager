@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(static function () {
             Route::delete('/destroy/{parentFolder?}', 'destroy')->name('destroy');
             Route::get('/download/{parentFolder}', 'download')->name('download');
             Route::patch('/favorite', 'favorite')->name('favorite');
+            Route::post('/share/{parentFolder?}', 'share')->name('share');
         });
 
     Route::controller(FileTrashController::class)
@@ -56,14 +57,14 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         });
 
     Route::controller(SharedByMeController::class)
-        ->prefix('/shared_by_me')
+        ->prefix('/shared-by-me')
         ->name('shared_by_me.')
         ->group(function () {
             Route::get('/', 'index')->name('index');
         });
 
     Route::controller(SharedForMeController::class)
-        ->prefix('/shared_for_me')
+        ->prefix('/shared-for-me')
         ->name('shared_for_me.')
         ->group(function () {
             Route::get('/', 'index')->name('index');

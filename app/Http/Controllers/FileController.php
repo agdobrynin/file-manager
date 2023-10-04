@@ -7,11 +7,13 @@ use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\FavoriteIdDto;
 use App\Dto\FilesIdDto;
 use App\Dto\FilesListFilterDto;
+use App\Dto\ShareFilesDto;
 use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FavoriteRequest;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\FilesListRequest;
 use App\Http\Requests\FileUploadRequest;
+use App\Http\Requests\ShareFilesRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileAncestorsResource;
 use App\Http\Resources\FileResource;
@@ -89,16 +91,22 @@ class FileController extends Controller
 
     public function destroy(FilesActionRequest $request): RedirectResponse
     {
-        $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $dto = new FilesIdDto(...$request->validated());
-        $children = $this->children($dto, $parentFolder);
+        $children = $this->children($dto, $request->parentFolder);
 
         $children->each(function (File $file) {
             $this->authorize('delete', $file);
             $file->deleteQuietly();
         });
 
-        return to_route('file.index', ['parentFolder' => $parentFolder]);
+        return to_route('file.index', ['parentFolder' => $request->parentFolder]);
+    }
+
+    private function children(FilesIdDto $dto, File $parentFolder): Collection
+    {
+        return $dto->all
+            ? $parentFolder->children()->get()
+            : File::query()->whereIn('id', $dto->ids)->get();
     }
 
     /**
@@ -106,9 +114,8 @@ class FileController extends Controller
      */
     public function download(FilesActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
     {
-        $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $dto = new FilesIdDto(...$request->validated());
-        $files = $this->children($dto, $parentFolder);
+        $files = $this->children($dto, $request->parentFolder);
 
         $downloadDto = $downloadFiles->handle($files);
 
@@ -131,10 +138,17 @@ class FileController extends Controller
         return back()->with(...$flash);
     }
 
-    private function children(FilesIdDto $dto, File $parentFolder): Collection
+    public function share(ShareFilesRequest $request): RedirectResponse
     {
-        return $dto->all
-            ? $parentFolder->children()->get()
-            : File::query()->whereIn('id', $dto->ids)->get();
+        $dto = new ShareFilesDto(...$request->validated());
+
+        if ($request->shareToUser) {
+            throw new \RuntimeException('Not implemented yet.');
+        }
+
+        return back()->with(
+            FlashMessagesEnum::SUCCESS->value,
+            'Selected files will be shared if user with email exist'
+        );
     }
 }

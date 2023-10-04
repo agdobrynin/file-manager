@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\File;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Validator;
 
 class FilesActionRequest extends ParentIdBaseRequest
 {
@@ -42,5 +43,19 @@ class FilesActionRequest extends ParentIdBaseRequest
         $this->merge([
             self::ALL_FILES_KEY => filter_var($this->{self::ALL_FILES_KEY}, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
         ]);
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if ($this->input(self::ALL_FILES_KEY) && $this->parentFolder === null) {
+                    $validator->errors()->add(
+                        'all',
+                        'When parameter "'.self::ALL_FILES_KEY.'" is true route parameter "parentFolder" is required.'
+                    );
+                }
+            }
+        ];
     }
 }
