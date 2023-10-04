@@ -21,6 +21,7 @@
             value="User email for share files"
         />
         <TextInput
+            ref="inputEmail"
             id="email"
             v-model="form.email"
             class="w-full"
@@ -44,7 +45,7 @@ import SecondaryButton from "@/Components/SecondaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { useForm } from "@inertiajs/vue3";
 import { mdiShare } from "@mdi/js";
-import { computed, ref } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import SvgIcon from "vue3-icon";
 
 const props = defineProps({
@@ -53,9 +54,6 @@ const props = defineProps({
     allFiles: Boolean,
 });
 
-const inProcess = ref(false);
-const show = ref(false);
-
 const form = useForm({
     ids: [],
     all: false,
@@ -63,6 +61,16 @@ const form = useForm({
 });
 
 const emit = defineEmits([ 'success' ])
+
+const inProcess = ref(false);
+const show = ref(false);
+const inputEmail = ref(null);
+
+watch(show, (val) => {
+    if (val) {
+        nextTick(() => inputEmail.value.focus());
+    }
+});
 
 const isDisable = computed(() => ( ! props.fileIds.length && ! props.allFiles));
 
