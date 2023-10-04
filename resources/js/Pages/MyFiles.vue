@@ -115,7 +115,7 @@ const indexRequestParams = (parentFolderId) => {
     return params;
 };
 
-const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles(props.files);
+const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
 
 const updateAllFiles = () => {
     filesReset(props.files);

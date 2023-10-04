@@ -51,7 +51,7 @@ watch(searchString, (value) => {
     selectedFileIds.value = [];
 });
 
-const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles(props.files);
+const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
 
 const doSearch = () => {
     const params = { search: searchString.value };
