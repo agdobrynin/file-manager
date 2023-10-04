@@ -14,13 +14,21 @@
                     :all-files="selectAllFiles"
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
-                    @delete-finish="deleteFinish"/>
+                    @delete-finish="deleteFinish"
+                />
                 <DownloadFiles
                     ref="downloadComponent"
                     :all-files="selectAllFiles"
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
-                    @download-complete="downloadComplete"/>
+                    @download-complete="clearSelected"
+                />
+                <ShareFiles
+                    :all-files="selectAllFiles"
+                    :file-ids="selectedFileIds"
+                    :parent-folder="parentId"
+                    @success="clearSelected"
+                />
                 <OnlyFavorites
                     v-model="onlyFavoritesCurrentState"
                     @update:model-value="doChangeSearchFavorites"
@@ -47,6 +55,7 @@
 </template>
 
 <script setup>
+import ShareFiles from "@/Components/ShareFiles.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
@@ -89,8 +98,7 @@ const searchString = ref('');
 
 watch(searchString, (value) => {
     disableSelectAll.value = !! value;
-    selectAllFiles.value = false;
-    selectedFileIds.value = [];
+    clearSelected();
 });
 
 /**
@@ -122,11 +130,13 @@ const updateAllFiles = () => {
     nextTick(() => tableEl.value?.scrollFilesTableTop());
 };
 
-const downloadComplete = () => selectedFileIds.value = [];
-
-const deleteFinish = () => {
+const clearSelected = () => {
     selectedFileIds.value = [];
     selectAllFiles.value = false;
+}
+
+const deleteFinish = () => {
+    clearSelected();
     updateAllFiles();
 };
 
@@ -137,7 +147,7 @@ const fileItemAction = (item) => {
 
         router.visit(route('file.index', indexRequestParams(item.id)));
     } else {
-        selectedFileIds.value = [];
+        clearSelected();
         nextTick(() => {
             selectedFileIds.value.push(item.id);
             downloadComponent.value.download();
