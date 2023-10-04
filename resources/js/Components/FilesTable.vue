@@ -6,7 +6,7 @@
                 <th class="px-3 w-[30px]">
                     #
                 </th>
-                <th class="w-[50px]">
+                <th class="w-[40px]">
                     <Checkbox
                         v-model="selectAllValue"
                         :checked="selectAllValue"
@@ -14,7 +14,7 @@
                         name="select_all_files"
                     />
                 </th>
-                <th v-if="displayFavorite" class="w-[30px]">&nbsp;</th>
+                <th v-if="displayFavorite" class="w-[40px]">&nbsp;</th>
                 <th class="my-files-table-head">Name</th>
                 <th v-if="displayOwner" class="my-files-table-head">Owner</th>
                 <th v-if="displayPath" class="my-files-table-head">Path</th>
@@ -32,7 +32,7 @@
                 @click.stop="clickItem(item)"
                 @dblclick.prevent="$emit('itemDoubleClick', item)"
             >
-                <td class="px-3 font-light text-sm text-slate-400 text-right">
+                <td class="ps-2 font-light text-sm text-slate-400 text-right">
                     {{ index + 1 }}
                 </td>
                 <td class="text-center">
