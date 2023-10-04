@@ -9,7 +9,7 @@
         <div class="px-3">
             <div class="py-3">
                 <NavLink
-                    :active="$page.url.startsWith(route('file.index', [], false))"
+                    :active="$page.props.route_name === 'file.index'"
                     :href="route('file.index')"
                     class="flex gap-2">
                     <CloudIcon class="w-7 h-auto"/>
@@ -24,7 +24,7 @@
                     Shared by me
                 </NavLink>
                 <NavLink
-                    :active="$page.url.startsWith(route('trash.index', [], false))"
+                    :active="$page.props.route_name === 'trash.index'"
                     :href="route('trash.index')"
                     class="flex gap-2">
                     <TrashIcon class="w-7 h-auto"/>
@@ -36,9 +36,9 @@
 </template>
 
 <script setup>
-import { Link } from "@inertiajs/vue3";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import NavLink from "@/Components/NavLink.vue";
 import { ShareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { CloudIcon, ShareIcon as ShareIconSolid } from '@heroicons/vue/24/solid'
+import { Link } from "@inertiajs/vue3";
 </script>

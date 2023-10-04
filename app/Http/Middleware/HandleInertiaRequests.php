@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Enums\FlashMessagesEnum;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
 
@@ -57,6 +58,7 @@ class HandleInertiaRequests extends Middleware
                 FlashMessagesEnum::ERROR->value => fn () => $request->session()->get(FlashMessagesEnum::ERROR->value),
                 FlashMessagesEnum::WARNING->value => fn () => $request->session()->get(FlashMessagesEnum::WARNING->value),
             ],
+            'route_name' => Route::current()?->getName(),
         ]);
     }
 }
