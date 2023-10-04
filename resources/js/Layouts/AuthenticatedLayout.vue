@@ -183,7 +183,14 @@ onMounted(() => {
     emitter.on(FILES_CHOOSE, uploadFiles);
 
     router.on('navigate', function (ev) {
-        if ([ 'MyFiles', 'MyTrash' ].includes(ev.detail.page.component)) {
+        const routeNamesWithSearch = [
+            'file.index',
+            'trash.index',
+            'shared_for_me.index',
+            'shared_by_me.index',
+        ];
+
+        if (routeNamesWithSearch.includes(ev.detail.page.props.route_name)) {
             disabledSearch.value = false;
         }
 

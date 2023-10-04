@@ -15,11 +15,19 @@
                     <CloudIcon class="w-7 h-auto"/>
                     My files
                 </NavLink>
-                <NavLink class="flex gap-2" href="">
+                <NavLink
+                    :active="$page.props.route_name === 'shared_for_me.index'"
+                    :href="route('shared_for_me.index')"
+                    class="flex gap-2"
+                >
                     <ShareIconSolid class="w-7 h-auto"/>
-                    Shared with me
+                    Shared for me
                 </NavLink>
-                <NavLink class="flex gap-2" href="">
+                <NavLink
+                    :active="$page.props.route_name === 'shared_by_me.index'"
+                    :href="route('shared_by_me.index')"
+                    class="flex gap-2"
+                >
                     <ShareIcon class="w-7 h-auto"/>
                     Shared by me
                 </NavLink>
