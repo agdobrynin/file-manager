@@ -22,7 +22,7 @@ class ShareFilesRequest extends FilesActionRequest
                 function (string $attr, string $email, $fail) {
                     $this->shareToUser = User::firstWhere('email', $email);
 
-                    if ($email === $this->shareToUser?->email) {
+                    if ($this->user()->email === $this->shareToUser?->email) {
                         $fail('Can not share files to yourself.');
                     }
                 }
