@@ -12,7 +12,7 @@ export function useDoLoadFiles() {
     const filesTotal = ref(page.props.files?.meta?.total || 0);
     
     function filesReset(files) {
-        const { data, links, meta } = toRaw(files);
+        const { data, links, meta } = toRaw(files || {});
         
         filesList.value = data || [];
         next.value = links?.next || null;
