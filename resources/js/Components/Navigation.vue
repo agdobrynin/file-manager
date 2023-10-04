@@ -9,14 +9,14 @@
         <div class="px-3">
             <div class="py-3">
                 <NavLink
-                    :active="$page.props.route_name === 'file.index'"
+                    :active="routeName === 'file.index'"
                     :href="route('file.index')"
                     class="flex gap-2">
                     <CloudIcon class="w-7 h-auto"/>
                     My files
                 </NavLink>
                 <NavLink
-                    :active="$page.props.route_name === 'shared_for_me.index'"
+                    :active="routeName === 'shared_for_me.index'"
                     :href="route('shared_for_me.index')"
                     class="flex gap-2"
                 >
@@ -24,7 +24,7 @@
                     Shared for me
                 </NavLink>
                 <NavLink
-                    :active="$page.props.route_name === 'shared_by_me.index'"
+                    :active="routeName === 'shared_by_me.index'"
                     :href="route('shared_by_me.index')"
                     class="flex gap-2"
                 >
@@ -32,7 +32,7 @@
                     Shared by me
                 </NavLink>
                 <NavLink
-                    :active="$page.props.route_name === 'trash.index'"
+                    :active="routeName === 'trash.index'"
                     :href="route('trash.index')"
                     class="flex gap-2">
                     <TrashIcon class="w-7 h-auto"/>
@@ -48,5 +48,10 @@ import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import NavLink from "@/Components/NavLink.vue";
 import { ShareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { CloudIcon, ShareIcon as ShareIconSolid } from '@heroicons/vue/24/solid'
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
+
+const page = usePage();
+
+const routeName = computed(() => page.props.route_name);
 </script>
