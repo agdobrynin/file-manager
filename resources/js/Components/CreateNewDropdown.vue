@@ -5,7 +5,7 @@
         <MenuButton
             class="inline-flex w-full justify-center border rounded-md px-4 py-2 uppercase text-sm font-medium text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
         >
-          Create New
+          New
           <ChevronDownIcon
               class="ml-2 mr-1 h-5 w-5 text-gray-600 hover:text-gray-300"
               aria-hidden="true"
@@ -65,13 +65,13 @@
 </template>
 
 <script setup>
+import CreateFolderModal from "@/Components/CreateFolderModal.vue";
+import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
+import { emitter, FILES_CHOOSE } from "@/event-bus.js";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import { ChevronDownIcon } from "@heroicons/vue/20/solid/index.js";
 import { DocumentPlusIcon, FolderArrowDownIcon, FolderPlusIcon } from "@heroicons/vue/24/outline/index.js";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
-import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
-import CreateFolderModal from "@/Components/CreateFolderModal.vue";
 import { ref } from "vue";
-import { emitter, FILES_CHOOSE } from "@/event-bus.js";
 
 const createFolderShow = ref(false);
 /**
