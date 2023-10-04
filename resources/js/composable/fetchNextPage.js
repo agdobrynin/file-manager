@@ -34,16 +34,6 @@ export function useDoLoadFiles() {
                     onSuccess: ({ props: { files: { data = [], links } } }) => {
                         filesList.value = [ ...filesList.value, ...data ];
                         next.value = links?.next || null;
-                        
-                        const params = new URLSearchParams((new URL(window.location.href)).search);
-                        params.delete('page');
-                        const queryString = params.toString();
-                        
-                        window.history.replaceState(
-                            {},
-                            '',
-                            `${window.location.pathname}${queryString ? '?' + queryString : ''}${window.location.hash}`,
-                        )
                     },
                 })
         }

@@ -32,3 +32,17 @@ export function debounce(fn, wait) {
         }, wait);
     }
 }
+
+export function fixWindowHistory(queryParamKeys = [ 'page' ]) {
+    const params = new URLSearchParams((new URL(window.location.href)).search);
+
+    queryParamKeys.forEach((key) => params.delete(key));
+
+    const queryString = params.toString();
+
+    window.history.replaceState(
+        {},
+        '',
+        `${window.location.pathname}${queryString ? '?' + queryString : ''}${window.location.hash}`,
+    )
+}
