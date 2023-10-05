@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
@@ -50,8 +51,6 @@ use Kalnoy\Nestedset\NodeTrait;
  * @method static \Kalnoy\Nestedset\QueryBuilder|File defaultOrder(string $dir = 'asc')
  * @method static \Kalnoy\Nestedset\QueryBuilder|File descendantsAndSelf($id, array $columns = [])
  * @method static \Kalnoy\Nestedset\QueryBuilder|File descendantsOf($id, array $columns = [], $andSelf = false)
- * @method static \Kalnoy\Nestedset\QueryBuilder|File filesInTrash(\App\Models\User $user, ?\App\Dto\FilesListFilterDto $dto = null)
- * @method static \Kalnoy\Nestedset\QueryBuilder filesList(\App\Models\User $user, \App\Dto\FilesListFilterDto $dto, \App\Models\File $folder)
  * @method static \Kalnoy\Nestedset\QueryBuilder|File fixSubtree($root)
  * @method static \Kalnoy\Nestedset\QueryBuilder|File fixTree($root = null)
  * @method static \Kalnoy\Nestedset\Collection<int, static> get($columns = ['*'])
@@ -106,6 +105,8 @@ use Kalnoy\Nestedset\NodeTrait;
  * @method static Builder|File withTrashed()
  * @method static \Kalnoy\Nestedset\QueryBuilder|File withoutRoot()
  * @method static Builder|File withoutTrashed()
+ * @method static Builder filesList(User $user, FilesListFilterDto $dto, File $folder)
+ * @method static Builder filesInTrash(User $user, ?FilesListFilterDto $dto = null)
  * @mixin \Eloquent
  */
 class File extends Model
@@ -188,6 +189,11 @@ class File extends Model
     public function favorite(): HasOne
     {
         return $this->hasOne(FileFavorite::class);
+    }
+
+    public function fileShare(): HasMany
+    {
+        return $this->hasMany(FileShare::class);
     }
 
     public function isOwnedByUser(?User $user): bool

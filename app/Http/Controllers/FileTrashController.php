@@ -13,10 +13,7 @@ use App\Http\Requests\FilesListRequest;
 use App\Http\Resources\FileInTrashResource;
 use App\Jobs\DeleteFileFromStorageJob;
 use App\Models\File;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Response;
@@ -27,8 +24,6 @@ class FileTrashController extends Controller
     public function index(FilesListRequest $request): Response|ResponseFactory
     {
         $dto = new FilesListFilterDto(...$request->validated());
-
-        /** @var Builder $query */
         $query = File::filesInTrash($request->user(), $dto);
 
         $files = $query->paginate(config('app.my_files.per_page'))
@@ -44,12 +39,14 @@ class FileTrashController extends Controller
     public function restore(FilesActionTrashRequest $request): RedirectResponse
     {
         $dto = new FilesIdDto(...$request->validated());
-        $children = $this->filesInTrashById($dto, $request->user());
+        $files = $dto->all
+            ? File::filesInTrash($request->user())->get()
+            : $request->requestFiles;
 
         $policyException = [];
         $restoredCount = 0;
 
-        foreach ($children as $file) {
+        foreach ($files as $file) {
             try {
                 $this->authorize('restore', $file);
                 $file->restore();
@@ -72,31 +69,19 @@ class FileTrashController extends Controller
             );
     }
 
-    public function destroy(
-        FilesActionTrashRequest      $request,
-        FilesDestroyServiceInterface $filesDestroy
-    ): RedirectResponse
+    public function destroy(FilesActionTrashRequest $request, FilesDestroyServiceInterface $filesDestroy): RedirectResponse
     {
         $dto = new FilesIdDto(...$request->validated());
-        $children = $this->filesInTrashById($dto, $request->user());
+        $files = $dto->all
+            ? File::filesInTrash($request->user())->get()
+            : $request->requestFiles;
 
-        $destroyedCollection = $filesDestroy->destroy($children)
+        $destroyedCollection = $filesDestroy->destroy($files)
             ->each(fn(DestroyFileFromStorageDto $destroyDto) => DeleteFileFromStorageJob::dispatch($destroyDto));
 
         return to_route('trash.index')->with(
             FlashMessagesEnum::SUCCESS->value,
             $destroyedCollection->count() . Str::plural(' file', $destroyedCollection->count()) . ' destroyed successfully'
         );
-    }
-
-    /**
-     * @return Collection<File>
-     */
-    protected function filesInTrashById(FilesIdDto $dto, User $user): Collection
-    {
-        /** @var Builder $query */
-        $query = File::filesInTrash($user);
-
-        return $dto->all ? $query->get() : $query->whereIn('id', $dto->ids)->get();
     }
 }

@@ -4,12 +4,16 @@ namespace App\Http\Requests;
 
 use App\Models\File;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Validator;
 
 class FilesActionRequest extends ParentIdBaseRequest
 {
     private const ALL_FILES_KEY = 'all';
+    /**
+     * @var Collection<File>
+     */
+    public Collection $requestFiles;
 
     /**
      * Get the validation rules that apply to the request.
@@ -24,25 +28,18 @@ class FilesActionRequest extends ParentIdBaseRequest
                 'required_if:' . self::ALL_FILES_KEY . ',null,false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
-                    foreach ($ids as $id) {
-                        $file = File::query()->where('id', $id)
-                            ->where('created_by', Auth::id())
-                            ->first();
+                    $foundFiles = File::query()->where('created_by', $this->user()->id)
+                        ->whereIn('id', $ids)
+                        ->get();
 
-                        if (null === $file) {
-                            $fail('Invalid file ID ' . $id . ' for auth user.');
-                        }
+                    if ($foundFiles->count() !== count($ids)) {
+                        $fail('Some file IDs are not valid.');
                     }
+
+                    $this->requestFiles = $foundFiles;
                 }
             ]
         ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            self::ALL_FILES_KEY => filter_var($this->{self::ALL_FILES_KEY}, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
-        ]);
     }
 
     public function after(): array
@@ -52,10 +49,17 @@ class FilesActionRequest extends ParentIdBaseRequest
                 if ($this->input(self::ALL_FILES_KEY) && $this->parentFolder === null) {
                     $validator->errors()->add(
                         'all',
-                        'When parameter "'.self::ALL_FILES_KEY.'" is true route parameter "parentFolder" is required.'
+                        'When parameter "' . self::ALL_FILES_KEY . '" is true route parameter "parentFolder" is required.'
                     );
                 }
             }
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            self::ALL_FILES_KEY => filter_var($this->{self::ALL_FILES_KEY}, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+        ]);
     }
 }

@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * App\Models\FileShare
@@ -12,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int $file_id
- * @property int $user_id
+ * @property int $for_user_id
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare query()
@@ -21,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereUserId($value)
+ * @method static Builder fileShareByFileOwnerAndFile(User $user, Collection $filesIds)
  * @mixin \Eloquent
  */
 class FileShare extends Model
@@ -29,6 +33,31 @@ class FileShare extends Model
 
     protected $fillable = [
         'file_id',
-        'user_id',
+        'for_user_id',
+        'created_at',
+        'updated_at',
     ];
+
+    public function file(): BelongsTo
+    {
+        return $this->belongsTo(File::class);
+    }
+
+    public function forUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, foreignKey: 'for_user_id');
+    }
+
+    public function scopeFileShareByFileOwnerAndFile(Builder $builder, User $user, Collection $files): Builder
+    {
+        $filesIds = $files->pluck('id')->toArray();
+
+        return $builder->whereHas(
+            'file', function (Builder $b) use ($filesIds, $user) {
+            return $b->whereIn('id', $filesIds)
+                ->whereHas('user', function (Builder $q) use ($user) {
+                    return $q->where('id', $user->id);
+                });
+        });
+    }
 }

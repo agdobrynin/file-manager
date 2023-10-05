@@ -20,13 +20,14 @@ use App\Http\Resources\FileResource;
 use App\Jobs\MoveFileToCloud;
 use App\Models\File;
 use App\Models\FileFavorite;
+use App\Models\FileShare;
 use App\Services\MakeDownloadFiles;
 use App\VO\FileFavoriteVO;
 use App\VO\FileFolderVO;
+use App\VO\FileShareVO;
 use App\VO\UploadFilesVO;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -41,7 +42,6 @@ class FileController extends Controller
 
         $dto = new FilesListFilterDto(...$request->validated());
 
-        /** @var Builder $query */
         $query = File::filesList($request->user(), $dto, $parentFolder);
 
         $files = $query->paginate(config('app.my_files.per_page'))
@@ -92,7 +92,9 @@ class FileController extends Controller
     public function destroy(FilesActionRequest $request): RedirectResponse
     {
         $dto = new FilesIdDto(...$request->validated());
-        $children = $this->children($dto, $request->parentFolder);
+        $children = $dto->all
+            ? $request->parentFolder->children()->get()
+            : $request->requestFiles;
 
         $children->each(function (File $file) {
             $this->authorize('delete', $file);
@@ -102,20 +104,15 @@ class FileController extends Controller
         return to_route('file.index', ['parentFolder' => $request->parentFolder]);
     }
 
-    private function children(FilesIdDto $dto, File $parentFolder): Collection
-    {
-        return $dto->all
-            ? $parentFolder->children()->get()
-            : File::query()->whereIn('id', $dto->ids)->get();
-    }
-
     /**
      * @throws Throwable
      */
     public function download(FilesActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
     {
         $dto = new FilesIdDto(...$request->validated());
-        $files = $this->children($dto, $request->parentFolder);
+        $files = $dto->all
+            ? $request->parentFolder->children()->get()
+            : $request->requestFiles;
 
         $downloadDto = $downloadFiles->handle($files);
 
@@ -143,12 +140,25 @@ class FileController extends Controller
         $dto = new ShareFilesDto(...$request->validated());
 
         if ($request->shareToUser) {
-            throw new \RuntimeException('Not implemented yet.');
+            $files = $dto->all
+                ? $request->parentFolder->children()->get()
+                : $request->requestFiles;
+
+            /** @var \Illuminate\Database\Eloquent\Collection<FileShare> $filesShare */
+            $filesShare = FileShare::fileShareByFileOwnerAndFile($request->user(), $files)
+                ->get()
+                ->keyBy('file.id');
+            /** @var Collection $insertData */
+            $insertData = $files->reject(fn(File $file) => $filesShare->has($file->id))
+                ->reduce(
+                    fn(Collection $c, File $file) => $c->add((new FileShareVO($request->shareToUser, $file))->toArray()),
+                    collect()
+                );
+
+            FileShare::insert($insertData->toArray());
+            // TODO send email with notification through QUEUE.
         }
 
-        return back()->with(
-            FlashMessagesEnum::SUCCESS->value,
-            'Selected files will be shared if user with email exist'
-        );
+        return back()->with(FlashMessagesEnum::SUCCESS->value, 'Selected files will be shared if user with email exist.');
     }
 }

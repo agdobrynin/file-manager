@@ -3,12 +3,16 @@
 namespace App\Http\Requests;
 
 use App\Models\File;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
 class FilesActionTrashRequest extends FormRequest
 {
     private const ALL_FILES_KEY = 'all';
+    /**
+     * @var Collection<File>
+     */
+    public Collection $requestFiles;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -31,15 +35,16 @@ class FilesActionTrashRequest extends FormRequest
                 'required_if:' . self::ALL_FILES_KEY . ',null,false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
-                    foreach ($ids as $id) {
-                        $file = File::onlyTrashed()->where('id', $id)
-                            ->where('created_by', Auth::id())
-                            ->first();
+                    $foundFiles = File::onlyTrashed()
+                        ->where('created_by', $this->user()->id)
+                        ->whereIn('id', $ids)
+                        ->get();
 
-                        if (null === $file) {
-                            $fail('Invalid file ID ' . $id . ' for auth user.');
-                        }
+                    if ($foundFiles->count() !== count($ids)) {
+                        $fail('Some file IDs are not valid.');
                     }
+
+                    $this->requestFiles = $foundFiles;
                 }
             ]
         ];
