@@ -15,7 +15,6 @@ class SharedForMeController extends Controller
     {
         $dto = new FilesListFilterDto(...$request->validated());
         $query = File::fileShareForUser($request->user(), $dto);
-
         $files = $query->paginate(config('app.shared_for_me.per_page'))
             ->withQueryString();
         $fileResourceCollection = FileShareResource::collection($files);
