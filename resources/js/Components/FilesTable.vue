@@ -6,7 +6,7 @@
                 <th class="px-3 w-[30px]">
                     #
                 </th>
-                <th class="w-[40px]">
+                <th class="px-3 w-[40px]">
                     <Checkbox
                         v-model="selectAllValue"
                         :checked="selectAllValue"
