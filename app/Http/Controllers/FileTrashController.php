@@ -26,7 +26,7 @@ class FileTrashController extends Controller
         $dto = new FilesListFilterDto(...$request->validated());
         $query = File::filesInTrash($request->user(), $dto);
 
-        $files = $query->paginate(config('app.my_files.per_page'))
+        $files = $query->paginate(config('app.my_trash.per_page'))
             ->withQueryString();
 
         $fileResourceCollection = FileInTrashResource::collection($files);

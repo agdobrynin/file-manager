@@ -21,7 +21,7 @@
                 <th v-if="displayDeletedAt" class="my-files-table-head">Deleted</th>
                 <th v-if="displayLastModified" class="my-files-table-head whitespace-nowrap">Last modified</th>
                 <th class="my-files-table-head">Size</th>
-                <th class="my-files-table-head">Disk</th>
+                <th v-if="displayDisk" class="my-files-table-head">Disk</th>
             </tr>
             </thead>
             <tbody>
@@ -71,7 +71,7 @@
                 <td class="my-files-table-cell">
                     {{ item.size ? bytesToSize(item.size) : '' }}
                 </td>
-                <td class="ps-5">
+                <td v-if="displayDisk" class="ps-5">
                     <SvgIcon v-if="!item.isFolder" :path="diskIcon(item)"/>
                 </td>
             </tr>
@@ -150,6 +150,10 @@ const props = defineProps({
     displayPath: {
         type: Boolean,
         default: false,
+    },
+    displayDisk: {
+        type: Boolean,
+        default: true,
     },
 });
 

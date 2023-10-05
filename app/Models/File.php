@@ -166,6 +166,38 @@ class File extends Model
             ->get();
     }
 
+    public static function fileShareByUser(User $user, FilesListFilterDto $dto): Builder
+    {
+        return self::fileShareToFile($dto)
+            ->whereHas(
+                'user',
+                fn(Builder $q) => $q->where('id', $user->getAuthIdentifier())
+            );
+    }
+
+    protected static function fileShareToFile(FilesListFilterDto $dto): Builder
+    {
+        return self::query()
+            ->select('files.*')
+            ->when(
+                $dto->search,
+                fn(Builder $q) => $q->where('name', 'like', "%{$dto->search}%")
+            )
+            ->with(['user'])
+            ->leftJoin('file_shares', 'file_shares.file_id', 'files.id')
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('file_shares.created_at', 'desc');
+    }
+
+    public static function fileShareForUser(User $user, FilesListFilterDto $dto): Builder
+    {
+        return self::fileShareToFile($dto)
+            ->whereHas(
+                'fileShare',
+                fn(Builder $q) => $q->where('for_user_id', $user->getAuthIdentifier())
+            );
+    }
+
     protected static function boot(): void
     {
         parent::boot();
@@ -215,6 +247,7 @@ class File extends Model
         }
 
         return $builder->whereNotNull('parent_id')
+            ->with(['favorite'])
             ->when($dto->onlyFavorites, fn() => $builder->whereHas('favorite'))
             ->where('created_by', '=', $user->getAuthIdentifier())
             ->with(['favorite'])
