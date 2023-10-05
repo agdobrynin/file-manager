@@ -22,7 +22,7 @@
             :display-deleted-at="false"
             :display-favorite="false"
             :display-last-modified="false"
-            :display-owner="false"
+            :display-owner="true"
             :display-path="true"
             :fetch-files="filesFetching"
             :files="filesList"

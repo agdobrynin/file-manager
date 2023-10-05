@@ -184,6 +184,7 @@ class File extends Model
                 fn(Builder $q) => $q->where('name', 'like', "%{$dto->search}%")
             )
             ->with(['user'])
+            ->whereHas('fileShare')
             ->leftJoin('file_shares', 'file_shares.file_id', 'files.id')
             ->orderBy('is_folder', 'desc')
             ->orderBy('file_shares.created_at', 'desc');
