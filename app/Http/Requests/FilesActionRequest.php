@@ -28,6 +28,7 @@ class FilesActionRequest extends ParentIdBaseRequest
                 'array',
                 function (string $attribute, array $ids, $fail) {
                     if ($ids) {
+                        // TODO move to model!
                         $foundFiles = File::query()->where('created_by', $this->user()->id)
                             ->whereIn('id', $ids)
                             ->get();

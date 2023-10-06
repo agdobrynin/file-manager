@@ -35,6 +35,7 @@ class FilesActionTrashRequest extends FormRequest
                 'required_if:' . self::ALL_FILES_KEY . ',null,false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
+                    // TODO move to model!
                     $foundFiles = File::onlyTrashed()
                         ->where('created_by', $this->user()->id)
                         ->whereIn('id', $ids)

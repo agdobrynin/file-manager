@@ -6,7 +6,6 @@
  */
 export function bytesToSize(bytes, factorDigits = 2) {
     const units = [ 'byte', 'kB', 'Mb', 'Gb', 'Tb' ];
-    
     const unitIndex = Math.max(0, Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1));
     
     return `${(bytes / (1024 ** unitIndex)).toFixed(factorDigits)} ${units[unitIndex]}`;
@@ -35,9 +34,7 @@ export function debounce(fn, wait) {
 
 export function fixWindowHistory(queryParamKeys = [ 'page' ]) {
     const params = new URLSearchParams((new URL(window.location.href)).search);
-
     queryParamKeys.forEach((key) => params.delete(key));
-
     const queryString = params.toString();
 
     window.history.replaceState(
