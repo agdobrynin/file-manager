@@ -61,11 +61,11 @@
                     {{ item.owner }}
                 </td>
                 <td v-if="displayForShortUser" class="my-files-table-cell">
-                    <SvgIcon
-                        :path="mdiAccount"
-                        class="mx-auto"
-                        size="28"
-                        @click.stop="showModalForUser(item)"/>
+                    <div class="cursor-help w-6 h-6" @click.stop="showModalForUser(item)">
+                        <SvgIcon
+                            :path="mdiAccount"
+                            class="mx-auto"/>
+                    </div>
                 </td>
                 <td v-if="displayPath" class="my-files-table-cell">
                     {{ item.path }}
