@@ -51,20 +51,20 @@
                     <SvgIcon v-if="item.isFavorite" :path="mdiStar" class="mx-auto w-7 h-7 hover:animate-pulse"/>
                     <SvgIcon v-else :path="mdiStarOutline" class="mx-auto w-7 h-7 hover:animate-pulse"/>
                 </td>
-                <td class="my-files-table-cell flex items-center gap-2 ps-2">
+                <td class="my-files-table-cell flex items-center gap-2 ps-2 max-w-[350px]">
                     <div>
                         <FileIcon :mime-type="item.mime" size="30"/>
                     </div>
-                    <div>{{ item.name }}</div>
+                    <div class="truncate">{{ item.name }}</div>
                 </td>
-                <td v-if="displayOwner" class="my-files-table-cell">
-                    {{ item.owner }}
+                <td v-if="displayOwner" class="my-files-table-cell max-w-[150px]">
+                    <div class="truncate">{{ item.owner }}</div>
                 </td>
-                <td v-if="displayShareForUser" class="my-files-table-cell">
-                    {{ item.shareForUser }}
+                <td v-if="displayShareForUser" class="my-files-table-cell max-w-[150px]">
+                    <div class="truncate">{{ item.shareForUser }}</div>
                 </td>
-                <td v-if="displayPath" class="my-files-table-cell">
-                    {{ item.path }}
+                <td v-if="displayPath" class="my-files-table-cell max-w-sm">
+                    <div class="truncate">{{ item.path }}</div>
                 </td>
                 <td v-if="displayDeletedAt" class="my-files-table-cell">
                     {{ item.deletedAt }}
