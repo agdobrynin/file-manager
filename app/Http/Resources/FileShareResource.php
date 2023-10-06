@@ -24,6 +24,7 @@ class FileShareResource extends JsonResource
             'mime' => $this->file->mime,
             'size' => $this->file->size,
             'owner' => $this->file->owner,
+            'updatedAt' => $this->updated_at->diffForHumans(),
             'shareForUser' => $this->forUser->name,
         ];
     }

@@ -17,7 +17,7 @@
             :disable-select-all="disableSelectAll"
             :display-deleted-at="false"
             :display-favorite="false"
-            :display-last-modified="false"
+            :display-last-modified="true"
             :display-owner="true"
             :display-path="true"
             :display-disk="false"
