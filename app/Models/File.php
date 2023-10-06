@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Dto\FilesListFilterDto;
+use App\Dto\MyFilesListFilterDto;
 use App\Enums\DiskEnum;
 use App\Traits\HasCreatorAndUpdater;
 use Illuminate\Database\Eloquent\Builder;
@@ -105,7 +106,7 @@ use Kalnoy\Nestedset\NodeTrait;
  * @method static Builder|File withTrashed()
  * @method static \Kalnoy\Nestedset\QueryBuilder|File withoutRoot()
  * @method static Builder|File withoutTrashed()
- * @method static Builder filesList(User $user, FilesListFilterDto $dto, File $folder)
+ * @method static Builder filesList(User $user, MyFilesListFilterDto $dto, File $folder)
  * @method static Builder filesInTrash(User $user, ?FilesListFilterDto $dto = null)
  * @mixin \Eloquent
  */
@@ -166,41 +167,6 @@ class File extends Model
             ->get();
     }
 
-    public static function fileShareByUser(User $user, FilesListFilterDto $dto): Builder
-    {
-        return self::fileShareToFile($dto)
-            ->with(['fileShare.forUser'])
-            ->whereHas(
-                'user',
-                fn(Builder $q) => $q->where('id', $user->getAuthIdentifier())
-            );
-    }
-
-    protected static function fileShareToFile(FilesListFilterDto $dto): Builder
-    {
-        return self::query()
-            ->select('files.*')
-            ->when(
-                $dto->search,
-                fn(Builder $q) => $q->where('name', 'like', "%{$dto->search}%")
-            )
-            ->with(['user'])
-            ->whereHas('fileShare')
-            ->join('file_shares', 'file_shares.file_id', 'files.id')
-            ->distinct()
-            ->orderBy('is_folder', 'desc')
-            ->orderBy('file_shares.created_at', 'desc');
-    }
-
-    public static function fileShareForUser(User $user, FilesListFilterDto $dto): Builder
-    {
-        return self::fileShareToFile($dto)
-            ->whereHas(
-                'fileShare',
-                fn(Builder $q) => $q->where('for_user_id', $user->getAuthIdentifier())
-            );
-    }
-
     protected static function boot(): void
     {
         parent::boot();
@@ -241,7 +207,7 @@ class File extends Model
         return (bool)$this->is_folder;
     }
 
-    public function scopeFilesList(Builder $builder, User $user, FilesListFilterDto $dto, File $folder): Builder
+    public function scopeFilesList(Builder $builder, User $user, MyFilesListFilterDto $dto, File $folder): Builder
     {
         if ($dto->search) {
             $builder->where('name', 'like', "%$dto->search%");

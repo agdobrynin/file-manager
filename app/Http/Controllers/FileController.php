@@ -6,13 +6,13 @@ namespace App\Http\Controllers;
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\FavoriteIdDto;
 use App\Dto\FilesIdDto;
-use App\Dto\FilesListFilterDto;
+use App\Dto\MyFilesListFilterDto;
 use App\Dto\ShareFilesDto;
 use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FavoriteRequest;
-use App\Http\Requests\FilesActionRequest;
-use App\Http\Requests\FilesListRequest;
 use App\Http\Requests\FileUploadRequest;
+use App\Http\Requests\MyFilesActionRequest;
+use App\Http\Requests\MyFilesListRequest;
 use App\Http\Requests\ShareFilesRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileAncestorsResource;
@@ -35,12 +35,12 @@ use Throwable;
 
 class FileController extends Controller
 {
-    public function index(FilesListRequest $request): Response
+    public function index(MyFilesListRequest $request): Response
     {
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $this->authorize('view', $parentFolder);
 
-        $dto = new FilesListFilterDto(...$request->validated());
+        $dto = new MyFilesListFilterDto(...$request->validated());
 
         $query = File::filesList($request->user(), $dto, $parentFolder);
 
@@ -89,7 +89,7 @@ class FileController extends Controller
         return to_route('file.index', ['parentFolder' => $parentFolder]);
     }
 
-    public function destroy(FilesActionRequest $request): RedirectResponse
+    public function destroy(MyFilesActionRequest $request): RedirectResponse
     {
         $dto = new FilesIdDto(...$request->validated());
         $children = $dto->all
@@ -107,7 +107,7 @@ class FileController extends Controller
     /**
      * @throws Throwable
      */
-    public function download(FilesActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
+    public function download(MyFilesActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
     {
         $dto = new FilesIdDto(...$request->validated());
         $files = $dto->all

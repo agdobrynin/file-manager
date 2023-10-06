@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\User;
 
-class ShareFilesRequest extends FilesActionRequest
+class ShareFilesRequest extends MyFilesActionRequest
 {
     public ?User $shareToUser;
 

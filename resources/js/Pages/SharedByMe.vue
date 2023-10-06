@@ -4,10 +4,10 @@
     <AuthenticatedLayout class="relative">
         <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-4">
             <div class="flex flex-wrap gap-4">
-                <SecondaryButton class="flex items-center gap-2">
-                    <SvgIcon :path="mdiShareOffOutline"/>
-                    Unshared
-                </SecondaryButton>
+                <UnsharedFiles
+                    :all="selectAllFiles"
+                    :ids="selectedFileIds"
+                    @success="reset"/>
                 <SecondaryButton class="flex items-center gap-2">
                     <SvgIcon :path="mdiFileDownload" size="18"/>
                     Download
@@ -24,7 +24,7 @@
             :display-last-modified="false"
             :display-owner="false"
             :display-path="true"
-            :display-for-short-user="true"
+            :display-share-for-user="true"
             :fetch-files="filesFetching"
             :files="filesList"
             class="w-full overflow-auto"
@@ -35,10 +35,11 @@
 
 <script setup>
 import SecondaryButton from "@/Components/SecondaryButton.vue";
+import UnsharedFiles from "@/Components/UnshareFiles.vue";
 import { Head, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import FilesTable from "@/Components/FilesTable.vue";
-import { mdiFileDownload, mdiShareOffOutline } from "@mdi/js";
+import { mdiFileDownload } from "@mdi/js";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
 import { DO_SEARCH_FILE, emitter } from "@/event-bus.js";

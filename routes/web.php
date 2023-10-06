@@ -61,6 +61,7 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         ->name('shared_by_me.')
         ->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::delete('/unshare', 'unshare')->name('unshare');
         });
 
     Route::controller(SharedForMeController::class)

@@ -17,7 +17,7 @@
                 <th v-if="displayFavorite" class="w-[40px]">&nbsp;</th>
                 <th class="my-files-table-head">Name</th>
                 <th v-if="displayOwner" class="my-files-table-head">Owner</th>
-                <th v-if="displayForShortUser" class="my-files-table-head whitespace-nowrap">For user</th>
+                <th v-if="displayShareForUser" class="my-files-table-head whitespace-nowrap">Share for user</th>
                 <th v-if="displayPath" class="my-files-table-head">Path</th>
                 <th v-if="displayDeletedAt" class="my-files-table-head">Deleted</th>
                 <th v-if="displayLastModified" class="my-files-table-head whitespace-nowrap">Last modified</th>
@@ -60,12 +60,8 @@
                 <td v-if="displayOwner" class="my-files-table-cell">
                     {{ item.owner }}
                 </td>
-                <td v-if="displayForShortUser" class="my-files-table-cell">
-                    <div class="cursor-help w-6 h-6" @click.stop="showModalForUser(item)">
-                        <SvgIcon
-                            :path="mdiAccount"
-                            class="mx-auto"/>
-                    </div>
+                <td v-if="displayShareForUser" class="my-files-table-cell">
+                    {{ item.shareForUser }}
                 </td>
                 <td v-if="displayPath" class="my-files-table-cell">
                     {{ item.path }}
@@ -97,25 +93,16 @@
             There is no data in this folder
         </div>
         <div ref="endOfFilesList"></div>
-        <DisplayUserFor
-            :show="showForUser"
-            :users="currentForUser"
-            @close-modal="closeModalForUser"/>
     </div>
 </template>
 
 <script setup>
 import Checkbox from "@/Components/Checkbox.vue";
-import DisplayUserFor from "@/Components/DisplayUserFor.vue";
 import FileIcon from "@/Components/FileIcon.vue";
 import { bytesToSize } from "@/helpers/helper.js";
-import { mdiAccount, mdiCloudOutline, mdiHarddisk, mdiStar, mdiStarOutline } from "@mdi/js";
+import { mdiCloudOutline, mdiHarddisk, mdiStar, mdiStarOutline } from "@mdi/js";
 import { computed, onMounted, onUpdated, ref } from "vue";
 import SvgIcon from "vue3-icon";
-
-/**
- * @typedef {{ name: String }} shortUser
- */
 
 /**
  * @typedef file
@@ -135,7 +122,7 @@ import SvgIcon from "vue3-icon";
  * @property {string} updatedAt
  * @property {string} updatedBy
  * @property {string|null} deletedAt
- * @property {shortUser[]} shareForUser
+ * @property {string} shareForUser
  */
 const props = defineProps({
     // model for list of selected items
@@ -173,7 +160,7 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
-    displayForShortUser: {
+    displayShareForUser: {
         type: Boolean,
         default: false,
     }
@@ -189,8 +176,6 @@ const emit = defineEmits([
 
 const endOfFilesList = ref(null);
 const topEl = ref(null);
-const showForUser = ref(false);
-const currentForUser = ref([]);
 
 const selectedFilesValue = computed({
     get: () => props.selectedFiles,
@@ -220,19 +205,6 @@ const clickItem = (item) => {
             selectedFilesValue.value.push(item.id);
         }
     }
-};
-
-/**
- * @param {file} item
- */
-const showModalForUser = (item) => {
-    showForUser.value = true;
-    currentForUser.value = item.shareForUser;
-};
-
-const closeModalForUser = () => {
-    showForUser.value = false;
-    currentForUser.value = [];
 };
 
 const observer = new IntersectionObserver(

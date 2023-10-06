@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Dto\FilesListFilterDto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,6 +26,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereUserId($value)
  * @method static Builder fileShareForUserAndFile(User $user, Collection $files)
+ * @method static Builder fileShareByUser(User $user, FilesListFilterDto $dto)
+ * @method static Builder fileShareForUser(User $user, FilesListFilterDto $dto)
+ * @method static Builder fileShareByFileOwner(User $user)
  * @mixin \Eloquent
  */
 class FileShare extends Model
@@ -55,5 +59,42 @@ class FileShare extends Model
         return $builder
             ->where('for_user_id', $user->getAuthIdentifier())
             ->whereIn('file_id', $filesIds);
+    }
+
+    public function scopeFileShareByUser(Builder $builder, User $user, FilesListFilterDto $dto): Builder
+    {
+        return $builder->with(['file', 'forUser'])
+            ->when($dto->search, function (Builder $builder) use ($dto) {
+                $builder->whereHas(
+                    'file',
+                    fn(Builder $query) => $query->where('name', 'like', '%' . $dto->search . '%')
+                );
+            })
+            ->whereHas(
+                'file.user',
+                fn(Builder $q) => $q->where('id', $user->getAuthIdentifier())
+            )
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function scopeFileShareForUser(Builder $builder, User $user, FilesListFilterDto $dto): Builder
+    {
+        return $builder->with(['file.user', 'forUser'])
+            ->when($dto->search, function (Builder $builder) use ($dto) {
+                $builder->whereHas(
+                    'file',
+                    fn(Builder $query) => $query->where('name', 'like', '%' . $dto->search . '%')
+                );
+            })
+            ->where('for_user_id', $user->getAuthIdentifier())
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function scopeFileShareByFileOwner(Builder $builder, User $user): Builder
+    {
+        return $builder->whereHas(
+            'file.user',
+            fn (Builder $b) => $b->where('id', $user->getAuthIdentifier())
+        );
     }
 }

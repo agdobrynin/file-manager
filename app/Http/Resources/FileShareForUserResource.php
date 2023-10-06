@@ -15,7 +15,7 @@ class FileShareForUserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name' => $this->forUser->name,
+            'name' => $this->name,
         ];
     }
 }

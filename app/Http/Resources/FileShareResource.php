@@ -16,15 +16,15 @@ class FileShareResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'disk' => $this->disk,
-            'path' => $this->path,
-            'parentId' => $this->parent_id,
-            'isFolder' => $this->is_folder,
-            'mime' => $this->mime,
-            'size' => $this->size,
-            'owner' => $this->owner,
-            'shareForUser' => FileShareForUserResource::collection($this->whenLoaded('fileShare')),
+            'name' => $this->file->name,
+            'disk' => $this->file->disk,
+            'path' => $this->file->path,
+            'parentId' => $this->file->parent_id,
+            'isFolder' => $this->file->is_folder,
+            'mime' => $this->file->mime,
+            'size' => $this->file->size,
+            'owner' => $this->file->owner,
+            'shareForUser' => $this->forUser->name,
         ];
     }
 }

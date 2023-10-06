@@ -9,7 +9,7 @@ use App\Dto\FilesIdDto;
 use App\Dto\FilesListFilterDto;
 use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FilesActionTrashRequest;
-use App\Http\Requests\FilesListRequest;
+use App\Http\Requests\FilesListFilterRequest;
 use App\Http\Resources\FileInTrashResource;
 use App\Jobs\DeleteFileFromStorageJob;
 use App\Models\File;
@@ -21,7 +21,7 @@ use Inertia\ResponseFactory;
 
 class FileTrashController extends Controller
 {
-    public function index(FilesListRequest $request): Response|ResponseFactory
+    public function index(FilesListFilterRequest $request): Response|ResponseFactory
     {
         $dto = new FilesListFilterDto(...$request->validated());
         $query = File::filesInTrash($request->user(), $dto);
