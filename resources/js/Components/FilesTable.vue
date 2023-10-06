@@ -1,6 +1,6 @@
 <template>
     <div class="bg-white shadow sm:rounded-lg">
-        <table class="table table-fixed min-w-full" id="files-table-main-table" ref="topEl">
+        <table id="files-table-main-table" ref="topEl" class="table table-fixed min-w-full">
             <thead class="bg-gray-100 border-b">
             <tr>
                 <th class="px-3 w-[30px]">
@@ -17,6 +17,7 @@
                 <th v-if="displayFavorite" class="w-[40px]">&nbsp;</th>
                 <th class="my-files-table-head">Name</th>
                 <th v-if="displayOwner" class="my-files-table-head">Owner</th>
+                <th v-if="displayForShortUser" class="my-files-table-head">For user</th>
                 <th v-if="displayPath" class="my-files-table-head">Path</th>
                 <th v-if="displayDeletedAt" class="my-files-table-head">Deleted</th>
                 <th v-if="displayLastModified" class="my-files-table-head whitespace-nowrap">Last modified</th>
@@ -58,6 +59,16 @@
                 </td>
                 <td v-if="displayOwner" class="my-files-table-cell">
                     {{ item.owner }}
+                </td>
+                <td v-if="displayForShortUser" class="my-files-table-cell whitespace-normal">
+                    <div class="grid gap-2.5 min-w-[100px] max-w-[150px]">
+                        <div v-for="(user, index) in item.shareForUser"
+                             :key="`user_for_${index}`"
+                             class="font-extralight truncate hover:overflow-visible"
+                        >
+                            {{ user.name }}
+                        </div>
+                    </div>
                 </td>
                 <td v-if="displayPath" class="my-files-table-cell">
                     {{ item.path }}
@@ -101,6 +112,10 @@ import { computed, onMounted, onUpdated, ref } from "vue";
 import SvgIcon from "vue3-icon";
 
 /**
+ * @typedef {{ name: String }} shortUser
+ * */
+
+/**
  * @typedef file
  * @type {Object}
  * @property {number} id
@@ -118,6 +133,7 @@ import SvgIcon from "vue3-icon";
  * @property {string} updatedAt
  * @property {string} updatedBy
  * @property {string|null} deletedAt
+ * @property {shortUser[]} shareForUser
  */
 const props = defineProps({
     // model for list of selected items
@@ -155,6 +171,10 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    displayForShortUser: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 const emit = defineEmits([
@@ -187,7 +207,7 @@ const selectAllValue = computed({
 const diskIcon = (item) => item.disk === 'cloud' ? mdiCloudOutline : mdiHarddisk;
 
 const clickItem = (item) => {
-    if (!selectAllValue.value) {
+    if ( ! selectAllValue.value) {
         const index = selectedFilesValue.value.indexOf(item.id);
 
         if (index >= 0) {

@@ -24,6 +24,7 @@ class FileShareResource extends JsonResource
             'mime' => $this->mime,
             'size' => $this->size,
             'owner' => $this->owner,
+            'shareForUser' => FileShareForUserResource::collection($this->whenLoaded('fileShare')),
         ];
     }
 }

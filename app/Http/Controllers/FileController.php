@@ -145,9 +145,10 @@ class FileController extends Controller
                 : $request->requestFiles;
 
             /** @var \Illuminate\Database\Eloquent\Collection<FileShare> $filesShare */
-            $filesShare = FileShare::fileShareByFileOwnerAndFile($request->user(), $files)
+            $filesShare = FileShare::fileShareForUserAndFile($request->shareToUser, $files)
                 ->get()
-                ->keyBy('file.id');
+                ->keyBy('file_id');
+
             /** @var Collection $insertData */
             $insertData = $files->reject(fn(File $file) => $filesShare->has($file->id))
                 ->reduce(

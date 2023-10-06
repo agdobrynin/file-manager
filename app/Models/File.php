@@ -169,6 +169,7 @@ class File extends Model
     public static function fileShareByUser(User $user, FilesListFilterDto $dto): Builder
     {
         return self::fileShareToFile($dto)
+            ->with(['fileShare.forUser'])
             ->whereHas(
                 'user',
                 fn(Builder $q) => $q->where('id', $user->getAuthIdentifier())
@@ -185,7 +186,8 @@ class File extends Model
             )
             ->with(['user'])
             ->whereHas('fileShare')
-            ->leftJoin('file_shares', 'file_shares.file_id', 'files.id')
+            ->join('file_shares', 'file_shares.file_id', 'files.id')
+            ->distinct()
             ->orderBy('is_folder', 'desc')
             ->orderBy('file_shares.created_at', 'desc');
     }

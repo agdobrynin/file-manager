@@ -24,6 +24,7 @@
             :display-last-modified="false"
             :display-owner="false"
             :display-path="true"
+            :display-for-short-user="true"
             :fetch-files="filesFetching"
             :files="filesList"
             class="w-full overflow-auto"

@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereUserId($value)
- * @method static Builder fileShareByFileOwnerAndFile(User $user, Collection $filesIds)
+ * @method static Builder fileShareForUserAndFile(User $user, Collection $files)
  * @mixin \Eloquent
  */
 class FileShare extends Model
@@ -48,16 +48,12 @@ class FileShare extends Model
         return $this->belongsTo(User::class, foreignKey: 'for_user_id');
     }
 
-    public function scopeFileShareByFileOwnerAndFile(Builder $builder, User $user, Collection $files): Builder
+    public function scopeFileShareForUserAndFile(Builder $builder, User $user, Collection $files): Builder
     {
         $filesIds = $files->pluck('id')->toArray();
 
-        return $builder->whereHas(
-            'file', function (Builder $b) use ($filesIds, $user) {
-            return $b->whereIn('id', $filesIds)
-                ->whereHas('user', function (Builder $q) use ($user) {
-                    return $q->where('id', $user->id);
-                });
-        });
+        return $builder
+            ->where('for_user_id', $user->getAuthIdentifier())
+            ->whereIn('file_id', $filesIds);
     }
 }
