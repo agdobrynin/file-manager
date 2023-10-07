@@ -5,7 +5,7 @@ namespace App\Dto;
 
 readonly class FilesListFilterDto
 {
-    public function __construct(public ?string $search = null, public ?bool $onlyFavorites = null)
+    public function __construct(public ?string $search = null)
     {
     }
 }

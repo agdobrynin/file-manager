@@ -1,19 +1,22 @@
 import { emitter } from "@/event-bus.js";
-import { router } from "@inertiajs/vue3";
-import { onUnmounted, ref } from "vue";
+import { router, usePage } from "@inertiajs/vue3";
+import { onUnmounted, ref, toRaw } from "vue";
 
 export const EVENT_LOAD_FILES_NEXT_PAGE = 'EVENT_LOAD_FILES_NEXT_PAGE';
 
-export function useDoLoadFiles(initFiles) {
+export function useDoLoadFiles() {
+    const page = usePage();
     const filesFetching = ref(false);
-    const filesList = ref(initFiles.data || []);
-    const next = ref(initFiles.links?.next || null);
-    const filesTotal = ref(initFiles?.meta?.total || 0);
+    const filesList = ref(page.props.files?.data || []);
+    const next = ref(page.props.files?.links?.next || null);
+    const filesTotal = ref(page.props.files?.meta?.total || 0);
     
     function filesReset(files) {
-        filesList.value = files?.data || [];
-        next.value = files?.links?.next || null;
-        filesTotal.value = files?.meta?.total || 0;
+        const { data, links, meta } = toRaw(files || {});
+        
+        filesList.value = data || [];
+        next.value = links?.next || null;
+        filesTotal.value = meta?.total || 0;
     }
     
     function fetchNextPage() {
@@ -31,16 +34,6 @@ export function useDoLoadFiles(initFiles) {
                     onSuccess: ({ props: { files: { data = [], links } } }) => {
                         filesList.value = [ ...filesList.value, ...data ];
                         next.value = links?.next || null;
-                        
-                        const params = new URLSearchParams((new URL(window.location.href)).search);
-                        params.delete('page');
-                        const queryString = params.toString();
-                        
-                        window.history.replaceState(
-                            {},
-                            '',
-                            `${window.location.pathname}${queryString ? '?' + queryString : ''}${window.location.hash}`,
-                        )
                     },
                 })
         }

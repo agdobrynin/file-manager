@@ -2,17 +2,21 @@
 
 namespace App\Http\Requests;
 
-use App\Models\File;
+use App\Models\FileShare;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Http\FormRequest;
 
-class FilesActionRequest extends ParentIdBaseRequest
+class FileShareActionRequest extends FormRequest
 {
     protected const ALL_FILES_KEY = 'all';
+
     /**
-     * @var Collection<File>
+     * Determine if the user is authorized to make this request.
      */
-    public Collection $requestFiles;
+    public function authorize(): bool
+    {
+        return true;
+    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -28,17 +32,13 @@ class FilesActionRequest extends ParentIdBaseRequest
                 'array',
                 function (string $attribute, array $ids, $fail) {
                     if ($ids) {
-                        $foundFiles = File::fileByOwner($this->user())
+                        $fileSharCount = FileShare::fileShareForUserOrByUser($this->user())
                             ->whereIn('id', $ids)
-                            ->get();
+                            ->count();
 
-                        if ($foundFiles->count() !== count($ids)) {
-                            $fail('Some file IDs are not valid.');
+                        if ($fileSharCount !== count($ids)) {
+                            $fail('Some file share IDs are not valid.');
                         }
-
-                        $this->requestFiles = $foundFiles;
-                    } else {
-                        $this->requestFiles = new Collection();
                     }
                 }
             ]

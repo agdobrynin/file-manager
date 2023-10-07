@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Dto\FilesListFilterDto;
+use App\Dto\MyFilesListFilterDto;
 use App\Enums\DiskEnum;
 use App\Traits\HasCreatorAndUpdater;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
@@ -50,8 +52,6 @@ use Kalnoy\Nestedset\NodeTrait;
  * @method static \Kalnoy\Nestedset\QueryBuilder|File defaultOrder(string $dir = 'asc')
  * @method static \Kalnoy\Nestedset\QueryBuilder|File descendantsAndSelf($id, array $columns = [])
  * @method static \Kalnoy\Nestedset\QueryBuilder|File descendantsOf($id, array $columns = [], $andSelf = false)
- * @method static \Kalnoy\Nestedset\QueryBuilder|File filesInTrash(\App\Models\User $user, ?\App\Dto\FilesListFilterDto $dto = null)
- * @method static \Kalnoy\Nestedset\QueryBuilder filesList(\App\Models\User $user, \App\Dto\FilesListFilterDto $dto, \App\Models\File $folder)
  * @method static \Kalnoy\Nestedset\QueryBuilder|File fixSubtree($root)
  * @method static \Kalnoy\Nestedset\QueryBuilder|File fixTree($root = null)
  * @method static \Kalnoy\Nestedset\Collection<int, static> get($columns = ['*'])
@@ -106,6 +106,9 @@ use Kalnoy\Nestedset\NodeTrait;
  * @method static Builder|File withTrashed()
  * @method static \Kalnoy\Nestedset\QueryBuilder|File withoutRoot()
  * @method static Builder|File withoutTrashed()
+ * @method static Builder filesList(User $user, MyFilesListFilterDto $dto, File $folder)
+ * @method static Builder filesInTrash(User $user, ?FilesListFilterDto $dto = null)
+ * @method static Builder fileByOwner(User $user)
  * @mixin \Eloquent
  */
 class File extends Model
@@ -190,6 +193,11 @@ class File extends Model
         return $this->hasOne(FileFavorite::class);
     }
 
+    public function fileShare(): HasMany
+    {
+        return $this->hasMany(FileShare::class);
+    }
+
     public function isOwnedByUser(?User $user): bool
     {
         return $this->created_by === $user?->getAuthIdentifier();
@@ -200,7 +208,7 @@ class File extends Model
         return (bool)$this->is_folder;
     }
 
-    public function scopeFilesList(Builder $builder, User $user, FilesListFilterDto $dto, File $folder): Builder
+    public function scopeFilesList(Builder $builder, User $user, MyFilesListFilterDto $dto, File $folder): Builder
     {
         if ($dto->search) {
             $builder->where('name', 'like', "%$dto->search%");
@@ -209,6 +217,7 @@ class File extends Model
         }
 
         return $builder->whereNotNull('parent_id')
+            ->with(['favorite'])
             ->when($dto->onlyFavorites, fn() => $builder->whereHas('favorite'))
             ->where('created_by', '=', $user->getAuthIdentifier())
             ->with(['favorite'])
@@ -229,6 +238,11 @@ class File extends Model
             ->orderBy('is_folder', 'desc')
             ->orderBy('deleted_at', 'desc')
             ->orderBy('files.id', 'desc');
+    }
+
+    public function scopeFileByOwner(Builder $builder, User $user): Builder
+    {
+        return $builder->where('created_by', $user->getAuthIdentifier());
     }
 
     protected function owner(): Attribute

@@ -1,8 +1,8 @@
 <template>
     <SecondaryButton :disabled="isDisable || inProcess" @click="download">
         <SvgIcon
-            :path="mdiFileDownload"
             :class="{'animate-ping' : inProcess}"
+            :path="mdiFileDownload"
             class="mr-2 h-5 w-5 text-gray-600"
             type="mdi"/>
         <div>Download</div>
@@ -10,84 +10,87 @@
 </template>
 
 <script setup>
-import { mdiFileDownload } from "@mdi/js";
-import SvgIcon from "vue3-icon";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
-import { computed, reactive, ref } from "vue";
-import axios from "axios";
 import { errorMessage } from "@/event-bus.js";
+import { mdiFileDownload } from "@mdi/js";
+import axios from "axios";
 import { parse } from "content-disposition-attachment";
+import { computed, ref } from "vue";
+import SvgIcon from "vue3-icon";
 
 const props = defineProps({
-    parentFolder: Number,
-    fileIds: Array,
-    allFiles: Boolean,
+    params: {
+        type: Object,
+        required: true,
+    },
+    url: {
+        type: String,
+        required: true,
+    },
+    method: {
+        type: String,
+        default: 'get',
+        validator(value) {
+            return [ 'get', 'post' ].includes(value)
+        }
+    }
 });
 
 const inProcess = ref(false);
 const link = ref();
 
-const form = reactive({
-    ids: [],
-    all: false,
-});
+const isDisable = computed(() => ( ! Object.keys(props.params).length));
 
-const isDisable = computed(() => (!props.fileIds.length && !props.allFiles));
+const emits = defineEmits([ 'downloadComplete' ])
 
-const emits = defineEmits(['downloadComplete'])
-
-const download = () => {
-    form.all = props.allFiles;
-
-    if (form.all) {
-        form.ids = [];
-    } else {
-        form.ids = props.fileIds;
-    }
-
-    const url = route('file.download', {parentFolder: props.parentFolder, ...form});
-
+const download = async () => {
     inProcess.value = true;
 
-    axios.get(url, {responseType: 'blob'})
-        .then((response) => {
-            const {filename = 'file.zip'} = parse(response.headers['content-disposition'])
+    try {
+        const response = await axios[props.method](
+            props.url,
+            {
+                params: props.params,
+                responseType: 'blob',
+            });
 
-            const data = window.URL.createObjectURL(new Blob([response.data]));
+        const { filename = 'file.zip' } = parse(response.headers['content-disposition'])
 
-            const link = document.createElement('a');
-            link.download = filename;
-            link.href = data;
-            link.click();
+        const data = window.URL.createObjectURL(new Blob([ response.data ]));
 
-            link.remove();
-            emits('downloadComplete')
-        })
-        .catch(async (reason) => {
-            const text = await reason.response.data.text()
-            let responseErrors;
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = data;
+        link.click();
 
-            try {
-                const {errors = {}, message} = JSON.parse(text);
+        link.remove();
+        emits('downloadComplete')
+    } catch (reason) {
+        const text = await reason.response.data.text()
+        let responseErrors;
 
-                if (Object.keys(errors).length > 0) {
-                    responseErrors = Object.values(errors).flat();
-                }
+        try {
+            const { errors = {}, message } = JSON.parse(text);
 
-                if (message) {
-                    if (Array.isArray(responseErrors)) {
-                        responseErrors.push(message);
-                    } else {
-                        responseErrors = message;
-                    }
-                }
-            } catch (e) {
-                responseErrors = reason.message;
+            if (Object.keys(errors).length > 0) {
+                responseErrors = Object.values(errors).flat();
             }
 
-            errorMessage(responseErrors);
-        })
-        .finally(() => inProcess.value = false)
+            if (message) {
+                if (Array.isArray(responseErrors)) {
+                    responseErrors.push(message);
+                } else {
+                    responseErrors = message;
+                }
+            }
+        } catch (e) {
+            responseErrors = reason.message;
+        }
+
+        errorMessage(responseErrors);
+    }
+
+    inProcess.value = false;
 };
 
 defineExpose({

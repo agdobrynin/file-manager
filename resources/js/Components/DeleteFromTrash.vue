@@ -10,6 +10,7 @@
     <ConfirmationDialog
         :show="showConfirmDialog"
         @cancel="showConfirmDialog = false"
+        @close="showConfirmDialog = false"
         @confirm="deleteForever">
         <div class="inline-flex items-center text-red-800 gap-4 mt-5">
             <div>
@@ -26,14 +27,13 @@
 </template>
 
 <script setup>
-
-import { mdiAlert, mdiTrashCanOutline } from "@mdi/js";
-import SvgIcon from "vue3-icon";
-import DangerButton from "@/Components/DangerButton.vue";
 import ConfirmationDialog from "@/Components/ConfirmationDialog.vue";
-import { ref } from "vue";
-import { router } from "@inertiajs/vue3";
+import DangerButton from "@/Components/DangerButton.vue";
 import { errorMessage } from "@/event-bus.js";
+import { router } from "@inertiajs/vue3";
+import { mdiAlert, mdiTrashCanOutline } from "@mdi/js";
+import { ref } from "vue";
+import SvgIcon from "vue3-icon";
 
 const props = defineProps({
     ids: {
@@ -56,7 +56,7 @@ const deleteForever = () => {
     router.delete(route('trash.destroy'),
         {
             data: {
-                all: props.all ? '1' : '0',
+                all: Number(props.all),
                 ids: props.all ? [] : props.ids
             },
             onError: (errors) => {

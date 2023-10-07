@@ -10,6 +10,7 @@ use App\Models\File;
 use App\Services\Exceptions\DownloadEmptyFolderException;
 use App\Services\Exceptions\OpenArchiveException;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
@@ -26,10 +27,10 @@ readonly class MakeDownloadFiles
     }
 
     /**
-     * @param Collection<File> $files
+     * @param Collection<File>|BaseCollection<File> $files
      * @throws Throwable|OpenArchiveException|DownloadEmptyFolderException|RuntimeException
      */
-    public function handle(Collection $files): DownloadFileDto
+    public function handle(BaseCollection|Collection $files): DownloadFileDto
     {
         throw_if($files->isEmpty(), message: 'No files for download');
 
@@ -87,9 +88,9 @@ readonly class MakeDownloadFiles
     }
 
     /**
-     * @param Collection<File> $files
+     * @param BaseCollection<File>|Collection<File> $files
      */
-    private function addToZip(Collection $files, string $ancestors = ''): void
+    private function addToZip(BaseCollection|Collection $files, string $ancestors = ''): void
     {
         foreach ($files as $file) {
             if ($file->isFolder() && $file->children()->count()) {

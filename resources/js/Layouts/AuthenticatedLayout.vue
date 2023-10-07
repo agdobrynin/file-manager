@@ -56,7 +56,7 @@ import {
     successMessage,
     warningMessage
 } from "@/event-bus.js";
-import { bytesToSize } from "@/helpers/helper.js";
+import { bytesToSize, fixWindowHistory } from "@/helpers/helper.js";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { fromEvent } from "file-selector";
 import { computed, onMounted, ref, watch, watchEffect } from "vue";
@@ -182,8 +182,19 @@ watchEffect(() => {
 onMounted(() => {
     emitter.on(FILES_CHOOSE, uploadFiles);
 
+    router.on('finish', function () {
+        fixWindowHistory([ 'page' ]);
+    });
+
     router.on('navigate', function (ev) {
-        if ([ 'MyFiles', 'MyTrash' ].includes(ev.detail.page.component)) {
+        const routeNamesWithSearch = [
+            'file.index',
+            'trash.index',
+            'share_for_me.index',
+            'share_by_me.index',
+        ];
+
+        if (routeNamesWithSearch.includes(ev.detail.page.props.route_name)) {
             disabledSearch.value = false;
         }
 

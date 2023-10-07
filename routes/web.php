@@ -3,6 +3,8 @@
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\FileTrashController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SharedByMeController;
+use App\Http\Controllers\SharedForMeController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(static function () {
             Route::delete('/destroy/{parentFolder?}', 'destroy')->name('destroy');
             Route::get('/download/{parentFolder}', 'download')->name('download');
             Route::patch('/favorite', 'favorite')->name('favorite');
+            Route::post('/share/{parentFolder?}', 'share')->name('share');
         });
 
     Route::controller(FileTrashController::class)
@@ -51,6 +54,23 @@ Route::middleware(['auth', 'verified'])->group(static function () {
             Route::get('/', 'index')->name('index');
             Route::post('/restore', 'restore')->name('restore');
             Route::delete('/destroy', 'destroy')->name('destroy');
+        });
+
+    Route::controller(SharedByMeController::class)
+        ->prefix('/share-by-me')
+        ->name('share_by_me.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::delete('/unshare', 'unshare')->name('unshare');
+            Route::get('/download', 'download')->name('download');
+        });
+
+    Route::controller(SharedForMeController::class)
+        ->prefix('/share-for-me')
+        ->name('share_for_me.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/download', 'download')->name('download');
         });
 });
 

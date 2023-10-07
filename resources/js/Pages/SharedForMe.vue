@@ -1,11 +1,14 @@
 <template>
-    <Head title="My files"/>
+    <Head title="Shared for me"/>
 
     <AuthenticatedLayout class="relative">
         <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-4">
             <div class="flex flex-wrap gap-4">
-                <DeleteFromTrash :all="selectAllFiles" :ids="selectedFileIds" @success="reset"/>
-                <RestoreFiles :all="selectAllFiles" :ids="selectedFileIds" @success="reset"/>
+                <DownloadFiles
+                    ref="downloadComponent"
+                    :params="paramsAllAndIds"
+                    :url="route('share_for_me.download')"
+                    @download-complete="clearSelectedFiles"/>
             </div>
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
@@ -13,20 +16,23 @@
             v-model:select-all="selectAllFiles"
             v-model:selected-files="selectedFileIds"
             :disable-select-all="disableSelectAll"
-            :display-deleted-at="true"
+            :display-deleted-at="false"
+            :display-disk="false"
             :display-favorite="false"
-            :display-last-modified="false"
-            :display-owner="false"
+            :display-last-modified="true"
+            :display-owner="true"
             :display-path="true"
             :fetch-files="filesFetching"
             :files="filesList"
             class="w-full overflow-auto"
             @can-load="emitter.emit(EVENT_LOAD_FILES_NEXT_PAGE)"
+            @item-double-click="downloadFile"
         />
     </AuthenticatedLayout>
 </template>
 
 <script setup>
+import DownloadFiles from "@/Components/DownloadFiles.vue";
 import { useSelectFiles } from "@/composable/selectFIles.js";
 import { Head, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
@@ -34,8 +40,6 @@ import FilesTable from "@/Components/FilesTable.vue";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
 import { DO_SEARCH_FILE, emitter } from "@/event-bus.js";
-import RestoreFiles from "@/Components/RestoreFiles.vue";
-import DeleteFromTrash from "@/Components/DeleteFromTrash.vue";
 
 const props = defineProps({
     files: Object,
@@ -43,6 +47,7 @@ const props = defineProps({
 
 const searchString = ref('');
 const disableSelectAll = ref(false);
+const downloadComponent = ref(null);
 
 watch(searchString, (value) => {
     disableSelectAll.value = !! value;
@@ -50,22 +55,25 @@ watch(searchString, (value) => {
 });
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
-const { selectedFileIds, selectAllFiles, clearSelectedFiles } = useSelectFiles();
+const { selectedFileIds, selectAllFiles, paramsAllAndIds, clearSelectedFiles } = useSelectFiles();
 
 const doSearch = () => {
     const params = { search: searchString.value };
 
-    router.visit(route('trash.index', params), {
+    router.visit(route('share_for_me.index', params), {
         replace: true,
         preserveState: true,
         onSuccess: () => filesReset(props.files),
     });
 };
 
-const reset = () => {
-    filesReset(props.files);
+const downloadFile = (item) => {
     clearSelectedFiles();
+    (new Promise((resolve) => resolve()))
+        .then(() => selectedFileIds.value.push(item.id))
+        .then(() => downloadComponent.value.download());
 };
+
 
 onMounted(() => {
     emitter.on(DO_SEARCH_FILE, (search) => {

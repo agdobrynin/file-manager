@@ -9,25 +9,33 @@
         <div class="px-3">
             <div class="py-3">
                 <NavLink
-                    :active="$page.props.route_name === 'file.index'"
+                    :active="routeName === 'file.index'"
                     :href="route('file.index')"
                     class="flex gap-2">
-                    <CloudIcon class="w-7 h-auto"/>
+                    <SvgIcon :path="mdiCloudOutline" size="30"/>
                     My files
                 </NavLink>
-                <NavLink class="flex gap-2" href="">
-                    <ShareIconSolid class="w-7 h-auto"/>
-                    Shared with me
+                <NavLink
+                    :active="routeName === 'share_for_me.index'"
+                    :href="route('share_for_me.index')"
+                    class="flex gap-2"
+                >
+                    <SvgIcon :path="mdiMonitorShare" size="30"/>
+                    Shared for me
                 </NavLink>
-                <NavLink class="flex gap-2" href="">
-                    <ShareIcon class="w-7 h-auto"/>
+                <NavLink
+                    :active="routeName === 'share_by_me.index'"
+                    :href="route('share_by_me.index')"
+                    class="flex gap-2"
+                >
+                    <SvgIcon :path="mdiShare" size="30"/>
                     Shared by me
                 </NavLink>
                 <NavLink
-                    :active="$page.props.route_name === 'trash.index'"
+                    :active="routeName === 'trash.index'"
                     :href="route('trash.index')"
                     class="flex gap-2">
-                    <TrashIcon class="w-7 h-auto"/>
+                    <SvgIcon :path="mdiTrashCanOutline" size="30"/>
                     Trash
                 </NavLink>
             </div>
@@ -38,7 +46,12 @@
 <script setup>
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import NavLink from "@/Components/NavLink.vue";
-import { ShareIcon, TrashIcon } from '@heroicons/vue/24/outline'
-import { CloudIcon, ShareIcon as ShareIconSolid } from '@heroicons/vue/24/solid'
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
+import { mdiCloudOutline, mdiMonitorShare, mdiShare, mdiTrashCanOutline } from "@mdi/js";
+import { computed } from "vue";
+import SvgIcon from "vue3-icon";
+
+const page = usePage();
+
+const routeName = computed(() => page.props.route_name);
 </script>

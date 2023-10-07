@@ -189,5 +189,13 @@ return [
     'my_files' => [
         'per_page' => env('MY_FILES_PER_PAGE', 10),
     ],
-
+    'my_trash' => [
+        'per_page' => env('MY_TRASH_PER_PAGE', 10),
+    ],
+    'share_by_me' => [
+        'per_page' => env('SHARE_BY_ME_PER_PAGE', 10),
+    ],
+    'share_for_me' => [
+        'per_page' => env('SHARE_FOR_ME_PER_PAGE', 10),
+    ]
 ];

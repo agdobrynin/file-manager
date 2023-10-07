@@ -14,13 +14,20 @@
                     :all-files="selectAllFiles"
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
-                    @delete-finish="deleteFinish"/>
+                    @delete-finish="deleteFinish"
+                />
                 <DownloadFiles
                     ref="downloadComponent"
+                    :params="downloadParams"
+                    :url="downloadUrl"
+                    @download-complete="clearSelectedFiles"
+                />
+                <ShareFiles
                     :all-files="selectAllFiles"
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
-                    @download-complete="downloadComplete"/>
+                    @success="clearSelectedFiles"
+                />
                 <OnlyFavorites
                     v-model="onlyFavoritesCurrentState"
                     @update:model-value="doChangeSearchFavorites"
@@ -47,11 +54,13 @@
 </template>
 
 <script setup>
+import ShareFiles from "@/Components/ShareFiles.vue";
+import { useSelectFiles } from "@/composable/selectFIles.js";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
 import CreateNewDropdown from "@/Components/CreateNewDropdown.vue";
-import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import DeleteFiles from "@/Components/DeleteFiles.vue";
 import DownloadFiles from "@/Components/DownloadFiles.vue";
 import FilesTable from "@/Components/FilesTable.vue";
@@ -79,9 +88,7 @@ const onlyFavoritesQueryStringKey = 'onlyFavorites';
 const searchQueryStringKey = 'search';
 const parentFolderRouteKey = 'parentFolder';
 
-const selectedFileIds = ref([]);
 const disableSelectAll = ref(false);
-const selectAllFiles = ref(false);
 const downloadComponent = ref(null);
 const tableEl = ref(null);
 const onlyFavoritesCurrentState = ref(false);
@@ -89,9 +96,13 @@ const searchString = ref('');
 
 watch(searchString, (value) => {
     disableSelectAll.value = !! value;
-    selectAllFiles.value = false;
-    selectedFileIds.value = [];
+    clearSelectedFiles();
 });
+
+const downloadUrl = computed(() => route('file.download', { parentFolder: props.parentId }));
+
+const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
+const { selectedFileIds, selectAllFiles, paramsAllAndIds: downloadParams, clearSelectedFiles } = useSelectFiles();
 
 /**
  * @param {Number|null} parentFolderId
@@ -115,18 +126,13 @@ const indexRequestParams = (parentFolderId) => {
     return params;
 };
 
-const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles(props.files);
-
 const updateAllFiles = () => {
     filesReset(props.files);
     nextTick(() => tableEl.value?.scrollFilesTableTop());
 };
 
-const downloadComplete = () => selectedFileIds.value = [];
-
 const deleteFinish = () => {
-    selectedFileIds.value = [];
-    selectAllFiles.value = false;
+    clearSelectedFiles();
     updateAllFiles();
 };
 
@@ -137,11 +143,10 @@ const fileItemAction = (item) => {
 
         router.visit(route('file.index', indexRequestParams(item.id)));
     } else {
-        selectedFileIds.value = [];
-        nextTick(() => {
-            selectedFileIds.value.push(item.id);
-            downloadComponent.value.download();
-        });
+        clearSelectedFiles();
+        (new Promise((resolve) => resolve()))
+            .then(() => selectedFileIds.value.push(item.id))
+            .then(() => downloadComponent.value.download());
     }
 };
 

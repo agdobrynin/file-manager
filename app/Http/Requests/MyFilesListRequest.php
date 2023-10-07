@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-class FilesListRequest extends ParentIdBaseRequest
+class MyFilesListRequest extends ParentIdBaseRequest
 {
     protected const ONLY_FAVORITES_QUERY_PARAM = 'onlyFavorites';
     /**

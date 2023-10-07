@@ -1,12 +1,12 @@
 <template>
     <div class="bg-white shadow sm:rounded-lg">
-        <table class="table table-fixed min-w-full" id="files-table-main-table" ref="topEl">
+        <table id="files-table-main-table" ref="topEl" class="table table-fixed min-w-full">
             <thead class="bg-gray-100 border-b">
             <tr>
                 <th class="px-3 w-[30px]">
                     #
                 </th>
-                <th class="w-[40px]">
+                <th class="px-3 w-[40px]">
                     <Checkbox
                         v-model="selectAllValue"
                         :checked="selectAllValue"
@@ -17,11 +17,12 @@
                 <th v-if="displayFavorite" class="w-[40px]">&nbsp;</th>
                 <th class="my-files-table-head">Name</th>
                 <th v-if="displayOwner" class="my-files-table-head">Owner</th>
+                <th v-if="displayShareForUser" class="my-files-table-head whitespace-nowrap">Share for user</th>
                 <th v-if="displayPath" class="my-files-table-head">Path</th>
                 <th v-if="displayDeletedAt" class="my-files-table-head">Deleted</th>
                 <th v-if="displayLastModified" class="my-files-table-head whitespace-nowrap">Last modified</th>
                 <th class="my-files-table-head">Size</th>
-                <th class="my-files-table-head">Disk</th>
+                <th v-if="displayDisk" class="my-files-table-head">Disk</th>
             </tr>
             </thead>
             <tbody>
@@ -50,17 +51,20 @@
                     <SvgIcon v-if="item.isFavorite" :path="mdiStar" class="mx-auto w-7 h-7 hover:animate-pulse"/>
                     <SvgIcon v-else :path="mdiStarOutline" class="mx-auto w-7 h-7 hover:animate-pulse"/>
                 </td>
-                <td class="my-files-table-cell flex items-center gap-2 ps-2">
+                <td class="my-files-table-cell flex items-center gap-2 ps-2 max-w-[350px]">
                     <div>
                         <FileIcon :mime-type="item.mime" size="30"/>
                     </div>
-                    <div>{{ item.name }}</div>
+                    <div class="truncate">{{ item.name }}</div>
                 </td>
-                <td v-if="displayOwner" class="my-files-table-cell">
-                    {{ item.owner }}
+                <td v-if="displayOwner" class="my-files-table-cell max-w-[150px]">
+                    <div class="truncate">{{ item.owner }}</div>
                 </td>
-                <td v-if="displayPath" class="my-files-table-cell">
-                    {{ item.path }}
+                <td v-if="displayShareForUser" class="my-files-table-cell max-w-[150px]">
+                    <div class="truncate">{{ item.shareForUser }}</div>
+                </td>
+                <td v-if="displayPath" class="my-files-table-cell max-w-sm">
+                    <div class="truncate">{{ item.path }}</div>
                 </td>
                 <td v-if="displayDeletedAt" class="my-files-table-cell">
                     {{ item.deletedAt }}
@@ -71,7 +75,7 @@
                 <td class="my-files-table-cell">
                     {{ item.size ? bytesToSize(item.size) : '' }}
                 </td>
-                <td class="ps-5">
+                <td v-if="displayDisk" class="ps-5">
                     <SvgIcon v-if="!item.isFolder" :path="diskIcon(item)"/>
                 </td>
             </tr>
@@ -118,6 +122,7 @@ import SvgIcon from "vue3-icon";
  * @property {string} updatedAt
  * @property {string} updatedBy
  * @property {string|null} deletedAt
+ * @property {string} shareForUser
  */
 const props = defineProps({
     // model for list of selected items
@@ -151,6 +156,14 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    displayDisk: {
+        type: Boolean,
+        default: true,
+    },
+    displayShareForUser: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 const emit = defineEmits([
@@ -183,7 +196,7 @@ const selectAllValue = computed({
 const diskIcon = (item) => item.disk === 'cloud' ? mdiCloudOutline : mdiHarddisk;
 
 const clickItem = (item) => {
-    if (!selectAllValue.value) {
+    if ( ! selectAllValue.value) {
         const index = selectedFilesValue.value.indexOf(item.id);
 
         if (index >= 0) {
