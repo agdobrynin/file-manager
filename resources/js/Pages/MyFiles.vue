@@ -18,9 +18,8 @@
                 />
                 <DownloadFiles
                     ref="downloadComponent"
-                    :all-files="selectAllFiles"
-                    :file-ids="selectedFileIds"
-                    :parent-folder="parentId"
+                    :params="downloadParams"
+                    :url="downloadUrl"
                     @download-complete="clearSelected"
                 />
                 <ShareFiles
@@ -60,7 +59,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
 import CreateNewDropdown from "@/Components/CreateNewDropdown.vue";
-import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import DeleteFiles from "@/Components/DeleteFiles.vue";
 import DownloadFiles from "@/Components/DownloadFiles.vue";
 import FilesTable from "@/Components/FilesTable.vue";
@@ -99,6 +98,18 @@ const searchString = ref('');
 watch(searchString, (value) => {
     disableSelectAll.value = !! value;
     clearSelected();
+});
+
+const downloadUrl = computed(() => route('file.download', { parentFolder: props.parentId }));
+const downloadParams = computed(() => {
+    if (selectAllFiles.value || selectedFileIds.value.length) {
+        return {
+            all: selectAllFiles.value,
+            ids: selectAllFiles.value ? [] : selectedFileIds.value,
+        }
+    }
+
+    return {};
 });
 
 /**
@@ -148,10 +159,9 @@ const fileItemAction = (item) => {
         router.visit(route('file.index', indexRequestParams(item.id)));
     } else {
         clearSelected();
-        nextTick(() => {
-            selectedFileIds.value.push(item.id);
-            downloadComponent.value.download();
-        });
+        (new Promise((resolve) => resolve()))
+            .then(() => selectedFileIds.value.push(item.id))
+            .then(() => downloadComponent.value.download());
     }
 };
 
