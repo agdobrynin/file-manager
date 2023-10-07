@@ -80,12 +80,10 @@ const reset = () => {
 };
 
 const downloadFile = (item) => {
-    if (!item.isFolder) {
-        clearSelectedFiles();
-        (new Promise((resolve) => resolve()))
-            .then(() => selectedFileIds.value.push(item.id))
-            .then(() => downloadComponent.value.download());
-    }
+    clearSelectedFiles();
+    (new Promise((resolve) => resolve()))
+        .then(() => selectedFileIds.value.push(item.id))
+        .then(() => downloadComponent.value.download());
 };
 
 onMounted(() => {
