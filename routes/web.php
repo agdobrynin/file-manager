@@ -62,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         ->group(function () {
             Route::get('/', 'index')->name('index');
             Route::delete('/unshare', 'unshare')->name('unshare');
+            Route::get('/download', 'download')->name('download');
         });
 
     Route::controller(SharedForMeController::class)

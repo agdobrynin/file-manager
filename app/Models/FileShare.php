@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereUserId($value)
- * @method static Builder fileShareForUserAndFile(User $user, Collection $files)
+ * @method static Builder fileShareForUserByFile(User $user, Collection $files)
  * @method static Builder fileShareByUser(User $user, FilesListFilterDto $dto)
  * @method static Builder fileShareForUser(User $user, FilesListFilterDto $dto)
  * @method static Builder fileShareByFileOwner(User $user)
@@ -52,7 +52,7 @@ class FileShare extends Model
         return $this->belongsTo(User::class, foreignKey: 'for_user_id');
     }
 
-    public function scopeFileShareForUserAndFile(Builder $builder, User $user, Collection $files): Builder
+    public function scopeFileShareForUserByFile(Builder $builder, User $user, Collection $files): Builder
     {
         $filesIds = $files->pluck('id')->toArray();
 

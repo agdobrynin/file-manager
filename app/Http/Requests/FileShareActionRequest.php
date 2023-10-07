@@ -6,7 +6,7 @@ use App\Models\FileShare;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FileShareByMeRequest extends FormRequest
+class FileShareActionRequest extends FormRequest
 {
     protected const ALL_FILES_KEY = 'all';
 
