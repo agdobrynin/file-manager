@@ -192,10 +192,10 @@ return [
     'my_trash' => [
         'per_page' => env('MY_TRASH_PER_PAGE', 10),
     ],
-    'shared_by_me' => [
-        'per_page' => env('SHARED_BY_ME_PER_PAGE', 10),
+    'share_by_me' => [
+        'per_page' => env('SHARE_BY_ME_PER_PAGE', 10),
     ],
-    'shared_for_me' => [
-        'per_page' => env('SHARED_FOR_ME_PER_PAGE', 10),
+    'share_for_me' => [
+        'per_page' => env('SHARE_FOR_ME_PER_PAGE', 10),
     ]
 ];

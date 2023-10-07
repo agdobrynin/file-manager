@@ -57,8 +57,8 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         });
 
     Route::controller(SharedByMeController::class)
-        ->prefix('/shared-by-me')
-        ->name('shared_by_me.')
+        ->prefix('/share-by-me')
+        ->name('share_by_me.')
         ->group(function () {
             Route::get('/', 'index')->name('index');
             Route::delete('/unshare', 'unshare')->name('unshare');
@@ -66,8 +66,8 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         });
 
     Route::controller(SharedForMeController::class)
-        ->prefix('/shared-for-me')
-        ->name('shared_for_me.')
+        ->prefix('/share-for-me')
+        ->name('share_for_me.')
         ->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/download', 'download')->name('download');

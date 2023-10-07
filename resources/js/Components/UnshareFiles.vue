@@ -33,7 +33,7 @@ const emit = defineEmits([ 'success' ]);
 const inProcess = ref(false);
 
 const doUnshareFiles = () => {
-    router.delete(route('shared_by_me.unshare'), {
+    router.delete(route('share_by_me.unshare'), {
         data: {
             all: Number(props.all),
             ids: props.all ? [] : props.ids

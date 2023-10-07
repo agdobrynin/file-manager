@@ -16,16 +16,16 @@
                     My files
                 </NavLink>
                 <NavLink
-                    :active="routeName === 'shared_for_me.index'"
-                    :href="route('shared_for_me.index')"
+                    :active="routeName === 'share_for_me.index'"
+                    :href="route('share_for_me.index')"
                     class="flex gap-2"
                 >
                     <SvgIcon :path="mdiMonitorShare" size="30"/>
                     Shared for me
                 </NavLink>
                 <NavLink
-                    :active="routeName === 'shared_by_me.index'"
-                    :href="route('shared_by_me.index')"
+                    :active="routeName === 'share_by_me.index'"
+                    :href="route('share_by_me.index')"
                     class="flex gap-2"
                 >
                     <SvgIcon :path="mdiShare" size="30"/>

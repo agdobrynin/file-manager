@@ -190,8 +190,8 @@ onMounted(() => {
         const routeNamesWithSearch = [
             'file.index',
             'trash.index',
-            'shared_for_me.index',
-            'shared_by_me.index',
+            'share_for_me.index',
+            'share_by_me.index',
         ];
 
         if (routeNamesWithSearch.includes(ev.detail.page.props.route_name)) {

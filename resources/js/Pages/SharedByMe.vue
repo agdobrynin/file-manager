@@ -11,7 +11,7 @@
                 <DownloadFiles
                     ref="downloadComponent"
                     :params="paramsAllAndIds"
-                    :url="route('shared_by_me.download')"
+                    :url="route('share_by_me.download')"
                     @download-complete="clearSelectedFiles"
                 />
             </div>
@@ -66,7 +66,7 @@ const { selectAllFiles, selectedFileIds, paramsAllAndIds, clearSelectedFiles } =
 const doSearch = () => {
     const params = { search: searchString.value };
 
-    router.visit(route('shared_by_me.index', params), {
+    router.visit(route('share_by_me.index', params), {
         replace: true,
         preserveState: true,
         onSuccess: () => filesReset(props.files),

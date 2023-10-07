@@ -24,7 +24,7 @@ class SharedByMeController extends Controller
         $dto = new FilesListFilterDto(...$request->validated());
         $query = FileShare::fileShareByUser($request->user(), $dto);
 
-        $files = $query->paginate(config('app.shared_by_me.per_page'))
+        $files = $query->paginate(config('app.share_by_me.per_page'))
             ->withQueryString();
 
         $fileResourceCollection = FileShareResource::collection($files);
@@ -41,7 +41,7 @@ class SharedByMeController extends Controller
 
         $deleteCount = FileShare::destroy($ids);
 
-        return to_route('shared_by_me.index')
+        return to_route('share_by_me.index')
             ->with(
                 FlashMessagesEnum::INFO->value,
                 $deleteCount . ' ' . Str::plural('file', $deleteCount) . ' disabled from sharing'
