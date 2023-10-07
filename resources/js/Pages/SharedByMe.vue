@@ -8,10 +8,12 @@
                     :all="selectAllFiles"
                     :ids="selectedFileIds"
                     @success="reset"/>
-                <SecondaryButton class="flex items-center gap-2">
-                    <SvgIcon :path="mdiFileDownload" size="18"/>
-                    Download
-                </SecondaryButton>
+                <DownloadFiles
+                    ref="downloadComponent"
+                    :params="paramsAllAndIds"
+                    :url="route('shared_by_me.download')"
+                    @download-complete="clearSelectedFiles"
+                />
             </div>
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
@@ -29,30 +31,29 @@
             :files="filesList"
             class="w-full overflow-auto"
             @can-load="emitter.emit(EVENT_LOAD_FILES_NEXT_PAGE)"
+            @item-double-click="downloadFile"
         />
     </AuthenticatedLayout>
 </template>
 
 <script setup>
-import SecondaryButton from "@/Components/SecondaryButton.vue";
+import DownloadFiles from "@/Components/DownloadFiles.vue";
 import UnsharedFiles from "@/Components/UnshareFiles.vue";
+import { useSelectFiles } from "@/composable/selectFIles.js";
 import { Head, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import FilesTable from "@/Components/FilesTable.vue";
-import { mdiFileDownload } from "@mdi/js";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
 import { DO_SEARCH_FILE, emitter } from "@/event-bus.js";
-import SvgIcon from "vue3-icon";
 
 const props = defineProps({
     files: Object,
 });
 
-const selectedFileIds = ref([]);
-const selectAllFiles = ref(false);
 const searchString = ref('');
 const disableSelectAll = ref(false);
+const downloadComponent = ref(null);
 
 watch(searchString, (value) => {
     disableSelectAll.value = !! value;
@@ -61,6 +62,7 @@ watch(searchString, (value) => {
 });
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
+const { selectAllFiles, selectedFileIds, paramsAllAndIds, clearSelectedFiles } = useSelectFiles()
 
 const doSearch = () => {
     const params = { search: searchString.value };
@@ -74,8 +76,16 @@ const doSearch = () => {
 
 const reset = () => {
     filesReset(props.files);
-    selectedFileIds.value = [];
-    selectAllFiles.value = false;
+    clearSelectedFiles();
+};
+
+const downloadFile = (item) => {
+    if (!item.isFolder) {
+        clearSelectedFiles();
+        (new Promise((resolve) => resolve()))
+            .then(() => selectedFileIds.value.push(item.id))
+            .then(() => downloadComponent.value.download());
+    }
 };
 
 onMounted(() => {
