@@ -108,6 +108,7 @@ use Kalnoy\Nestedset\NodeTrait;
  * @method static Builder|File withoutTrashed()
  * @method static Builder filesList(User $user, MyFilesListFilterDto $dto, File $folder)
  * @method static Builder filesInTrash(User $user, ?FilesListFilterDto $dto = null)
+ * @method static Builder fileByOwner(User $user)
  * @mixin \Eloquent
  */
 class File extends Model
@@ -237,6 +238,11 @@ class File extends Model
             ->orderBy('is_folder', 'desc')
             ->orderBy('deleted_at', 'desc')
             ->orderBy('files.id', 'desc');
+    }
+
+    public function scopeFileByOwner(Builder $builder, User $user): Builder
+    {
+        return $builder->where('created_by', $user->getAuthIdentifier());
     }
 
     protected function owner(): Attribute
