@@ -27,7 +27,6 @@
 </template>
 
 <script setup>
-
 import ConfirmationDialog from "@/Components/ConfirmationDialog.vue";
 import DangerButton from "@/Components/DangerButton.vue";
 import { errorMessage } from "@/event-bus.js";
@@ -57,7 +56,7 @@ const deleteForever = () => {
     router.delete(route('trash.destroy'),
         {
             data: {
-                all: props.all ? '1' : '0',
+                all: Number(props.all),
                 ids: props.all ? [] : props.ids
             },
             onError: (errors) => {
