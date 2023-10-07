@@ -70,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(static function () {
         ->name('shared_for_me.')
         ->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/download', 'download')->name('download');
         });
 });
 

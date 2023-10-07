@@ -27,8 +27,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare whereUserId($value)
  * @method static Builder fileShareForUserByFile(User $user, Collection $files)
  * @method static Builder fileShareByUser(User $user, FilesListFilterDto $dto)
- * @method static Builder fileShareForUser(User $user, FilesListFilterDto $dto)
+ * @method static Builder fileShareForUserWithFilter(User $user, FilesListFilterDto $dto)
  * @method static Builder fileShareByFileOwner(User $user)
+ * @method static Builder fileShareForUser(User $user)
+ * @method static Builder fileShareForUserOrByUser(User $user);
  * @mixin \Eloquent
  */
 class FileShare extends Model
@@ -77,7 +79,7 @@ class FileShare extends Model
             ->orderBy('created_at', 'desc');
     }
 
-    public function scopeFileShareForUser(Builder $builder, User $user, FilesListFilterDto $dto): Builder
+    public function scopeFileShareForUserWithFilter(Builder $builder, User $user, FilesListFilterDto $dto): Builder
     {
         return $builder->with(['file.user', 'forUser'])
             ->when($dto->search, function (Builder $builder) use ($dto) {
@@ -94,7 +96,23 @@ class FileShare extends Model
     {
         return $builder->whereHas(
             'file.user',
-            fn (Builder $b) => $b->where('id', $user->getAuthIdentifier())
+            fn(Builder $b) => $b->where('id', $user->getAuthIdentifier())
         );
+    }
+
+    public function scopeFileShareForUser(Builder $builder, User $user): Builder
+    {
+        return $builder->whereHas('file')
+            ->where('for_user_id', $user->getAuthIdentifier())
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function scopeFileShareForUserOrByUser(Builder $builder, User $user): Builder
+    {
+        return $builder->whereHas(
+            'file.user',
+            fn(Builder $b) => $b->where('id', $user->getAuthIdentifier())
+        )
+            ->orWhere('for_user_id', $user->getAuthIdentifier());
     }
 }

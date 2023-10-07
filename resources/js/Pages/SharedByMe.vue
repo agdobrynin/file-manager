@@ -57,8 +57,7 @@ const downloadComponent = ref(null);
 
 watch(searchString, (value) => {
     disableSelectAll.value = !! value;
-    selectAllFiles.value = false;
-    selectedFileIds.value = [];
+    clearSelectedFiles();
 });
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();

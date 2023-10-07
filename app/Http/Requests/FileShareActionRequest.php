@@ -32,7 +32,7 @@ class FileShareActionRequest extends FormRequest
                 'array',
                 function (string $attribute, array $ids, $fail) {
                     if ($ids) {
-                        $fileSharCount = FileShare::fileShareByFileOwner($this->user())
+                        $fileSharCount = FileShare::fileShareForUserOrByUser($this->user())
                             ->whereIn('id', $ids)
                             ->count();
 

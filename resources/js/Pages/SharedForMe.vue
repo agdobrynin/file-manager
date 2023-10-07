@@ -4,10 +4,11 @@
     <AuthenticatedLayout class="relative">
         <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-4">
             <div class="flex flex-wrap gap-4">
-                <SecondaryButton class="flex items-center gap-2">
-                    <SvgIcon :path="mdiFileDownload" size="18"/>
-                    Download
-                </SecondaryButton>
+                <DownloadFiles
+                    ref="downloadComponent"
+                    :params="paramsAllAndIds"
+                    :url="route('shared_for_me.download')"
+                    @download-complete="clearSelectedFiles"/>
             </div>
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
@@ -16,46 +17,45 @@
             v-model:selected-files="selectedFileIds"
             :disable-select-all="disableSelectAll"
             :display-deleted-at="false"
+            :display-disk="false"
             :display-favorite="false"
             :display-last-modified="true"
             :display-owner="true"
             :display-path="true"
-            :display-disk="false"
             :fetch-files="filesFetching"
             :files="filesList"
             class="w-full overflow-auto"
             @can-load="emitter.emit(EVENT_LOAD_FILES_NEXT_PAGE)"
+            @item-double-click="downloadFile"
         />
     </AuthenticatedLayout>
 </template>
 
 <script setup>
-import SecondaryButton from "@/Components/SecondaryButton.vue";
+import DownloadFiles from "@/Components/DownloadFiles.vue";
+import { useSelectFiles } from "@/composable/selectFIles.js";
 import { Head, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import FilesTable from "@/Components/FilesTable.vue";
-import { mdiFileDownload } from "@mdi/js";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
 import { DO_SEARCH_FILE, emitter } from "@/event-bus.js";
-import SvgIcon from "vue3-icon";
 
 const props = defineProps({
     files: Object,
 });
 
-const selectedFileIds = ref([]);
-const selectAllFiles = ref(false);
 const searchString = ref('');
 const disableSelectAll = ref(false);
+const downloadComponent = ref(null);
 
 watch(searchString, (value) => {
     disableSelectAll.value = !! value;
-    selectAllFiles.value = false;
-    selectedFileIds.value = [];
+    clearSelectedFiles();
 });
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
+const { selectedFileIds, selectAllFiles, paramsAllAndIds, clearSelectedFiles } = useSelectFiles();
 
 const doSearch = () => {
     const params = { search: searchString.value };
@@ -67,11 +67,13 @@ const doSearch = () => {
     });
 };
 
-const reset = () => {
-    filesReset(props.files);
-    selectedFileIds.value = [];
-    selectAllFiles.value = false;
+const downloadFile = (item) => {
+    clearSelectedFiles();
+    (new Promise((resolve) => resolve()))
+        .then(() => selectedFileIds.value.push(item.id))
+        .then(() => downloadComponent.value.download());
 };
+
 
 onMounted(() => {
     emitter.on(DO_SEARCH_FILE, (search) => {
