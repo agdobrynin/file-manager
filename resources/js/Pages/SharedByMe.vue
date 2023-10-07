@@ -21,7 +21,7 @@
             :disable-select-all="disableSelectAll"
             :display-deleted-at="false"
             :display-favorite="false"
-            :display-last-modified="false"
+            :display-last-modified="true"
             :display-owner="false"
             :display-path="true"
             :display-share-for-user="true"
