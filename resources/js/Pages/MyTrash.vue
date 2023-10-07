@@ -27,6 +27,7 @@
 </template>
 
 <script setup>
+import { useSelectFiles } from "@/composable/selectFIles.js";
 import { Head, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import FilesTable from "@/Components/FilesTable.vue";
@@ -40,18 +41,16 @@ const props = defineProps({
     files: Object,
 });
 
-const selectedFileIds = ref([]);
-const selectAllFiles = ref(false);
 const searchString = ref('');
 const disableSelectAll = ref(false);
 
 watch(searchString, (value) => {
     disableSelectAll.value = !! value;
-    selectAllFiles.value = false;
-    selectedFileIds.value = [];
+    clearSelectedFiles();
 });
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
+const { selectedFileIds, selectAllFiles, clearSelectedFiles } = useSelectFiles();
 
 const doSearch = () => {
     const params = { search: searchString.value };
@@ -65,8 +64,7 @@ const doSearch = () => {
 
 const reset = () => {
     filesReset(props.files);
-    selectedFileIds.value = [];
-    selectAllFiles.value = false;
+    clearSelectedFiles();
 };
 
 onMounted(() => {

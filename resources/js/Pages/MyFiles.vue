@@ -20,13 +20,13 @@
                     ref="downloadComponent"
                     :params="downloadParams"
                     :url="downloadUrl"
-                    @download-complete="clearSelected"
+                    @download-complete="clearSelectedFiles"
                 />
                 <ShareFiles
                     :all-files="selectAllFiles"
                     :file-ids="selectedFileIds"
                     :parent-folder="parentId"
-                    @success="clearSelected"
+                    @success="clearSelectedFiles"
                 />
                 <OnlyFavorites
                     v-model="onlyFavoritesCurrentState"
@@ -55,6 +55,7 @@
 
 <script setup>
 import ShareFiles from "@/Components/ShareFiles.vue";
+import { useSelectFiles } from "@/composable/selectFIles.js";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import NavMyFolders from "@/Components/NavMyFolders.vue";
@@ -87,9 +88,7 @@ const onlyFavoritesQueryStringKey = 'onlyFavorites';
 const searchQueryStringKey = 'search';
 const parentFolderRouteKey = 'parentFolder';
 
-const selectedFileIds = ref([]);
 const disableSelectAll = ref(false);
-const selectAllFiles = ref(false);
 const downloadComponent = ref(null);
 const tableEl = ref(null);
 const onlyFavoritesCurrentState = ref(false);
@@ -97,20 +96,13 @@ const searchString = ref('');
 
 watch(searchString, (value) => {
     disableSelectAll.value = !! value;
-    clearSelected();
+    clearSelectedFiles();
 });
 
 const downloadUrl = computed(() => route('file.download', { parentFolder: props.parentId }));
-const downloadParams = computed(() => {
-    if (selectAllFiles.value || selectedFileIds.value.length) {
-        return {
-            all: selectAllFiles.value,
-            ids: selectAllFiles.value ? [] : selectedFileIds.value,
-        }
-    }
 
-    return {};
-});
+const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
+const { selectedFileIds, selectAllFiles, paramsAllAndIds: downloadParams, clearSelectedFiles } = useSelectFiles();
 
 /**
  * @param {Number|null} parentFolderId
@@ -134,20 +126,13 @@ const indexRequestParams = (parentFolderId) => {
     return params;
 };
 
-const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
-
 const updateAllFiles = () => {
     filesReset(props.files);
     nextTick(() => tableEl.value?.scrollFilesTableTop());
 };
 
-const clearSelected = () => {
-    selectedFileIds.value = [];
-    selectAllFiles.value = false;
-}
-
 const deleteFinish = () => {
-    clearSelected();
+    clearSelectedFiles();
     updateAllFiles();
 };
 
@@ -158,7 +143,7 @@ const fileItemAction = (item) => {
 
         router.visit(route('file.index', indexRequestParams(item.id)));
     } else {
-        clearSelected();
+        clearSelectedFiles();
         (new Promise((resolve) => resolve()))
             .then(() => selectedFileIds.value.push(item.id))
             .then(() => downloadComponent.value.download());
