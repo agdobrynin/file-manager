@@ -59,6 +59,7 @@ class FileShare extends Model
         $filesIds = $files->pluck('id')->toArray();
 
         return $builder
+            ->whereHas('file')
             ->where('for_user_id', $user->getAuthIdentifier())
             ->whereIn('file_id', $filesIds);
     }
@@ -66,6 +67,7 @@ class FileShare extends Model
     public function scopeFileShareByUser(Builder $builder, User $user, FilesListFilterDto $dto): Builder
     {
         return $builder->with(['file', 'forUser'])
+            ->whereHas('file')
             ->when($dto->search, function (Builder $builder) use ($dto) {
                 $builder->whereHas(
                     'file',
@@ -82,6 +84,7 @@ class FileShare extends Model
     public function scopeFileShareForUserWithFilter(Builder $builder, User $user, FilesListFilterDto $dto): Builder
     {
         return $builder->with(['file.user', 'forUser'])
+            ->whereHas('file')
             ->when($dto->search, function (Builder $builder) use ($dto) {
                 $builder->whereHas(
                     'file',
