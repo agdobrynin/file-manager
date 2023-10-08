@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Dto\FilesIdDto;
+use App\Dto\FileIdsDto;
 use App\Dto\FilesListFilterDto;
 use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FileShareActionRequest;
@@ -34,7 +34,7 @@ class SharedByMeController extends Controller
 
     public function unshare(FileShareActionRequest $request): RedirectResponse
     {
-        $dto = new FilesIdDto(...$request->validated());
+        $dto = new FileIdsDto(...$request->validated());
         $ids = $dto->all
             ? FileShare::fileShareByFileOwner($request->user())->pluck('id')
             : $dto->ids;
@@ -53,7 +53,7 @@ class SharedByMeController extends Controller
      */
     public function download(FileShareActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
     {
-        $dto = new FilesIdDto(...$request->validated());
+        $dto = new FileIdsDto(...$request->validated());
         $fileShares = FileShare::fileShareByFileOwner($request->user())->with('file');
 
         if (!$dto->all) {

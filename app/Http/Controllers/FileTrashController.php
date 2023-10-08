@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\FilesDestroyServiceInterface;
 use App\Dto\DestroyFileFromStorageDto;
-use App\Dto\FilesIdDto;
+use App\Dto\FileIdsDto;
 use App\Dto\FilesListFilterDto;
 use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FilesActionTrashRequest;
@@ -38,7 +38,7 @@ class FileTrashController extends Controller
 
     public function restore(FilesActionTrashRequest $request): RedirectResponse
     {
-        $dto = new FilesIdDto(...$request->validated());
+        $dto = new FileIdsDto(...$request->validated());
         $files = $dto->all
             ? File::filesInTrash($request->user())->get()
             : $request->requestFiles;
@@ -71,7 +71,7 @@ class FileTrashController extends Controller
 
     public function destroy(FilesActionTrashRequest $request, FilesDestroyServiceInterface $filesDestroy): RedirectResponse
     {
-        $dto = new FilesIdDto(...$request->validated());
+        $dto = new FileIdsDto(...$request->validated());
         $files = $dto->all
             ? File::filesInTrash($request->user())->get()
             : $request->requestFiles;

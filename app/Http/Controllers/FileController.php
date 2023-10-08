@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\FavoriteIdDto;
-use App\Dto\FilesIdDto;
+use App\Dto\FileIdsDto;
 use App\Dto\MyFilesListFilterDto;
 use App\Dto\ShareFilesDto;
 use App\Enums\FlashMessagesEnum;
@@ -91,7 +91,7 @@ class FileController extends Controller
 
     public function destroy(MyFilesActionRequest $request): RedirectResponse
     {
-        $dto = new FilesIdDto(...$request->validated());
+        $dto = new FileIdsDto(...$request->validated());
         $children = $dto->all
             ? $request->parentFolder->children()->get()
             : $request->requestFiles;
@@ -109,7 +109,7 @@ class FileController extends Controller
      */
     public function download(MyFilesActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
     {
-        $dto = new FilesIdDto(...$request->validated());
+        $dto = new FileIdsDto(...$request->validated());
         $files = $dto->all
             ? $request->parentFolder->children()->get()
             : $request->requestFiles;

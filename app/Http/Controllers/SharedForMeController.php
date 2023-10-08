@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Dto\FilesIdDto;
+use App\Dto\FileIdsDto;
 use App\Dto\FilesListFilterDto;
 use App\Http\Requests\FileShareActionRequest;
 use App\Http\Requests\FilesListFilterRequest;
@@ -32,7 +32,7 @@ class SharedForMeController extends Controller
      */
     public function download(FileShareActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
     {
-        $dto = new FilesIdDto(...$request->validated());
+        $dto = new FileIdsDto(...$request->validated());
         $fileShares = FileShare::fileShareForUser($request->user())->with('file');
 
         if (!$dto->all) {
