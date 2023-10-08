@@ -23,7 +23,7 @@ class FileInTrashResource extends JsonResource
             'parentId' => $this->parent_id,
             'isFolder' => $this->is_folder,
             'size' => $this->size,
-            'deletedAt' => $this->deleted_at ? $this->deleted_at->diffForHumans() : null,
+            'deletedAt' => $this->deleted_at?->diffForHumans(),
         ];
     }
 }
