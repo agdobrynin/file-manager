@@ -18,6 +18,12 @@ import { parse } from "content-disposition-attachment";
 import { computed, ref } from "vue";
 import SvgIcon from "vue3-icon";
 
+/**
+ * @property {{
+ *     all?: Boolean,
+ *     ids?: Number[],
+ * }} params
+ */
 const props = defineProps({
     params: {
         type: Object,
@@ -39,7 +45,7 @@ const props = defineProps({
 const inProcess = ref(false);
 const link = ref();
 
-const isDisable = computed(() => ( ! Object.keys(props.params).length));
+const isDisable = computed(() => ! Object.keys(props.params).length);
 
 const emits = defineEmits([ 'downloadComplete' ])
 

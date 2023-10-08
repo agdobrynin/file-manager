@@ -11,14 +11,12 @@
             <div class="flex flex-wrap gap-4 items-center">
                 <CreateNewDropdown/>
                 <DeleteFiles
-                    :all-files="selectAllFiles"
-                    :file-ids="selectedFileIds"
                     :parent-folder="parentId"
                     @delete-finish="deleteFinish"
-                />
+                    :params="paramsAllAndIds"/>
                 <DownloadFiles
                     ref="downloadComponent"
-                    :params="downloadParams"
+                    :params="paramsAllAndIds"
                     :url="downloadUrl"
                     @download-complete="clearSelectedFiles"
                 />
@@ -102,7 +100,7 @@ watch(searchString, (value) => {
 const downloadUrl = computed(() => route('file.download', { parentFolder: props.parentId }));
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
-const { selectedFileIds, selectAllFiles, paramsAllAndIds: downloadParams, clearSelectedFiles } = useSelectFiles();
+const { selectedFileIds, selectAllFiles, paramsAllAndIds, clearSelectedFiles } = useSelectFiles();
 
 /**
  * @param {Number|null} parentFolderId

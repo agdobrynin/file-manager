@@ -1,8 +1,9 @@
 <template>
     <SecondaryButton
+        :disabled="idDisabled"
         class="!text-white !bg-green-600 hover:bg-green-500 border-none"
-        :disabled="!ids.length && !all"
-        @click="restore">
+        @click="restore"
+    >
         <SvgIcon
             :path="mdiRestoreAlert"
             class="mr-2 h-5 w-5"/>
@@ -11,31 +12,33 @@
 </template>
 
 <script setup>
-import { mdiRestoreAlert } from "@mdi/js";
-import SvgIcon from "vue3-icon";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
-import { router } from "@inertiajs/vue3";
 import { errorMessage } from "@/event-bus.js";
+import { router } from "@inertiajs/vue3";
+import { mdiRestoreAlert } from "@mdi/js";
+import { computed } from "vue";
+import SvgIcon from "vue3-icon";
 
+/**
+ * @property {{
+ *     all?: Boolean
+ *     ids?: Number[]
+ * }} params
+ */
 const props = defineProps({
-    ids: {
-        type: Array,
+    params: {
+        type: Object,
         required: true,
     },
-    all: {
-        type: Boolean,
-        required: true,
-    }
 })
 
-const emit =defineEmits(['success']);
+const emit = defineEmits([ 'success' ]);
+
+const idDisabled = computed(() => ! Object.keys(props.params).length);
 
 const restore = () => {
     router.post(route('trash.restore'),
-        {
-            all: props.all,
-            ids: !props.all ? props.ids : [],
-        },
+        props.params,
         {
             onError: (errors) => {
                 const displayErrors = Object.keys(errors).length

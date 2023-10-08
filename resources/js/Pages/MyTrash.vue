@@ -4,8 +4,8 @@
     <AuthenticatedLayout class="relative">
         <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-4">
             <div class="flex flex-wrap gap-4">
-                <DeleteFromTrash :all="selectAllFiles" :ids="selectedFileIds" @success="reset"/>
-                <RestoreFiles :all="selectAllFiles" :ids="selectedFileIds" @success="reset"/>
+                <DeleteFromTrash :params="paramsAllAndIds" @success="reset"/>
+                <RestoreFiles :params="paramsAllAndIds" @success="reset"/>
             </div>
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
@@ -50,7 +50,7 @@ watch(searchString, (value) => {
 });
 
 const { filesFetching, filesList, filesTotal, filesReset } = useDoLoadFiles();
-const { selectedFileIds, selectAllFiles, clearSelectedFiles } = useSelectFiles();
+const { selectedFileIds, selectAllFiles, paramsAllAndIds, clearSelectedFiles } = useSelectFiles();
 
 const doSearch = () => {
     const params = { search: searchString.value };

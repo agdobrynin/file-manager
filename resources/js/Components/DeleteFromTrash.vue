@@ -1,6 +1,6 @@
 <template>
     <DangerButton
-        :disabled="!ids.length && !all"
+        :disabled="isDisabled"
         @click="showConfirmDialog = true">
         <SvgIcon
             :path="mdiTrashCanOutline"
@@ -32,33 +32,34 @@ import DangerButton from "@/Components/DangerButton.vue";
 import { errorMessage } from "@/event-bus.js";
 import { router } from "@inertiajs/vue3";
 import { mdiAlert, mdiTrashCanOutline } from "@mdi/js";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import SvgIcon from "vue3-icon";
 
+/**
+ * @property {{
+ *     all?: Boolean,
+ *     ids?: Number[]
+ * }} params
+ */
 const props = defineProps({
-    ids: {
-        type: Array,
+    params: {
+        type: Object,
         required: true,
     },
-    all: {
-        type: Boolean,
-        required: true,
-    }
 });
 
 const showConfirmDialog = ref(false);
 
 const emit = defineEmits([ 'success' ]);
 
+const isDisabled = computed(() => ! Object.keys(props.params).length);
+
 const deleteForever = () => {
     showConfirmDialog.value = false;
 
     router.delete(route('trash.destroy'),
         {
-            data: {
-                all: Number(props.all),
-                ids: props.all ? [] : props.ids
-            },
+            data: props.params,
             onError: (errors) => {
                 const displayErrors = Object.keys(errors).length
                     ? Object.values(errors)
