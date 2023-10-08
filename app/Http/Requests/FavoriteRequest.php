@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Models\File;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
 class FavoriteRequest extends FormRequest
 {
@@ -28,11 +27,7 @@ class FavoriteRequest extends FormRequest
                 'required',
                 'integer',
                 function (string $attribute, int $id, $fail) {
-                    $file = File::query()->where('id', $id)
-                        ->where('created_by', Auth::id())
-                        ->first();
-
-                    if (null === $file) {
+                    if (!File::find($id)?->isOwnedByUser($this->user())) {
                         $fail('Invalid file ID ' . $id . ' for auth user.');
                     }
                 }
