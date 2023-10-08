@@ -31,9 +31,7 @@ class FileTrashController extends Controller
 
         $fileResourceCollection = FileInTrashResource::collection($files);
 
-        return inertia('MyTrash', [
-            'files' => $fileResourceCollection,
-        ]);
+        return inertia('MyTrash', ['files' => $fileResourceCollection]);
     }
 
     public function restore(FilesActionTrashRequest $request): RedirectResponse
@@ -56,17 +54,14 @@ class FileTrashController extends Controller
             }
         }
 
-        $response = to_route('trash.index');
+        $flashes[FlashMessagesEnum::SUCCESS->value] = $restoredCount . Str::plural(' file', $restoredCount) .
+            ' restored successfully';
 
         if ($policyException) {
-            $response->with(FlashMessagesEnum::WARNING->value, $policyException);
+            $flashes[FlashMessagesEnum::WARNING->value] = $policyException;
         }
 
-        return $response
-            ->with(
-                FlashMessagesEnum::SUCCESS->value,
-                $restoredCount . Str::plural(' file', $restoredCount) . ' restored successfully'
-            );
+        return to_route('trash.index')->with($flashes);
     }
 
     public function destroy(FilesActionTrashRequest $request, FilesDestroyServiceInterface $filesDestroy): RedirectResponse
