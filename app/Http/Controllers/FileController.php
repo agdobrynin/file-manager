@@ -7,7 +7,7 @@ use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Dto\FavoriteIdDto;
 use App\Dto\FileIdsDto;
 use App\Dto\MyFilesListFilterDto;
-use App\Dto\ShareFilesDto;
+use App\Dto\ShareFileIdsToUserDto;
 use App\Enums\FlashMessagesEnum;
 use App\Http\Requests\FavoriteRequest;
 use App\Http\Requests\FileUploadRequest;
@@ -116,7 +116,8 @@ class FileController extends Controller
 
         $downloadDto = $downloadFilesService->handle($files);
 
-        return \response()->download($downloadDto->storagePath, $downloadDto->fileName)->deleteFileAfterSend();
+        return response()->download($downloadDto->storagePath, $downloadDto->fileName)
+            ->deleteFileAfterSend();
     }
 
     public function favorite(FavoriteRequest $request): RedirectResponse
@@ -137,7 +138,7 @@ class FileController extends Controller
 
     public function share(ShareFilesRequest $request): RedirectResponse
     {
-        $dto = new ShareFilesDto(...$request->validated());
+        $dto = new ShareFileIdsToUserDto(...$request->validated());
 
         if ($request->shareToUser) {
             $files = $dto->all
@@ -152,11 +153,12 @@ class FileController extends Controller
             $shareFiles = $files->reject(fn(File $file) => $filesShare->has($file->id));
             /** @var Collection<FileShareVO> $insertData */
             $insertData = $shareFiles->reduce(
-                    fn(Collection $c, File $file) => $c->add((new FileShareVO($request->shareToUser, $file))->toArray()),
-                    collect()
-                );
+                fn(Collection $c, File $file) => $c->add((new FileShareVO($request->shareToUser, $file))->toArray()),
+                collect()
+            );
 
             FileShare::insert($insertData->toArray());
+
             $notify = new \App\Notifications\FileShare(
                 files: $files,
                 formUser: $request->user()
