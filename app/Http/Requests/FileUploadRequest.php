@@ -3,9 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\File;
-use App\Models\User;
 use Closure;
-use Illuminate\Support\Facades\Auth;
 
 class FileUploadRequest extends ParentIdBaseRequest
 {
@@ -55,18 +53,16 @@ class FileUploadRequest extends ParentIdBaseRequest
                         }
                     }
 
-                    /** @var User $user */
-                    $user = Auth::user();
-                    $parentFolder = $this->parentFolder ?: File::rootFolderByUser($user);
+                    $parentFolder = $this->parentFolder ?: File::rootFolderByUser($this->user());
 
 
-                    $folders = File::existNames($firstLevelFolders->unique()->toArray(), $user, $parentFolder);
+                    $folders = File::existNames($firstLevelFolders->unique()->toArray(), $this->user(), $parentFolder);
 
                     foreach ($folders->pluck('name')->toArray() as $index => $folder) {
                         $this->validator->errors()->add('folder.' . $index, 'Folder "' . $folder . '" already exist');
                     }
 
-                    $files = File::existNames($firstLevelFiles->unique()->toArray(), $user, $parentFolder);
+                    $files = File::existNames($firstLevelFiles->unique()->toArray(), $this->user(), $parentFolder);
 
                     foreach ($files->pluck('name')->toArray() as $index => $file) {
                         $this->validator->errors()->add('file.' . $index, 'File "' . $file . '" already exist');
