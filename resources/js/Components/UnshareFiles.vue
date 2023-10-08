@@ -1,6 +1,6 @@
 <template>
     <SecondaryButton
-        :disabled="!ids.length && !all || inProcess"
+        :disabled="isDisabled"
         class="flex items-center gap-2"
         @click.prevent="doUnshareFiles"
     >
@@ -14,30 +14,31 @@ import SecondaryButton from "@/Components/SecondaryButton.vue";
 import { errorMessage } from "@/event-bus.js";
 import { router } from "@inertiajs/vue3";
 import { mdiShareOffOutline } from "@mdi/js";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import SvgIcon from "vue3-icon";
 
+/**
+ * @property {{
+ *     all?: Boolean,
+ *     ids?: Number[],
+ * }} params
+ */
 const props = defineProps({
-    ids: {
-        type: Array,
+    params: {
+        type: Object,
         required: true,
     },
-    all: {
-        type: Boolean,
-        required: true,
-    }
 });
 
 const emit = defineEmits([ 'success' ]);
 
 const inProcess = ref(false);
 
+const isDisabled = computed(() => ! Object.keys(props.params).length);
+
 const doUnshareFiles = () => {
     router.delete(route('share_by_me.unshare'), {
-        data: {
-            all: Number(props.all),
-            ids: props.all ? [] : props.ids
-        },
+        data: props.params,
         onSuccess: () => emit('success'),
         onError: (errors) => {
             const displayErrors = Object.keys(errors).length

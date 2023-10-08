@@ -4,16 +4,12 @@
     <AuthenticatedLayout class="relative">
         <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-4">
             <div class="flex flex-wrap gap-4">
-                <UnsharedFiles
-                    :all="selectAllFiles"
-                    :ids="selectedFileIds"
-                    @success="reset"/>
-                <DownloadFiles
-                    ref="downloadComponent"
-                    :params="paramsAllAndIds"
-                    :url="route('share_by_me.download')"
-                    @download-complete="clearSelectedFiles"
-                />
+                <UnsharedFiles :params="paramsAllAndIds"
+                               @success="reset"/>
+                <DownloadFiles ref="downloadComponent"
+                               :params="paramsAllAndIds"
+                               :url="route('share_by_me.download')"
+                               @download-complete="clearSelectedFiles"/>
             </div>
             <div class="border rounded-md p-2 bg-gray-100">Total items: {{ filesTotal }}</div>
         </div>
