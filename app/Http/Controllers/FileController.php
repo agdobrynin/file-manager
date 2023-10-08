@@ -148,16 +148,20 @@ class FileController extends Controller
             $filesShare = FileShare::fileShareForUserByFile($request->shareToUser, $files)
                 ->get()
                 ->keyBy('file_id');
-
-            /** @var Collection $insertData */
-            $insertData = $files->reject(fn(File $file) => $filesShare->has($file->id))
-                ->reduce(
+            /** @var Collection<File> $shareFiles */
+            $shareFiles = $files->reject(fn(File $file) => $filesShare->has($file->id));
+            /** @var Collection<FileShareVO> $insertData */
+            $insertData = $shareFiles->reduce(
                     fn(Collection $c, File $file) => $c->add((new FileShareVO($request->shareToUser, $file))->toArray()),
                     collect()
                 );
 
             FileShare::insert($insertData->toArray());
-            // TODO send email with notification through QUEUE.
+            $notify = new \App\Notifications\FileShare(
+                files: $files,
+                formUser: $request->user()
+            );
+            $request->shareToUser->notify($notify);
         }
 
         return back()->with(FlashMessagesEnum::SUCCESS->value, 'Selected files will be shared if user with email exist.');
