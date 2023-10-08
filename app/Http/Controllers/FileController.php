@@ -21,7 +21,7 @@ use App\Jobs\MoveFileToCloud;
 use App\Models\File;
 use App\Models\FileFavorite;
 use App\Models\FileShare;
-use App\Services\MakeDownloadFiles;
+use App\Services\MakeDownloadFilesService;
 use App\VO\FileFavoriteVO;
 use App\VO\FileFolderVO;
 use App\VO\FileShareVO;
@@ -107,14 +107,14 @@ class FileController extends Controller
     /**
      * @throws Throwable
      */
-    public function download(MyFilesActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
+    public function download(MyFilesActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse
     {
         $dto = new FileIdsDto(...$request->validated());
         $files = $dto->all
             ? $request->parentFolder->children()->get()
             : $request->requestFiles;
 
-        $downloadDto = $downloadFiles->handle($files);
+        $downloadDto = $downloadFilesService->handle($files);
 
         return \response()->download($downloadDto->storagePath, $downloadDto->fileName)->deleteFileAfterSend();
     }

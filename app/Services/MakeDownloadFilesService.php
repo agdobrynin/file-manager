@@ -16,7 +16,7 @@ use RuntimeException;
 use Throwable;
 use ZipArchive;
 
-readonly class MakeDownloadFiles
+readonly class MakeDownloadFilesService
 {
     public function __construct(
         private ZipArchive                        $archive,

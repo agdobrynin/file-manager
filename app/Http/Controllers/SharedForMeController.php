@@ -8,7 +8,7 @@ use App\Http\Requests\FileShareActionRequest;
 use App\Http\Requests\FilesListFilterRequest;
 use App\Http\Resources\FileShareResource;
 use App\Models\FileShare;
-use App\Services\MakeDownloadFiles;
+use App\Services\MakeDownloadFilesService;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -30,7 +30,7 @@ class SharedForMeController extends Controller
     /**
      * @throws Throwable
      */
-    public function download(FileShareActionRequest $request, MakeDownloadFiles $downloadFiles): BinaryFileResponse
+    public function download(FileShareActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse
     {
         $dto = new FileIdsDto(...$request->validated());
         $fileShares = FileShare::fileShareForUser($request->user())->with('file');
@@ -39,7 +39,7 @@ class SharedForMeController extends Controller
             $fileShares = $fileShares->whereIn('id', $dto->ids);
         }
 
-        $downloadDto = $downloadFiles->handle($fileShares->get()->pluck('file'));
+        $downloadDto = $downloadFilesService->handle($fileShares->get()->pluck('file'));
 
         return response()->download($downloadDto->storagePath, $downloadDto->fileName)
             ->deleteFileAfterSend();
