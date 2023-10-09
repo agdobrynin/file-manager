@@ -1,6 +1,8 @@
 <template>
     <div>
-        <SecondaryButton :disabled="isDisabled || isProgress" @click="showConfirmDelete = true">
+        <SecondaryButton :disabled="isDisabled || isProgress"
+                         @click="showConfirmDelete = true"
+        >
             <SvgIcon
                 :class="{'animate-ping' : isProgress}"
                 :path="mdiTrashCanOutline"
@@ -67,7 +69,9 @@ const doDelete = () => {
         return;
     }
 
-    router.delete(route('file.destroy', { parentFolder: props.parentFolder || null }), {
+    const url = route('file.destroy', { parentFolder: props.parentFolder || null });
+
+    router.delete(url, {
         data: props.params,
         onStart: () => {
             isProgress.value = true;
