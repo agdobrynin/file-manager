@@ -1,5 +1,7 @@
 <template>
-    <SecondaryButton :disabled="isDisable || inProcess" @click="download">
+    <SecondaryButton :disabled="isDisable || inProcess"
+                     @click="download"
+    >
         <SvgIcon
             :class="{'animate-ping' : inProcess}"
             :path="mdiFileDownload"
@@ -72,7 +74,7 @@ const download = async () => {
         link.remove();
         emits('downloadComplete')
     } catch (reason) {
-        const text = await reason.response.data.text()
+        const text = await reason?.response?.data?.text()
         let responseErrors;
 
         try {

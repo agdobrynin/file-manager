@@ -1,7 +1,8 @@
 <template>
     <DangerButton
         :disabled="isDisabled"
-        @click="showConfirmDialog = true">
+        @click="showConfirmDialog = true"
+    >
         <SvgIcon
             :path="mdiTrashCanOutline"
             class="mr-2 h-5 w-5"/>
@@ -11,7 +12,8 @@
         :show="showConfirmDialog"
         @cancel="showConfirmDialog = false"
         @close="showConfirmDialog = false"
-        @confirm="deleteForever">
+        @confirm="deleteForever"
+    >
         <div class="inline-flex items-center text-red-800 gap-4 mt-5">
             <div>
                 <SvgIcon :path="mdiAlert" class="h-10 w-10"/>

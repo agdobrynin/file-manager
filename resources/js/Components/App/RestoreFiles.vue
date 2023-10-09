@@ -37,16 +37,21 @@ const emit = defineEmits([ 'success' ]);
 const idDisabled = computed(() => ! Object.keys(props.params).length);
 
 const restore = () => {
-    router.post(route('trash.restore'),
-        props.params,
+    const url = route('trash.restore');
+
+    router.visit(url,
         {
+            method: 'post',
+            data: props.params,
+            onSuccess: () => {
+                emit('success');
+            },
             onError: (errors) => {
                 const displayErrors = Object.keys(errors).length
                     ? Object.values(errors)
                     : 'Something wrong';
                 errorMessage(displayErrors);
             },
-            onSuccess: () => emit('success'),
         });
 }
 </script>

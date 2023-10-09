@@ -11,7 +11,8 @@
                 <NavLink
                     :active="routeName === 'file.index'"
                     :href="route('file.index')"
-                    class="flex gap-2">
+                    class="flex gap-2"
+                >
                     <SvgIcon :path="mdiCloudOutline" size="30"/>
                     My files
                 </NavLink>
@@ -34,7 +35,8 @@
                 <NavLink
                     :active="routeName === 'trash.index'"
                     :href="route('trash.index')"
-                    class="flex gap-2">
+                    class="flex gap-2"
+                >
                     <SvgIcon :path="mdiTrashCanOutline" size="30"/>
                     Trash
                 </NavLink>

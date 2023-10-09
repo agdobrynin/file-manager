@@ -8,8 +8,7 @@
             >
                 <span class="sr-only">Only favorites</span>
                 <span :class="value ? 'translate-x-5' : 'translate-x-1'"
-                      class="inline-block h-2 w-2 transform rounded-full bg-white transition"
-                />
+                      class="inline-block h-2 w-2 transform rounded-full bg-white transition"/>
             </Switch>
             <SwitchLabel :class="value ? 'text-blue-600' : 'text-gray-400'" class="ms-2">
                 Only favorites
