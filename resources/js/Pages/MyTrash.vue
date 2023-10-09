@@ -30,12 +30,12 @@
 import { useSelectFiles } from "@/composable/selectFIles.js";
 import { Head, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import FilesTable from "@/Components/FilesTable.vue";
+import FilesTable from "@/Components/App/FilesTable.vue";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
 import { DO_SEARCH_FILE, emitter } from "@/event-bus.js";
-import RestoreFiles from "@/Components/RestoreFiles.vue";
-import DeleteFromTrash from "@/Components/DeleteFromTrash.vue";
+import RestoreFiles from "@/Components/App/RestoreFiles.vue";
+import DeleteFromTrash from "@/Components/App/DeleteFromTrash.vue";
 
 const props = defineProps({
     files: Object,

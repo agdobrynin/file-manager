@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import ConfirmationDialog from "@/Components/ConfirmationDialog.vue";
+import ConfirmationDialog from "@/Components/App/ConfirmationDialog.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import { errorMessage, successMessage } from "@/event-bus.js";
 import { router, usePage } from "@inertiajs/vue3";

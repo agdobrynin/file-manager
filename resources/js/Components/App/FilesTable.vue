@@ -97,8 +97,8 @@
 </template>
 
 <script setup>
+import FileIcon from "@/Components/App/FileIcon.vue";
 import Checkbox from "@/Components/Checkbox.vue";
-import FileIcon from "@/Components/FileIcon.vue";
 import { bytesToSize } from "@/helpers/helper.js";
 import { mdiCloudOutline, mdiHarddisk, mdiStar, mdiStarOutline } from "@mdi/js";
 import { computed, onMounted, onUpdated, ref } from "vue";

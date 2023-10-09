@@ -40,11 +40,11 @@
 </template>
 
 <script setup>
-import Navigation from "@/Components/Navigation.vue";
-import Notify from "@/Components/Notify.vue";
-import SearchForm from "@/Components/SearchForm.vue";
-import UploadProgress from "@/Components/UploadProgress.vue";
-import UserSettingsDropdown from "@/Components/UserSettingsDropdown.vue";
+import Navigation from "@/Components/App/Navigation.vue";
+import Notify from "@/Components/App/Notify.vue";
+import SearchForm from "@/Components/App/SearchForm.vue";
+import UploadProgress from "@/Components/App/UploadProgress.vue";
+import UserSettingsDropdown from "@/Components/App/UserSettingsDropdown.vue";
 import {
     DO_SEARCH_FILE,
     emitter,

@@ -3,21 +3,21 @@
 </template>
 
 <script setup>
-import SvgIcon from "vue3-icon";
-import { computed } from "vue";
 import * as mimeTypes from "@/helpers/mimeTypes.js"
 import {
-  mdiFile,
-  mdiFileExcel,
-  mdiFileImage,
-  mdiFileMusic,
-  mdiFilePdfBox,
-  mdiFileVideo,
-  mdiFileWord,
-  mdiFolderOutline,
-  mdiTextBox,
-  mdiZipBox
+    mdiFile,
+    mdiFileExcel,
+    mdiFileImage,
+    mdiFileMusic,
+    mdiFilePdfBox,
+    mdiFileVideo,
+    mdiFileWord,
+    mdiFolderOutline,
+    mdiTextBox,
+    mdiZipBox
 } from "@mdi/js"
+import { computed } from "vue";
+import SvgIcon from "vue3-icon";
 
 const props = defineProps({
   mimeType: {

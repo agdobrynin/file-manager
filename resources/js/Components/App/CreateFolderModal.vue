@@ -30,15 +30,15 @@
 </template>
 
 <script setup>
-import Modal from "@/Components/Modal.vue";
-import InputLabel from "@/Components/InputLabel.vue";
-import TextInput from "@/Components/TextInput.vue";
-import { useForm, usePage } from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
-import SecondaryButton from "@/Components/SecondaryButton.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import Modal from "@/Components/Modal.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import { nextTick, ref } from "vue";
+import SecondaryButton from "@/Components/SecondaryButton.vue";
+import TextInput from "@/Components/TextInput.vue";
 import { emitter, FOLDER_CREATE_SUCCESS, successMessage } from "@/event-bus.js";
+import { useForm, usePage } from "@inertiajs/vue3";
+import { nextTick, ref } from "vue";
 
 const props = defineProps({
     show: {

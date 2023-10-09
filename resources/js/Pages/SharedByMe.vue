@@ -33,12 +33,12 @@
 </template>
 
 <script setup>
-import DownloadFiles from "@/Components/DownloadFiles.vue";
-import UnsharedFiles from "@/Components/UnshareFiles.vue";
+import DownloadFiles from "@/Components/App/DownloadFiles.vue";
+import UnsharedFiles from "@/Components/App/UnshareFiles.vue";
 import { useSelectFiles } from "@/composable/selectFIles.js";
 import { Head, router } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import FilesTable from "@/Components/FilesTable.vue";
+import FilesTable from "@/Components/App/FilesTable.vue";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
 import { DO_SEARCH_FILE, emitter } from "@/event-bus.js";

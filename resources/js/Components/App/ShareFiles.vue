@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import ConfirmationDialog from "@/Components/ConfirmationDialog.vue";
+import ConfirmationDialog from "@/Components/App/ConfirmationDialog.vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";

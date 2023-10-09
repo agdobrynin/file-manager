@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import CreateFolderModal from "@/Components/CreateFolderModal.vue";
+import CreateFolderModal from "@/Components/App/CreateFolderModal.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import { emitter, FILES_CHOOSE } from "@/event-bus.js";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";

@@ -31,8 +31,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
 import { emitter, notificationTypes, SHOW_NOTIFICATION } from "@/event-bus.js";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 const messages = ref([]);
 

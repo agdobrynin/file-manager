@@ -52,19 +52,19 @@
 </template>
 
 <script setup>
-import ShareFiles from "@/Components/ShareFiles.vue";
+import ShareFiles from "@/Components/App/ShareFiles.vue";
 import { useSelectFiles } from "@/composable/selectFIles.js";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
-import NavMyFolders from "@/Components/NavMyFolders.vue";
-import CreateNewDropdown from "@/Components/CreateNewDropdown.vue";
+import NavMyFolders from "@/Components/App/NavMyFolders.vue";
+import CreateNewDropdown from "@/Components/App/CreateNewDropdown.vue";
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
-import DeleteFiles from "@/Components/DeleteFiles.vue";
-import DownloadFiles from "@/Components/DownloadFiles.vue";
-import FilesTable from "@/Components/FilesTable.vue";
+import DeleteFiles from "@/Components/App/DeleteFiles.vue";
+import DownloadFiles from "@/Components/App/DownloadFiles.vue";
+import FilesTable from "@/Components/App/FilesTable.vue";
 import { DO_SEARCH_FILE, emitter, errorMessage, FILES_UPLOADED_SUCCESS, FOLDER_CREATE_SUCCESS } from "@/event-bus.js";
 import { EVENT_LOAD_FILES_NEXT_PAGE, useDoLoadFiles } from "@/composable/fetchNextPage.js";
-import OnlyFavorites from "@/Components/OnlyFavorites.vue";
+import OnlyFavorites from "@/Components/App/OnlyFavorites.vue";
 
 /**
  * Build params for function route('file.index').
