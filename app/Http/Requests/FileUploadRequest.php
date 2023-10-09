@@ -29,6 +29,7 @@ class FileUploadRequest extends ParentIdBaseRequest
             self::RELATIVE_PATHS_KEY => [
                 'required',
                 'array',
+                'min:1',
                 function (string $attribute, array $values, Closure $fail) {
                     $maxCountFiles = config('upload_files.upload.max_files');
 
