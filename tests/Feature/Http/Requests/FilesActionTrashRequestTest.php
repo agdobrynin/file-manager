@@ -2,15 +2,16 @@
 
 namespace Tests\Feature\Http\Requests;
 
-use App\Http\Requests\FilesActionRequest;
+use App\Http\Requests\FilesActionTrashRequest;
 use App\Models\File;
 use App\Models\User;
 use Closure;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
-class FilesActionRequestTest extends TestCase
+class FilesActionTrashRequestTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -24,36 +25,43 @@ class FilesActionRequestTest extends TestCase
             'error keys' => ['all'],
         ];
 
-        yield 'ids must be not null if all is false' => [
-            'data' => ['all' => '0'],
-            'authorize' => true,
-            'fails' => true,
-            'passes' => false,
-            'error keys' => ['ids'],
-        ];
-
-        yield 'ids min:1 if all is false' => [
-            'data' => ['all' => '0', 'ids' => []],
-            'authorize' => true,
-            'fails' => true,
-            'passes' => false,
-            'error keys' => ['ids'],
-        ];
-
-        yield 'success with ids' => [
-            'data' => function () {
-                $ids = File::factory(2)->create()->pluck('id')->toArray();
-
-                return ['all' => '0', 'ids' => $ids];
-            },
+        yield 'all true' => [
+            'data' => ['all' => '1'],
             'authorize' => true,
             'fails' => false,
             'passes' => true,
             'error keys' => [],
         ];
 
-        yield 'success with all' => [
-            'data' => ['all' => '1'],
+        yield 'all false and ids is empty' => [
+            'data' => ['all' => false],
+            'authorize' => true,
+            'fails' => true,
+            'passes' => false,
+            'error keys' => ['ids'],
+        ];
+
+        yield 'all false and ids with files not in trash' => [
+            'data' => function () {
+                $ids = File::factory(2)->create()->pluck('id')->toArray();
+
+                return ['all' => false, 'ids' => $ids];
+            },
+            'authorize' => true,
+            'fails' => true,
+            'passes' => false,
+            'error keys' => ['ids'],
+        ];
+
+        yield 'all false and ids in trash' => [
+            'data' => function () {
+                /** @var Collection $files */
+                $files = File::factory(2)->create();
+                File::destroy($files);
+                $ids = $files->pluck('id')->toArray();
+
+                return ['all' => false, 'ids' => $ids];
+            },
             'authorize' => true,
             'fails' => false,
             'passes' => true,
@@ -69,7 +77,7 @@ class FilesActionRequestTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $request = FilesActionRequest::create('/', 'POST');
+        $request = FilesActionTrashRequest::create('/trash');
         $request->setUserResolver(fn() => $user);
 
         if ($data instanceof Closure) {
