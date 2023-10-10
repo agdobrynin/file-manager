@@ -40,7 +40,7 @@ class FileUploadRequest extends ParentIdBaseRequest
                     $firstLevelFolders = collect();
                     $firstLevelFiles = collect();
 
-                    foreach ($this->input(self::RELATIVE_PATHS_KEY) as $index => $path) {
+                    foreach ($values as $index => $path) {
                         $firstPathOfPath = explode('/', $path)[0];
 
                         if ($firstPathOfPath === $path) {
