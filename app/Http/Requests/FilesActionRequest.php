@@ -28,17 +28,18 @@ class FilesActionRequest extends ParentIdBaseRequest
             'ids' => [
                 'required_if:' . self::ALL_FILES_KEY . ',false',
                 'array',
-                'min:1',
                 function (string $attribute, array $ids, $fail) {
-                    $foundFiles = File::fileByOwner($this->user())
-                        ->whereIn('id', $ids)
-                        ->get();
+                    if ($ids) {
+                        $foundFiles = File::fileByOwner($this->user())
+                            ->whereIn('id', $ids)
+                            ->get();
 
-                    if ($foundFiles->count() !== count($ids)) {
-                        $fail('Some file IDs are not valid.');
+                        if ($foundFiles->count() !== count($ids)) {
+                            $fail('Some file IDs are not valid.');
+                        }
+
+                        $this->requestFiles = $foundFiles;
                     }
-
-                    $this->requestFiles = $foundFiles;
                 }
             ]
         ];
