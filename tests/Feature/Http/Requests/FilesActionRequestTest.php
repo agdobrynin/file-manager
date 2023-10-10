@@ -1,6 +1,6 @@
 <?php
 
-namespace Http\Requests;
+namespace Tests\Feature\Http\Requests;
 
 use App\Http\Requests\FilesActionRequest;
 use App\Models\File;
