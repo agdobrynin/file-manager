@@ -4,11 +4,9 @@ namespace App\Http\Requests;
 
 use App\Models\File;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Http\FormRequest;
 
-class FilesActionTrashRequest extends FormRequest
+class FilesActionTrashRequest extends ActionWithAllKeyRequest
 {
-    private const ALL_FILES_KEY = 'all';
     /**
      * @var Collection<File>
      */
@@ -19,7 +17,7 @@ class FilesActionTrashRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return (bool)$this->user();
     }
 
     /**
@@ -31,8 +29,7 @@ class FilesActionTrashRequest extends FormRequest
     {
         $this->requestFiles = new Collection();
 
-        return [
-            self::ALL_FILES_KEY => 'required|boolean',
+        return array_merge(parent::rules(), [
             'ids' => [
                 'required_if:' . self::ALL_FILES_KEY . ',false',
                 'array',
@@ -50,13 +47,6 @@ class FilesActionTrashRequest extends FormRequest
                     $this->requestFiles = $foundFiles;
                 }
             ]
-        ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            self::ALL_FILES_KEY => filter_var($this->{self::ALL_FILES_KEY}, FILTER_VALIDATE_BOOLEAN),
         ]);
     }
 }
