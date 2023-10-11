@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
+use App\Dto\ErrorMessageDto;
 use App\Dto\FavoriteIdDto;
 use App\Dto\FileIdsDto;
 use App\Dto\MyFilesListFilterDto;
@@ -26,6 +27,7 @@ use App\VO\FileFavoriteVO;
 use App\VO\FileFolderVO;
 use App\VO\FileShareVO;
 use App\VO\UploadFilesVO;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -107,14 +109,21 @@ class FileController extends Controller
     /**
      * @throws Throwable
      */
-    public function download(MyFilesActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse
+    public function download(MyFilesActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse|JsonResponse
     {
         $dto = new FileIdsDto(...$request->validated());
         $files = $dto->all
             ? $request->parentFolder->children()->get()
             : $request->requestFiles;
 
-        $downloadDto = $downloadFilesService->handle($files);
+        try {
+            $downloadDto = $downloadFilesService->handle($files);
+        } catch (Throwable $throwable) {
+            $sto = new ErrorMessageDto(message: $throwable->getMessage());
+
+            return \response()
+                ->json($sto, 400);
+        }
 
         return response()->download($downloadDto->storagePath, $downloadDto->fileName)
             ->deleteFileAfterSend();
