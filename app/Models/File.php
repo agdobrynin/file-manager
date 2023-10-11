@@ -205,7 +205,7 @@ class File extends Model
 
     public function isFolder(): bool
     {
-        return (bool)$this->is_folder;
+        return $this->is_folder;
     }
 
     public function scopeFilesList(Builder $builder, User $user, MyFilesListFilterDto $dto, File $folder): Builder

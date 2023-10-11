@@ -52,9 +52,9 @@ readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
                     name: $item->getClientOriginalName(),
                     mime: $item->getClientMimeType(),
                     size: $item->getSize(),
-                    disk: $this->storageService->disk(),
                     path: null,
                     storagePath: $storagePath,
+                    disk: $this->storageService->disk(),
                 );
 
                 /** @var Model $file */
