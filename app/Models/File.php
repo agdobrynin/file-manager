@@ -6,6 +6,7 @@ use App\Dto\FilesListFilterDto;
 use App\Dto\MyFilesListFilterDto;
 use App\Enums\DiskEnum;
 use App\Traits\HasCreatorAndUpdater;
+use App\VO\FileFolderVO;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -135,12 +136,7 @@ class File extends Model
         try {
             return self::rootFolderByUser($user);
         } catch (ModelNotFoundException $exception) {
-            $file = self::make([
-                'name' => $user->email,
-                'is_folder' => true,
-                'disk' => DiskEnum::LOCAL,
-            ]);
-
+            $file = self::make((new FileFolderVO($user->email))->toArray());
             $file->makeRoot()->save();
 
             return $file;
