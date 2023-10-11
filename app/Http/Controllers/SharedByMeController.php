@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Dto\ErrorMessageDto;
 use App\Dto\FileIdsDto;
 use App\Dto\FilesListFilterDto;
 use App\Enums\FlashMessagesEnum;
@@ -10,6 +11,7 @@ use App\Http\Requests\FilesListFilterRequest;
 use App\Http\Resources\FileShareResource;
 use App\Models\FileShare;
 use App\Services\MakeDownloadFilesService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Response;
@@ -51,7 +53,7 @@ class SharedByMeController extends Controller
     /**
      * @throws Throwable
      */
-    public function download(FileShareActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse
+    public function download(FileShareActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse|JsonResponse
     {
         $dto = new FileIdsDto(...$request->validated());
         $fileShares = FileShare::fileShareByFileOwner($request->user())->with('file');
@@ -60,7 +62,14 @@ class SharedByMeController extends Controller
             $fileShares = $fileShares->whereIn('id', $dto->ids);
         }
 
-        $downloadDto = $downloadFilesService->handle($fileShares->get()->pluck('file'));
+        try {
+            $downloadDto = $downloadFilesService->handle($fileShares->get()->pluck('file'));
+        } catch (Throwable $throwable) {
+            $sto = new ErrorMessageDto(message: $throwable->getMessage());
+
+            return \response()
+                ->json($sto, 400);
+        }
 
         return \response()->download($downloadDto->storagePath, $downloadDto->fileName)
             ->deleteFileAfterSend();
