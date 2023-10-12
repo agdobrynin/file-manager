@@ -19,7 +19,7 @@ class StoreFolderRequestTest extends TestCase
     public static function data(): Generator
     {
         yield 'folder name with invalid symbols #1' => [
-            'data' => ['name' => 'Folder<folder>'],
+            'data' => ['name' => 'Folder<folder'],
             'passed' => false,
             'errors key' => ['name']
         ];
@@ -37,7 +37,7 @@ class StoreFolderRequestTest extends TestCase
         ];
 
         yield 'folder name with invalid symbols #4' => [
-            'data' => ['name' => 'Folder | folder'],
+            'data' => ['name' => 'Folder > folder'],
             'passed' => false,
             'errors key' => ['name']
         ];
