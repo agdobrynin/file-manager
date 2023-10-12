@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 final readonly class FilesDestroyService implements FilesDestroyServiceInterface
 {
     /**
-     * @param Collection $collection
+     * @param Collection<File> $collection
      * @return \Illuminate\Support\Collection<DestroyFileFromStorageDto>
      */
     public function destroy(Collection $collection): \Illuminate\Support\Collection
