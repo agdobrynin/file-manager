@@ -168,15 +168,19 @@ class File extends Model
     {
         parent::boot();
 
-        static::creating(static function (File $model) {
-            if (!$model->isRoot()) {
-                $separator = str_ends_with($model->parent->path ?? '', DIRECTORY_SEPARATOR)
-                    ? ''
-                    : DIRECTORY_SEPARATOR;
+        static::creating(static fn(File $model) => self::makePath($model));
+        static::saving(static fn(File $model) => self::makePath($model));
+    }
 
-                $model->path = $model->parent->path . $separator . $model->name;
-            }
-        });
+    protected static function makePath(File $model): void
+    {
+        if (!$model->isRoot()) {
+            $separator = str_ends_with($model->parent->path ?? '', DIRECTORY_SEPARATOR)
+                ? ''
+                : DIRECTORY_SEPARATOR;
+
+            $model->path = $model->parent?->path . $separator . $model->name;
+        }
     }
 
     public function user(): BelongsTo
