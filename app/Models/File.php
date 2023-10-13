@@ -151,6 +151,7 @@ class File extends Model
         return self::query()
             ->whereIsRoot()
             ->where('created_by', $user?->getAuthIdentifier())
+            ->where('is_folder', true)
             ->firstOrFail();
     }
 
