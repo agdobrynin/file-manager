@@ -104,7 +104,8 @@ class FileScopeFilesListTest extends TestCase
     {
         $params = $this->makeTestDataset();
         // For user by sub folder
-        $resSubFolderQuery = File::filesList($params->user2, new MyFilesListFilterDto(), $params->subFolderUser2);
+        $dto = new MyFilesListFilterDto();
+        $resSubFolderQuery = File::filesList($params->user2, $dto, $params->subFolderUser2);
         $resSubFolder = $resSubFolderQuery->get();
 
         $this->assertCount(5, $resSubFolder);
@@ -116,7 +117,8 @@ class FileScopeFilesListTest extends TestCase
     {
         $params = $this->makeTestDataset();
         // For user by sub folder
-        $resSubFolderQuery = File::filesList($params->user1, new MyFilesListFilterDto(), $params->subFolderUser2);
+        $dto = new MyFilesListFilterDto();
+        $resSubFolderQuery = File::filesList($params->user1, $dto, $params->subFolderUser2);
         $resSubFolder = $resSubFolderQuery->get();
 
         $this->assertCount(0, $resSubFolder);
@@ -126,8 +128,8 @@ class FileScopeFilesListTest extends TestCase
     public function test_filter_favorite_for_user1(): void
     {
         $params = $this->makeTestDataset();
-
-        $resSubFolderWithFilterQuery = File::filesList($params->user1, new MyFilesListFilterDto(onlyFavorites: true), $params->rootUser1);
+        $dto = new MyFilesListFilterDto(onlyFavorites: true);
+        $resSubFolderWithFilterQuery = File::filesList($params->user1, $dto, $params->rootUser1);
         $resSubFolderWithFilter = $resSubFolderWithFilterQuery->get();
 
         $this->assertCount(0, $resSubFolderWithFilter);
@@ -138,8 +140,8 @@ class FileScopeFilesListTest extends TestCase
     public function test_filter_favorite_for_user2(): void
     {
         $params = $this->makeTestDataset();
-
-        $resSubFolderWithFilterQuery = File::filesList($params->user2, new MyFilesListFilterDto(onlyFavorites: true), $params->rootUser2);
+        $dto = new MyFilesListFilterDto(onlyFavorites: true);
+        $resSubFolderWithFilterQuery = File::filesList($params->user2, $dto, $params->rootUser2);
         $resSubFolderWithFilter = $resSubFolderWithFilterQuery->get();
 
         $this->assertCount(1, $resSubFolderWithFilter);
@@ -150,7 +152,8 @@ class FileScopeFilesListTest extends TestCase
     {
         $params = $this->makeTestDataset();
         // with search string
-        $resFilterQuery = File::filesList($params->user2, new MyFilesListFilterDto('.jpg'), $params->rootUser2);
+        $dto = new MyFilesListFilterDto(search: '.jpg');
+        $resFilterQuery = File::filesList($params->user2, $dto, $params->rootUser2);
         $this->assertCount(4, $resFilterQuery->get());
     }
 
@@ -158,7 +161,8 @@ class FileScopeFilesListTest extends TestCase
     {
         $params = $this->makeTestDataset();
         // with search string
-        $resFilterQuery = File::filesList($params->user1, new MyFilesListFilterDto('.jpg'), $params->rootUser1);
+        $dto = new MyFilesListFilterDto(search: '.jpg');
+        $resFilterQuery = File::filesList($params->user1, $dto, $params->rootUser1);
         $this->assertCount(2, $resFilterQuery->get());
         $this->assertInstanceOf(File::class, $resFilterQuery->first());
         $this->assertStringEndsWith('.jpg', $resFilterQuery->first()->name);
@@ -168,7 +172,8 @@ class FileScopeFilesListTest extends TestCase
     {
         $params = $this->makeTestDataset();
         // with search string
-        $resFilterQuery = File::filesList($params->user2, new MyFilesListFilterDto('Folder'), $params->rootUser2);
+        $dto = new MyFilesListFilterDto(search: 'Folder');
+        $resFilterQuery = File::filesList($params->user2, $dto, $params->rootUser2);
         $this->assertCount(1, $resFilterQuery->get());
         $this->assertStringStartsWith('Folder', $resFilterQuery->first()->name);
     }
