@@ -56,20 +56,18 @@ class FileShare extends Model
 
     public function scopeFileShareByFileOwner(Builder $builder, User $user): Builder
     {
-        return $builder->whereHas(
-            'file.user',
-            fn(Builder $b) => $b->where('id', $user->getAuthIdentifier())
-        );
+        return $builder->whereHas('file.user', function (Builder $b) use ($user) {
+            return $b->where('id', $user->getAuthIdentifier());
+        });
     }
 
     public function scopeFileShareByUser(Builder $builder, User $user, FilesListFilterDto $dto): Builder
     {
         return $this->fileShareByFilter($builder, $dto)
             ->with(['file', 'forUser'])
-            ->whereHas(
-                'file.user',
-                fn(Builder $q) => $q->where('id', $user->getAuthIdentifier())
-            );
+            ->whereHas('file.user', function (Builder $q) use ($user) {
+                return $q->where('id', $user->getAuthIdentifier());
+            });
     }
 
     protected function fileShareByFilter(Builder $builder, FilesListFilterDto $dto): Builder
@@ -77,9 +75,14 @@ class FileShare extends Model
         return $builder
             ->whereHas('file')
             ->when($dto->search, function (Builder $builder) use ($dto) {
-                $builder->whereHas(
-                    'file',
-                    fn(Builder $query) => $query->where('name', 'like', '%' . $dto->search . '%')
+                $builder->whereHas('file',
+                    function (Builder $query) use ($dto) {
+                        return $query->where(
+                            'name',
+                            'like',
+                            '%' . $dto->search . '%'
+                        );
+                    }
                 );
             })
             ->orderBy('created_at', 'desc');
@@ -104,11 +107,9 @@ class FileShare extends Model
 
     public function scopeFileShareForUserOrByUser(Builder $builder, User $user): Builder
     {
-        return $builder->whereHas(
-            'file.user',
-            fn(Builder $b) => $b->where('id', $user->getAuthIdentifier())
-        )
-            ->orWhere('for_user_id', $user->getAuthIdentifier());
+        return $builder->whereHas('file.user', function (Builder $b) use($user) {
+            return $b->where('id', $user->getAuthIdentifier());
+        })->orWhere('for_user_id', $user->getAuthIdentifier());
     }
 
     public function scopeFileShareForUserWithFilter(Builder $builder, User $user, FilesListFilterDto $dto): Builder
