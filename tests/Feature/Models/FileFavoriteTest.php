@@ -1,0 +1,32 @@
+<?php
+
+namespace Tests\Feature\Models;
+
+use App\Models\File;
+use App\Models\FileFavorite;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class FileFavoriteTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_relations(): void
+    {
+        $user = User::factory()->create();
+        $folder = File::factory()
+            ->for($user, 'user')
+            ->for($user, 'userUpdate')
+            ->isFolder()
+            ->createQuietly();
+
+        $favorite = FileFavorite::factory()
+            ->for($user)
+            ->for($folder)
+            ->create();
+
+        $this->assertInstanceOf(User::class, $favorite->user()->first());
+        $this->assertInstanceOf(File::class, $favorite->file()->first());
+    }
+}

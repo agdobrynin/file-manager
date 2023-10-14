@@ -189,6 +189,11 @@ class File extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function userUpdate(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
     public function favorite(): HasOne
     {
         return $this->hasOne(FileFavorite::class);
