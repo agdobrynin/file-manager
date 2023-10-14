@@ -54,6 +54,43 @@ class FileShare extends Model
         return $this->belongsTo(User::class, foreignKey: 'for_user_id');
     }
 
+    public function scopeFileShareByFileOwner(Builder $builder, User $user): Builder
+    {
+        return $builder->whereHas(
+            'file.user',
+            fn(Builder $b) => $b->where('id', $user->getAuthIdentifier())
+        );
+    }
+
+    public function scopeFileShareByUser(Builder $builder, User $user, FilesListFilterDto $dto): Builder
+    {
+        return $this->fileShareByFilter($builder, $dto)
+            ->whereHas(
+                'file.user',
+                fn(Builder $q) => $q->where('id', $user->getAuthIdentifier())
+            );
+    }
+
+    protected function fileShareByFilter(Builder $builder, FilesListFilterDto $dto): Builder
+    {
+        return $builder->with(['file', 'forUser'])
+            ->whereHas('file')
+            ->when($dto->search, function (Builder $builder) use ($dto) {
+                $builder->whereHas(
+                    'file',
+                    fn(Builder $query) => $query->where('name', 'like', '%' . $dto->search . '%')
+                );
+            })
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function scopeFileShareForUser(Builder $builder, User $user): Builder
+    {
+        return $builder->whereHas('file')
+            ->where('for_user_id', $user->getAuthIdentifier())
+            ->orderBy('created_at', 'desc');
+    }
+
     public function scopeFileShareForUserByFile(Builder $builder, User $user, Collection $files): Builder
     {
         $filesIds = $files->pluck('id')->toArray();
@@ -64,52 +101,6 @@ class FileShare extends Model
             ->whereIn('file_id', $filesIds);
     }
 
-    public function scopeFileShareByUser(Builder $builder, User $user, FilesListFilterDto $dto): Builder
-    {
-        return $builder->with(['file', 'forUser'])
-            ->whereHas('file')
-            ->when($dto->search, function (Builder $builder) use ($dto) {
-                $builder->whereHas(
-                    'file',
-                    fn(Builder $query) => $query->where('name', 'like', '%' . $dto->search . '%')
-                );
-            })
-            ->whereHas(
-                'file.user',
-                fn(Builder $q) => $q->where('id', $user->getAuthIdentifier())
-            )
-            ->orderBy('created_at', 'desc');
-    }
-
-    public function scopeFileShareForUserWithFilter(Builder $builder, User $user, FilesListFilterDto $dto): Builder
-    {
-        return $builder->with(['file.user', 'forUser'])
-            ->whereHas('file')
-            ->when($dto->search, function (Builder $builder) use ($dto) {
-                $builder->whereHas(
-                    'file',
-                    fn(Builder $query) => $query->where('name', 'like', '%' . $dto->search . '%')
-                );
-            })
-            ->where('for_user_id', $user->getAuthIdentifier())
-            ->orderBy('created_at', 'desc');
-    }
-
-    public function scopeFileShareByFileOwner(Builder $builder, User $user): Builder
-    {
-        return $builder->whereHas(
-            'file.user',
-            fn(Builder $b) => $b->where('id', $user->getAuthIdentifier())
-        );
-    }
-
-    public function scopeFileShareForUser(Builder $builder, User $user): Builder
-    {
-        return $builder->whereHas('file')
-            ->where('for_user_id', $user->getAuthIdentifier())
-            ->orderBy('created_at', 'desc');
-    }
-
     public function scopeFileShareForUserOrByUser(Builder $builder, User $user): Builder
     {
         return $builder->whereHas(
@@ -117,5 +108,12 @@ class FileShare extends Model
             fn(Builder $b) => $b->where('id', $user->getAuthIdentifier())
         )
             ->orWhere('for_user_id', $user->getAuthIdentifier());
+    }
+
+    public function scopeFileShareForUserWithFilter(Builder $builder, User $user, FilesListFilterDto $dto): Builder
+    {
+        return $this->fileShareByFilter($builder, $dto)
+            ->with(['file.user'])
+            ->where('for_user_id', $user->getAuthIdentifier());
     }
 }
