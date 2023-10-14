@@ -40,7 +40,7 @@ class FileFactory extends Factory
     public function isFolder(): FileFactory|Factory
     {
         $vo = new FileFolderVO(
-            name: $this->faker->title,
+            name: $this->faker->name,
         );
 
         return $this->state($vo->toArray());

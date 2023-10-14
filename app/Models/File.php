@@ -217,9 +217,12 @@ class File extends Model
             $builder->where('parent_id', $folder->id);
         }
 
+        if ($dto->onlyFavorites) {
+            $builder->whereHas('favorite');
+        }
+
         return $builder->whereNotNull('parent_id')
             ->with(['favorite'])
-            ->when($dto->onlyFavorites, fn() => $builder->whereHas('favorite'))
             ->where('created_by', '=', $user->getAuthIdentifier())
             ->with(['favorite'])
             ->orderBy('is_folder', 'desc')
