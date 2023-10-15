@@ -27,7 +27,7 @@ class FileFactory extends Factory
         ];
     }
 
-    public function isFile(): FileFactory|Factory
+    public function isFile(): Factory
     {
         $name = $this->faker->title;
 

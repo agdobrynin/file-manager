@@ -6,7 +6,6 @@ use App\Models\File;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 class FileScopeFileByOwner extends TestCase
@@ -18,10 +17,17 @@ class FileScopeFileByOwner extends TestCase
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
 
-        Auth::setUser($user1);
-        File::factory(5)->isFile()->create();
-        Auth::setUser($user2);
-        File::factory(10)->isFile()->create();
+        File::factory(5)
+            ->for($user1)
+            ->for($user1, 'userUpdate')
+            ->isFile()
+            ->createQuietly();
+
+        File::factory(10)
+            ->for($user2)
+            ->for($user2, 'userUpdate')
+            ->isFile()
+            ->createQuietly();
 
         $forUser1 = File::fileByOwner($user1);
         $this->assertInstanceOf(Builder::class, $forUser1);
