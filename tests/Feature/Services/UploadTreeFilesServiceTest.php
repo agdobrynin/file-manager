@@ -17,6 +17,20 @@ class UploadTreeFilesServiceTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_fail(): void
+    {
+        $user = User::factory()->create();
+        $storage = $this->mock(StorageServiceInterface::class);
+
+        $srv = new UploadTreeFilesService($storage);
+        $parent = File::factory()->isFile($user)->createQuietly();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Parent element must be is folder');
+
+        $srv->upload(parentFolder: $parent, files: []);
+    }
+
     public function test_upload_service(): void
     {
         $user = User::factory()->create();
@@ -33,7 +47,8 @@ class UploadTreeFilesServiceTest extends TestCase
         ];
 
         $storage = $this->mock(StorageServiceInterface::class, function (MockInterface $mock) {
-            $filesCount = 4;
+            $filesCount = 4; // count of files in $files variable.
+
             $mock->shouldReceive('upload')
                 ->times($filesCount);
             $mock->shouldReceive('disk')
@@ -63,19 +78,5 @@ class UploadTreeFilesServiceTest extends TestCase
                 $this->assertStringStartsWith('/images/img-', $file->path);
                 $this->assertEquals(DiskEnum::LOCAL, $file->disk);
             });
-    }
-
-    public function test_fail(): void
-    {
-        $user = User::factory()->create();
-        $storage = $this->mock(StorageServiceInterface::class);
-
-        $srv = new UploadTreeFilesService($storage);
-        $parent = File::factory()->isFile($user)->createQuietly();
-
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Parent element must be is folder');
-
-        $srv->upload(parentFolder: $parent, files: []);
     }
 }
