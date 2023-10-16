@@ -33,40 +33,43 @@ class FileScopeFilesListTest extends TestCase
      */
     protected function makeTestDataset(): object
     {
-        $randFileParams = static fn(string $suffix = null) => [
-            'name' => fake()->name . ($suffix ?: ''),
-            'mime' => fake()->mimeType(),
-            'size' => fake()->numberBetween(10, 100)
-        ];
-        $randFolderParams = static fn(string $prefix = null) => ['name' => ($prefix ?: '') . fake()->name];
+        $randFileParams = static fn(string $suffix = null) => (new FileVO(
+            name: fake()->name . ($suffix ?: ''),
+            mime: fake()->mimeType(),
+            size: 100,
+        ))->toArray();
+
+        $randFolderParams = static fn(string $prefix = null) => (new FileFolderVO(
+            ($prefix ?: '') . fake()->name)
+        )->toArray();
 
         // User #1 branch
         $user1 = User::factory()->create();
         Auth::setUser($user1);
         $root1 = File::makeRootByUser($user1);
-        File::create((new FileVO(...$randFileParams('.jpg')))->toArray(), $root1);
-        File::create((new FileVO(...$randFileParams('.jpg')))->toArray(), $root1);
-        File::create((new FileFolderVO(...$randFolderParams('Folder ')))->toArray(), $root1);
+        File::create($randFileParams('.jpg'), $root1);
+        File::create($randFileParams('.jpg'), $root1);
+        File::create($randFolderParams('Folder '), $root1);
 
         // User #2 branch
         $user2 = User::factory()->create();
         Auth::setUser($user2);
         $root2 = File::makeRootByUser($user2);
         $subFolder = File::create([
-            ...(new FileFolderVO(...$randFolderParams('Folder ')))->toArray(),
+            ...$randFolderParams('Folder '),
             'children' => [
-                [... (new FileVO(...$randFileParams('.jpg')))->toArray()],
-                [... (new FileVO(...$randFileParams('.jpg')))->toArray()],
-                [... (new FileVO(...$randFileParams('.jpg')))->toArray()],
-                [... (new FileVO(...$randFileParams('.png')))->toArray()],
-                [... (new FileFolderVO(...$randFolderParams()))->toArray()],
+                [... $randFileParams('.jpg')],
+                [... $randFileParams('.jpg')],
+                [... $randFileParams('.jpg')],
+                [... $randFileParams('.png')],
+                [... $randFolderParams()],
             ],
         ], $root2);
         /** @var File $fileTrash file move to trash */
-        $fileTrash = File::create((new FileVO(...$randFileParams('.jpg')))->toArray(), $root2);
-        File::create((new FileVO(...$randFileParams('.jpg')))->toArray(), $root2);
+        $fileTrash = File::create($randFileParams('.jpg'), $root2);
+        File::create($randFileParams('.jpg'), $root2);
         /** @var File $file1 has favorite mark */
-        $file1 = File::create((new FileVO(...$randFileParams()))->toArray(), $root2);
+        $file1 = File::create($randFileParams(), $root2);
 
         // File in root1 branch is favorite mark
         $file1->favorite()->create([
