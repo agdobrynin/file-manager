@@ -15,10 +15,7 @@ class FileFavoriteTest extends TestCase
     public function test_relations(): void
     {
         $user = User::factory()->create();
-        $folder = File::factory()
-            ->for($user, 'user')
-            ->for($user, 'userUpdate')
-            ->isFolder()
+        $folder = File::factory()->isFolder($user)
             ->createQuietly();
 
         $favorite = FileFavorite::factory()

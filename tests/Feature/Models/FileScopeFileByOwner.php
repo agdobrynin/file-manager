@@ -17,16 +17,10 @@ class FileScopeFileByOwner extends TestCase
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
 
-        File::factory(5)
-            ->for($user1)
-            ->for($user1, 'userUpdate')
-            ->isFile()
+        File::factory(5)->isFile($user1)
             ->createQuietly();
 
-        File::factory(10)
-            ->for($user2)
-            ->for($user2, 'userUpdate')
-            ->isFile()
+        File::factory(10)->isFile($user2)
             ->createQuietly();
 
         $forUser1 = File::fileByOwner($user1);

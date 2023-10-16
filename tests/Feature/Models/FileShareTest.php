@@ -24,17 +24,15 @@ class FileShareTest extends TestCase
         $user2 = User::factory()->create();
 
         // files with file shares for user 2
-        File::factory(3)->isFile()
-            ->for($user2)
+        File::factory(3)->isFile($user2)
             ->has(FileShare::factory()->for($user2, 'forUser'))
-            ->for($user2, 'userUpdate')
             ->createQuietly();
 
         $filesForUser1 = File::factory(5)
+            ->isFolder($user1)
             ->sequence(
                 fn(Sequence $sequence) => (new FileFolderVO(name: 'Folder #' . $sequence->index))->toArray()
-            )
-            ->for($user1)->for($user1, 'userUpdate')->createQuietly();
+            )->createQuietly();
         // Make 2 share for user 1
         FileShare::factory()->for($user1, 'forUser')->for($filesForUser1[0])
             ->createQuietly();
@@ -58,8 +56,7 @@ class FileShareTest extends TestCase
 
         // Data for other user
         File::factory(20)
-            ->for($user1)
-            ->for($user1, 'userUpdate')
+            ->isFile($user1)
             ->state(
                 (new FileVO(name: fake()->title . '.png', mime: 'image/image', size: 1))->toArray(),
             )
@@ -95,11 +92,10 @@ class FileShareTest extends TestCase
         $user2 = User::factory()->create();
 
         $files = File::factory(5)
+            ->isFile($user1)
             ->state(new Sequence(
                 fn(Sequence $sequence) => ['name' => 'File #' . $sequence->index]
-            ))
-            ->for($user1)
-            ->for($user1, 'userUpdate')->createQuietly();
+            ))->createQuietly();
         // Make 2 share for user 1
         FileShare::factory()->for($user2, 'forUser')->for($files[0])
             ->createQuietly();
@@ -177,9 +173,7 @@ class FileShareTest extends TestCase
     public function test_relation(): void
     {
         $user = User::factory()->create();
-        $file = File::factory()->isFile()
-            ->for($user)
-            ->for($user, 'userUpdate')
+        $file = File::factory()->isFile($user)
             ->createQuietly(['name' => 'my-file.doc']);
 
         $fileShare = FileShare::factory()

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\DiskEnum;
+use App\Models\User;
 use App\VO\FileFolderVO;
 use App\VO\FileVO;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -27,7 +28,7 @@ class FileFactory extends Factory
         ];
     }
 
-    public function isFile(): Factory
+    public function isFile(?User $user = null): Factory
     {
         $name = $this->faker->title;
 
@@ -39,15 +40,29 @@ class FileFactory extends Factory
             storagePath: 'file/' . $name,
         );
 
-        return $this->state($vo->toArray());
+        $factory = $this->state($vo->toArray());
+
+        if ($user) {
+            $factory = $factory->for($user, 'user')
+                ->for($user, 'userUpdate');
+        }
+
+        return $factory;
     }
 
-    public function isFolder(): FileFactory|Factory
+    public function isFolder(?User $user = null): FileFactory|Factory
     {
         $vo = new FileFolderVO(
             name: $this->faker->name,
         );
 
-        return $this->state($vo->toArray());
+        $factory = $this->state($vo->toArray());
+
+        if ($user) {
+            $factory = $factory->for($user, 'user')
+                ->for($user, 'userUpdate');
+        }
+
+        return $factory;
     }
 }
