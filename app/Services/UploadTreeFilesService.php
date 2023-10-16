@@ -52,22 +52,20 @@ readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
                     name: $item->getClientOriginalName(),
                     mime: $item->getClientMimeType(),
                     size: $item->getSize(),
-                    path: null,
                     storagePath: $storagePath,
                     disk: $this->storageService->disk(),
                 );
 
                 /** @var Model $file */
-                $file = Model::query()->make($fileVO->toArray());
-                $file->appendToNode($parentFolder)
-                    ->save();
+                $file = $parentFolder->children()
+                    ->save(Model::make($fileVO->toArray()));
 
                 $models->add($file);
             } elseif (is_array($item)) {
                 $folderVO = new FileFolderVO($key);
                 /** @var Model $folder */
-                $folder = Model::query()->make($folderVO->toArray());
-                $parentFolder->appendNode($folder);
+                $folder = $parentFolder->children()
+                    ->save(Model::make($folderVO->toArray()));
 
                 $this->make($folder, $item, $models);
             }
