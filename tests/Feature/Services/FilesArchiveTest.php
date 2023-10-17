@@ -118,9 +118,16 @@ class FilesArchiveTest extends TestCase
                     ->andReturnTrue();
 
                 $mock->shouldReceive('addFromString')
-                    ->withAnyArgs()
-                    ->andReturnTrue()
-                    ->times(3);
+                    ->with('file3.jpg', 'file-content-as-string')
+                    ->andReturnTrue();
+
+                $mock->shouldReceive('addFromString')
+                    ->with('folder/file2.jpg', 'file-content-as-string')
+                    ->andReturnTrue();
+
+                $mock->shouldReceive('addFromString')
+                    ->with('folder/file1.jpg', 'file-content-as-string')
+                    ->andReturnTrue();
 
                 $mock->shouldReceive('close');
             }
