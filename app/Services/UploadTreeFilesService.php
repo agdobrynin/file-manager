@@ -37,8 +37,7 @@ readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
         foreach ($files as $key => $item) {
             if ($item instanceof UploadedFile || $item instanceof File) {
                 $separator = str_starts_with($parentFolder->path ?? '/', DIRECTORY_SEPARATOR)
-                    ? ''
-                    : DIRECTORY_SEPARATOR;
+                    ? '' : DIRECTORY_SEPARATOR;
 
                 $destinationDirectoryStorage = 'files' .
                     DIRECTORY_SEPARATOR .

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\VO\FileFolderVO;
 use App\VO\FileVO;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\File>
@@ -20,17 +21,27 @@ class FileFactory extends Factory
      */
     public function definition(): array
     {
+        $name = Str::random() . '.' . $this->faker->fileExtension();
+
         return [
-            'name' => fake()->name,
+            'name' => $name,
             'is_folder' => false,
             'path' => null,
             'disk' => DiskEnum::LOCAL,
+            'size' => fake()->numberBetween(10, 200),
+            'storage_path' => '/files/' . $name
         ];
+    }
+
+    public function forUser(User $user): Factory
+    {
+        return $this->for($user, 'user')
+            ->for($user, 'userUpdate');
     }
 
     public function isFile(?User $user = null): Factory
     {
-        $name = $this->faker->title;
+        $name = Str::random() . '.' . $this->faker->fileExtension();
 
         $vo = new FileVO(
             name: $name,
