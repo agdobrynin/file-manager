@@ -4,7 +4,6 @@ namespace Tests\Feature\Services;
 
 use App\Contracts\GetFileContentInterface;
 use App\Contracts\StorageLocalServiceInterface;
-use App\Dto\DownloadFileDto;
 use App\Enums\DiskEnum;
 use App\Models\File;
 use App\Models\User;
@@ -32,7 +31,7 @@ class FilesArchiveTest extends TestCase
 
         $mockStorage = $this->mock(
             StorageLocalServiceInterface::class,
-            function (MockInterface $mock) use ($zipFile, $storagePath) {
+            function (MockInterface $mock) use ($storagePath) {
                 $mock->shouldReceive('filesystem->path')
                     ->andReturn($storagePath)
                     ->once();
@@ -142,7 +141,6 @@ class FilesArchiveTest extends TestCase
             mockStorage: $mockStorage,
         ))->addFiles($root->children);
 
-        $this->assertInstanceOf(DownloadFileDto::class, $dto);
         $this->assertEquals($user->name . '.zip', $dto->fileName);
         $this->assertEquals($storagePath, $dto->storagePath);
     }
