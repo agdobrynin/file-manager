@@ -74,6 +74,11 @@ class FileControllerMethodIndexTest extends TestCase
                 ->whereType('files.data.0.deletedAt', ['string', 'null'])
                 // it is last page
                 ->where('files.links.next', null)
+                // check ancestors props
+                ->whereType('ancestors.data.0.id', 'integer')
+                ->whereType('ancestors.data.0.isFolder', 'boolean')
+                ->whereType('ancestors.data.0.name', 'string')
+                ->whereType('ancestors.data.0.parentId', ['integer', 'null'])
             );
     }
 
@@ -84,6 +89,53 @@ class FileControllerMethodIndexTest extends TestCase
             ->assertInertia(fn(AssertableInertia $page) => $page
                 ->component('Auth/Login')
                 ->where('auth.user', null)
+            );
+    }
+
+    public function test_search_in_my_files_with_pagination(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $root = File::makeRootByUser($user);
+        // make files
+        collect(['f-1-1.png', 'f-1-4.doc'])->each(function (string $name) use ($root) {
+            File::factory()
+                ->afterMaking(fn(File $file) => $root->appendNode($file))
+                ->isFile()->make(['name' => $name]);
+        });
+        $folder = File::create((new FileFolderVO('Folder1'))->toArray(), $root);
+        collect(['f-2-1.png', 'f-2-2.xls'])->each(function (string $name) use ($folder) {
+            File::factory()
+                ->afterMaking(fn(File $file) => $folder->appendNode($file))
+                ->isFile()->make(['name' => $name]);
+        });
+        $subFolder = File::create((new FileFolderVO('Sub Folder2'))->toArray(), $folder);
+        collect(['f-2-2-1.png', 'f-2-2-2.doc'])->each(function (string $name) use ($subFolder) {
+            File::factory()
+                ->afterMaking(fn(File $file) => $subFolder->appendNode($file))
+                ->isFile()->make(['name' => $name]);
+        });
+
+        // set config for page size in files list.
+        Config::set('app.my_files.per_page', 2);
+
+        $this->actingAs($user)->get('/file?search=.png')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->component('MyFiles')
+                ->where('files.meta.total', 3)
+                ->has('files.data', 2) // per_page = 2, but all find files 3
+                ->where('files.data.0.name', 'f-2-2-1.png')
+                ->where('files.data.1.name', 'f-2-1.png')
+            );
+        //page 2
+        $this->actingAs($user)->get('/file?search=.png&page=2')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->component('MyFiles')
+                ->where('files.meta.total', 3)
+                ->has('files.data', 1)
+                ->where('files.data.0.name', 'f-1-1.png')
             );
     }
 
