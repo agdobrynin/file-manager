@@ -6,7 +6,6 @@ use App\Models\File;
 use App\Models\User;
 use App\VO\FileFolderVO;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
@@ -57,28 +56,23 @@ class FileControllerMethodIndexTest extends TestCase
             ->assertOk()
             ->assertInertia(fn(AssertableInertia $page) => $page
                 ->has('files.data', 2)
-                // test fileResource structure
-                ->where('files.data.0', function (Collection $item) {
-                    $expectKeys = collect([
-                        'id',
-                        'isFavorite',
-                        'name',
-                        'disk',
-                        'path',
-                        'parentId',
-                        'isFolder',
-                        'mime',
-                        'size',
-                        'owner',
-                        'createdAt',
-                        'updatedAt',
-                        'createdBy',
-                        'updatedBy',
-                        'deletedAt',
-                    ]);
-
-                    return $item->keys()->diff($expectKeys)->isEmpty();
-                })
+                // test fileResource structure with check types
+                ->whereType('files.data.0.id', 'integer')
+                ->whereType('files.data.0.isFavorite', 'boolean')
+                ->whereType('files.data.0.name', 'string')
+                ->whereType('files.data.0.disk', 'string')
+                ->whereType('files.data.0.path', 'string')
+                ->whereType('files.data.0.parentId', 'integer')
+                ->whereType('files.data.0.isFolder', 'boolean')
+                ->whereType('files.data.0.mime', ['string', 'null'])
+                ->whereType('files.data.0.size', ['integer', 'null'])
+                ->whereType('files.data.0.owner', 'string')
+                ->whereType('files.data.0.createdAt', 'string')
+                ->whereType('files.data.0.updatedAt', 'string')
+                ->whereType('files.data.0.createdBy', 'integer')
+                ->whereType('files.data.0.updatedBy', 'integer')
+                ->whereType('files.data.0.deletedAt', ['string', 'null'])
+                // it is last page
                 ->where('files.links.next', null)
             );
     }
