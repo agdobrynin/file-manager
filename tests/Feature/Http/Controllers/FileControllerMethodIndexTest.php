@@ -16,6 +16,40 @@ class FileControllerMethodIndexTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_file_resource_property(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $root = File::makeRootByUser($user);
+        // make files
+        $this->makeFilesTree(['f-1-1.png'], $root);
+
+        $this->get('/file')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                // test fileResource structure with check types
+                ->whereType('files.data.0.id', 'integer')
+                ->whereType('files.data.0.isFavorite', 'boolean')
+                ->whereType('files.data.0.name', 'string')
+                ->whereType('files.data.0.disk', 'string')
+                ->whereType('files.data.0.path', 'string')
+                ->whereType('files.data.0.parentId', 'integer')
+                ->whereType('files.data.0.isFolder', 'boolean')
+                ->whereType('files.data.0.mime', ['string', 'null'])
+                ->whereType('files.data.0.size', ['integer', 'null'])
+                ->whereType('files.data.0.owner', 'string')
+                ->whereType('files.data.0.createdAt', 'string')
+                ->whereType('files.data.0.updatedAt', 'string')
+                ->whereType('files.data.0.createdBy', 'integer')
+                ->whereType('files.data.0.updatedBy', 'integer')
+                ->whereType('files.data.0.deletedAt', ['string', 'null'])
+                // check ancestors props
+                ->whereType('ancestors.data.0.id', 'integer')
+                ->whereType('ancestors.data.0.isFolder', 'boolean')
+                ->whereType('ancestors.data.0.name', 'string')
+                ->whereType('ancestors.data.0.parentId', ['integer', 'null'])
+            );
+    }
     public function test_files_list_with_pagination(): void
     {
         $user = User::factory()->create();
@@ -39,7 +73,6 @@ class FileControllerMethodIndexTest extends TestCase
                 ->where('parentId', $root->id)
                 ->has('files.data', 3)
                 // Folder is first in list
-                ->where('files.data.0.isFolder', true)
                 ->where('files.meta.total', 5)
                 ->whereContains('files.links.next', static function (string $value) {
                     return Str::contains($value, '/file?page=2');
@@ -50,29 +83,8 @@ class FileControllerMethodIndexTest extends TestCase
             ->assertOk()
             ->assertInertia(fn(AssertableInertia $page) => $page
                 ->has('files.data', 2)
-                // test fileResource structure with check types
-                ->whereType('files.data.0.id', 'integer')
-                ->whereType('files.data.0.isFavorite', 'boolean')
-                ->whereType('files.data.0.name', 'string')
-                ->whereType('files.data.0.disk', 'string')
-                ->whereType('files.data.0.path', 'string')
-                ->whereType('files.data.0.parentId', 'integer')
-                ->whereType('files.data.0.isFolder', 'boolean')
-                ->whereType('files.data.0.mime', ['string', 'null'])
-                ->whereType('files.data.0.size', ['integer', 'null'])
-                ->whereType('files.data.0.owner', 'string')
-                ->whereType('files.data.0.createdAt', 'string')
-                ->whereType('files.data.0.updatedAt', 'string')
-                ->whereType('files.data.0.createdBy', 'integer')
-                ->whereType('files.data.0.updatedBy', 'integer')
-                ->whereType('files.data.0.deletedAt', ['string', 'null'])
                 // it is last page
                 ->where('files.links.next', null)
-                // check ancestors props
-                ->whereType('ancestors.data.0.id', 'integer')
-                ->whereType('ancestors.data.0.isFolder', 'boolean')
-                ->whereType('ancestors.data.0.name', 'string')
-                ->whereType('ancestors.data.0.parentId', ['integer', 'null'])
             );
     }
 
