@@ -22,6 +22,32 @@ class FileControllerMethodIndexTest extends TestCase
             );
     }
 
+    public function test_user_list_for_auth_user(): void
+    {
+        // Make tree for other user
+        $otherUser = User::factory()->create();
+        $this->actingAs($otherUser);
+        $otherRoot = File::makeRootByUser($otherUser);
+
+        collect(['f1.png', 'f2.png'])->each(function (string $name) use ($otherRoot) {
+            File::factory()
+                ->afterMaking(fn(File $file) => $otherRoot->appendNode($file))
+                ->isFile()->make(['name' => $name]);
+        });
+
+        // Make request user
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        File::makeRootByUser($user);
+
+        $this->actingAs($user)->get('/file')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->component('MyFiles')
+                ->has('files.data', 0)
+            );
+    }
+
     public function test_user_not_verified(): void
     {
         $user = User::factory()->unverified()->create();
@@ -37,7 +63,7 @@ class FileControllerMethodIndexTest extends TestCase
             );
     }
 
-    public function test_user_with_empty_files(): void
+    public function test_user_with_empty_files_with_check_props(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -59,6 +85,19 @@ class FileControllerMethodIndexTest extends TestCase
                 // has pagination info
                 ->has('files.links.next')
                 ->has('files.meta.total')
+            );
+    }
+
+    public function test_user_with_route_with_parent_folder_id(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $root = File::makeRootByUser($user);
+
+        $this->get('/file/' . $root->id)
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->component('MyFiles')
             );
     }
 
