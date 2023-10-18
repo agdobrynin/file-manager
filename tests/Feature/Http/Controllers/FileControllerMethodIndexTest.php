@@ -6,9 +6,9 @@ use App\Models\File;
 use App\Models\FileFavorite;
 use App\Models\User;
 use App\VO\FileFolderVO;
+use Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
@@ -16,15 +16,28 @@ class FileControllerMethodIndexTest extends TestCase
 {
     use RefreshDatabase;
 
+    public static function dataForTestFilesListWithPagination(): Generator
+    {
+        yield 'for page 1 or default' => [
+            'url' => '/file',
+            'howManyFiles' => 3,
+            'nextPage' => '/file?page=2',
+        ];
+
+        yield 'for page 2' => [
+            'url' => '/file?page=2',
+            'howManyFiles' => 2,
+            'nextPage' => null,
+        ];
+    }
+
     public function test_file_resource_property(): void
     {
         $user = User::factory()->create();
-        $this->actingAs($user);
-        $root = File::makeRootByUser($user);
         // make files
-        $this->makeFilesTree(['f-1-1.png'], $root);
+        $this->makeFilesTreeForUser(['f-1-1.png'], $user);
 
-        $this->get('/file')
+        $this->actingAs($user)->get('/file')
             ->assertOk()
             ->assertInertia(fn(AssertableInertia $page) => $page
                 // test fileResource structure with check types
@@ -50,55 +63,50 @@ class FileControllerMethodIndexTest extends TestCase
                 ->whereType('ancestors.data.0.parentId', ['integer', 'null'])
             );
     }
-    public function test_files_list_with_pagination(): void
+
+    protected function makeFilesTreeForUser(array $names, User $user): File
     {
-        $user = User::factory()->create();
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
+
+        $makeFilesTree = static function (array $names, File $parent) use (&$makeFilesTree) {
+            foreach ($names as $key => $name) {
+                if (is_array($name)) {
+                    $folder = File::create((new FileFolderVO(name: $key))->toArray(), $parent);
+                    $makeFilesTree($name, $folder);
+                } else {
+                    File::factory()->afterMaking(fn(File $file) => $parent->appendNode($file))
+                        ->isFile()->make(['name' => $name]);
+                }
+            }
+        };
+
+        $makeFilesTree($names, $root);
+
+        return $root;
+    }
+
+    /** @dataProvider dataForTestFilesListWithPagination */
+    public function test_files_list_with_pagination(string $url, int $howManyFiles, ?string $nextPage): void
+    {
+        $user = User::factory()->create();
         // make files
-        $this->makeFilesTree([
+        $this->makeFilesTreeForUser([
             'f-1-1.png', 'f-1-2.png', 'f-1-3.jpg', 'f-1-4.doc',
             'Folder1' => ['f-2-1.png', 'f-2-2.png']
-        ], $root);
-
-        // How many files contains in root node in database
-        $this->assertCount(5, $root->children);
+        ], $user);
 
         // set config for page size in files list.
         Config::set('app.my_files.per_page', 3);
 
-        $this->get('/file')
+        $this->actingAs($user)->get($url)
             ->assertOk()
             ->assertInertia(fn(AssertableInertia $page) => $page
-                ->where('parentId', $root->id)
-                ->has('files.data', 3)
+                ->has('files.data', $howManyFiles)
                 // Folder is first in list
                 ->where('files.meta.total', 5)
-                ->whereContains('files.links.next', static function (string $value) {
-                    return Str::contains($value, '/file?page=2');
-                })
+                ->where('files.links.next', $nextPage ? Config::get('app.url') . $nextPage : null)
             );
-        // try to get page 2
-        $this->get('/file?page=2')
-            ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
-                ->has('files.data', 2)
-                // it is last page
-                ->where('files.links.next', null)
-            );
-    }
-
-    protected function makeFilesTree(array $names, File $parent): void
-    {
-        foreach ($names as $key => $name) {
-            if (is_array($name)) {
-                $folder = File::create((new FileFolderVO(name: $key))->toArray(), $parent);
-                $this->makeFilesTree($name, $folder);
-            } else {
-                File::factory()->afterMaking(fn(File $file) => $parent->appendNode($file))
-                    ->isFile()->make(['name' => $name]);
-            }
-        }
     }
 
     public function test_not_auth_user_redirect_to_login(): void
@@ -114,24 +122,21 @@ class FileControllerMethodIndexTest extends TestCase
     public function test_search_and_favorite_in_my_files(): void
     {
         $user = User::factory()->create();
-        $this->actingAs($user);
-        $root = File::makeRootByUser($user);
         // make files
-        $this->makeFilesTree([
+        $root = $this->makeFilesTreeForUser([
             'f-1-1.png', 'f-1-2.png', 'f-1-3.png', 'f-1-4.doc',
             'Folder1' => ['f-2-1.png', 'f-2-2.png', 'f-2-3.xls'],
-        ], $root);
+        ], $user);
 
         // Favorite and search display all descendants
         // Make is favorite files
-        foreach (['Folder1', 'f-1-1.png', 'f-2-1.png', 'f-2-3.xls'] as $name) {
-            $file = File::where('name', '=', $name)->first();
-            FileFavorite::factory()
-                ->for($file, 'file')
-                ->for($file->user, 'user')
-                ->create();
-        }
-
+        $root->refresh()->descendants()->get()->each(function (File $file) {
+            if (in_array($file->name, ['Folder1', 'f-1-1.png', 'f-2-1.png', 'f-2-3.xls'])) {
+                FileFavorite::factory()->for($file, 'file')
+                    ->for($file->user, 'user')
+                    ->create();
+            }
+        });
 
         $this->actingAs($user)->get('/file?search=.png&onlyFavorites=1')
             ->assertOk()
@@ -174,10 +179,8 @@ class FileControllerMethodIndexTest extends TestCase
     public function test_search_in_my_files_with_pagination(): void
     {
         $user = User::factory()->create();
-        $this->actingAs($user);
-        $root = File::makeRootByUser($user);
         // make files
-        $this->makeFilesTree([
+        $this->makeFilesTreeForUser([
             'f-1-1.png', 'f-1-4.doc',
             'Folder1' => [
                 'f-2-1.png', 'f-2-2.xls',
@@ -185,7 +188,7 @@ class FileControllerMethodIndexTest extends TestCase
                     'f-2-2-1.png', 'f-2-2-2.doc'
                 ]
             ]
-        ], $root);
+        ], $user);
 
         // set config for page size in files list.
         Config::set('app.my_files.per_page', 2);
@@ -214,9 +217,7 @@ class FileControllerMethodIndexTest extends TestCase
     {
         // Make tree for other user
         $otherUser = User::factory()->create();
-        $this->actingAs($otherUser);
-        $otherRoot = File::makeRootByUser($otherUser);
-        $this->makeFilesTree(['f1.png', 'f2.png'], $otherRoot);
+        $this->makeFilesTreeForUser(['f1.png', 'f2.png'], $otherUser);
 
         // Make request user
         $user = User::factory()->create();
