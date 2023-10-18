@@ -44,10 +44,10 @@ class SharedForMeController extends Controller
         try {
             $downloadDto = $downloadFilesService->handle($fileShares->get()->pluck('file'));
         } catch (Throwable $throwable) {
-            $sto = new ErrorMessageDto(message: $throwable->getMessage());
+            $errorMessageDto = new ErrorMessageDto(message: $throwable->getMessage());
 
             return \response()
-                ->json($sto, 400);
+                ->json($errorMessageDto, 400);
         }
 
         return response()->download($downloadDto->storagePath, $downloadDto->fileName)
