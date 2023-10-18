@@ -3,6 +3,7 @@
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\File;
+use App\Models\FileFavorite;
 use App\Models\User;
 use App\VO\FileFolderVO;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -89,6 +90,72 @@ class FileControllerMethodIndexTest extends TestCase
             ->assertInertia(fn(AssertableInertia $page) => $page
                 ->component('Auth/Login')
                 ->where('auth.user', null)
+            );
+    }
+
+    public function test_search_and_favorite_in_my_files(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $root = File::makeRootByUser($user);
+        // make files
+        collect(['f-1-1.png', 'f-1-2.png', 'f-1-3.png', 'f-1-4.doc'])->each(function (string $name) use ($root) {
+            File::factory()
+                ->afterMaking(fn(File $file) => $root->appendNode($file))
+                ->isFile()->make(['name' => $name]);
+        });
+        $subFolder = File::create((new FileFolderVO('Folder1'))->toArray(), $root);
+        collect(['f-2-1.png', 'f-2-2.png', 'f-2-3.xls'])->each(function (string $name) use ($subFolder) {
+            File::factory()
+                ->afterMaking(fn(File $file) => $subFolder->appendNode($file))
+                ->isFile()->make(['name' => $name]);
+        });
+
+        // Favorite and search display all descendants
+        // Make is favorite files
+        collect(['Folder1', 'f-1-1.png', 'f-2-1.png', 'f-2-3.xls'])->each(function(string $name) {
+            $file = File::where('name', '=', $name)->first();
+            FileFavorite::factory()
+                ->for($file, 'file')
+                ->for($file->user, 'user')
+                ->create();
+        });
+
+
+        $this->actingAs($user)->get('/file?search=.png&onlyFavorites=1')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->component('MyFiles')
+                ->where('files.meta.total', 2)
+                ->has('files.data', 2)
+                ->where('files.data.0.name', 'f-2-1.png')
+                ->where('files.data.0.isFavorite', true)
+                ->where('files.data.1.name', 'f-1-1.png')
+                ->where('files.data.1.isFavorite', true)
+            );
+        // Favorites in root folder
+        $this->actingAs($user)->get('/file?onlyFavorites=1')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->component('MyFiles')
+                ->where('files.meta.total', 2)
+                ->has('files.data', 2)
+                ->where('files.data.0.name', 'Folder1')
+                ->where('files.data.0.isFavorite', true)
+                ->where('files.data.1.name', 'f-1-1.png')
+                ->where('files.data.1.isFavorite', true)
+            );
+        // Favorites in sub folder
+        $this->actingAs($user)->get('/file/' . $subFolder->id . '?onlyFavorites=1')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->component('MyFiles')
+                ->where('files.meta.total', 2)
+                ->has('files.data', 2)
+                ->where('files.data.0.name', 'f-2-3.xls')
+                ->where('files.data.0.isFavorite', true)
+                ->where('files.data.1.name', 'f-2-1.png')
+                ->where('files.data.1.isFavorite', true)
             );
     }
 
