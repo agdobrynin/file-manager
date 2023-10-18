@@ -205,5 +205,6 @@ class FilesArchiveTest extends TestCase
             ->addFiles($subFolder->children);
 
         $this->assertEquals($subFolder->name . '.zip', $dto->fileName);
+        $this->assertEquals('/a/aaa.zip', $dto->storagePath);
     }
 }
