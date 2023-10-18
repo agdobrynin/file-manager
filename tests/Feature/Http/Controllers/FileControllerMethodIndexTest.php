@@ -22,17 +22,10 @@ class FileControllerMethodIndexTest extends TestCase
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
         // make files
-        collect(['f-1-1.png', 'f-1-2.png', 'f-1-3.jpg', 'f-1-4.doc'])->each(function (string $name) use ($root) {
-            File::factory()
-                ->afterMaking(fn(File $file) => $root->appendNode($file))
-                ->isFile()->make(['name' => $name]);
-        });
-        $folder = File::create((new FileFolderVO('Folder1'))->toArray(), $root);
-        collect(['f-2-1.png', 'f-2-2.png'])->each(function (string $name) use ($folder) {
-            File::factory()
-                ->afterMaking(fn(File $file) => $folder->appendNode($file))
-                ->isFile()->make(['name' => $name]);
-        });
+        $this->makeFilesTree([
+            'f-1-1.png', 'f-1-2.png', 'f-1-3.jpg', 'f-1-4.doc',
+            'Folder1' => ['f-2-1.png', 'f-2-2.png']
+        ], $root);
 
         // How many files contains in root node in database
         $this->assertCount(5, $root->children);
@@ -83,6 +76,19 @@ class FileControllerMethodIndexTest extends TestCase
             );
     }
 
+    protected function makeFilesTree(array $names, File $parent): void
+    {
+        foreach ($names as $key => $name) {
+            if (is_array($name)) {
+                $folder = File::create((new FileFolderVO(name: $key))->toArray(), $parent);
+                $this->makeFilesTree($name, $folder);
+            } else {
+                File::factory()->afterMaking(fn(File $file) => $parent->appendNode($file))
+                    ->isFile()->make(['name' => $name]);
+            }
+        }
+    }
+
     public function test_not_auth_user_redirect_to_login(): void
     {
         $this->followingRedirects()->get('/file')
@@ -99,27 +105,20 @@ class FileControllerMethodIndexTest extends TestCase
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
         // make files
-        collect(['f-1-1.png', 'f-1-2.png', 'f-1-3.png', 'f-1-4.doc'])->each(function (string $name) use ($root) {
-            File::factory()
-                ->afterMaking(fn(File $file) => $root->appendNode($file))
-                ->isFile()->make(['name' => $name]);
-        });
-        $subFolder = File::create((new FileFolderVO('Folder1'))->toArray(), $root);
-        collect(['f-2-1.png', 'f-2-2.png', 'f-2-3.xls'])->each(function (string $name) use ($subFolder) {
-            File::factory()
-                ->afterMaking(fn(File $file) => $subFolder->appendNode($file))
-                ->isFile()->make(['name' => $name]);
-        });
+        $this->makeFilesTree([
+            'f-1-1.png', 'f-1-2.png', 'f-1-3.png', 'f-1-4.doc',
+            'Folder1' => ['f-2-1.png', 'f-2-2.png', 'f-2-3.xls'],
+        ], $root);
 
         // Favorite and search display all descendants
         // Make is favorite files
-        collect(['Folder1', 'f-1-1.png', 'f-2-1.png', 'f-2-3.xls'])->each(function(string $name) {
+        foreach (['Folder1', 'f-1-1.png', 'f-2-1.png', 'f-2-3.xls'] as $name) {
             $file = File::where('name', '=', $name)->first();
             FileFavorite::factory()
                 ->for($file, 'file')
                 ->for($file->user, 'user')
                 ->create();
-        });
+        }
 
 
         $this->actingAs($user)->get('/file?search=.png&onlyFavorites=1')
@@ -146,6 +145,7 @@ class FileControllerMethodIndexTest extends TestCase
                 ->where('files.data.1.isFavorite', true)
             );
         // Favorites in sub folder
+        $subFolder = $root->children->firstWhere(fn(File $file) => $file->isFolder());
         $this->actingAs($user)->get('/file/' . $subFolder->id . '?onlyFavorites=1')
             ->assertOk()
             ->assertInertia(fn(AssertableInertia $page) => $page
@@ -165,23 +165,15 @@ class FileControllerMethodIndexTest extends TestCase
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
         // make files
-        collect(['f-1-1.png', 'f-1-4.doc'])->each(function (string $name) use ($root) {
-            File::factory()
-                ->afterMaking(fn(File $file) => $root->appendNode($file))
-                ->isFile()->make(['name' => $name]);
-        });
-        $folder = File::create((new FileFolderVO('Folder1'))->toArray(), $root);
-        collect(['f-2-1.png', 'f-2-2.xls'])->each(function (string $name) use ($folder) {
-            File::factory()
-                ->afterMaking(fn(File $file) => $folder->appendNode($file))
-                ->isFile()->make(['name' => $name]);
-        });
-        $subFolder = File::create((new FileFolderVO('Sub Folder2'))->toArray(), $folder);
-        collect(['f-2-2-1.png', 'f-2-2-2.doc'])->each(function (string $name) use ($subFolder) {
-            File::factory()
-                ->afterMaking(fn(File $file) => $subFolder->appendNode($file))
-                ->isFile()->make(['name' => $name]);
-        });
+        $this->makeFilesTree([
+            'f-1-1.png', 'f-1-4.doc',
+            'Folder1' => [
+                'f-2-1.png', 'f-2-2.xls',
+                'Sub Folder2' => [
+                    'f-2-2-1.png', 'f-2-2-2.doc'
+                ]
+            ]
+        ], $root);
 
         // set config for page size in files list.
         Config::set('app.my_files.per_page', 2);
@@ -212,12 +204,7 @@ class FileControllerMethodIndexTest extends TestCase
         $otherUser = User::factory()->create();
         $this->actingAs($otherUser);
         $otherRoot = File::makeRootByUser($otherUser);
-
-        collect(['f1.png', 'f2.png'])->each(function (string $name) use ($otherRoot) {
-            File::factory()
-                ->afterMaking(fn(File $file) => $otherRoot->appendNode($file))
-                ->isFile()->make(['name' => $name]);
-        });
+        $this->makeFilesTree(['f1.png', 'f2.png'], $otherRoot);
 
         // Make request user
         $user = User::factory()->create();
