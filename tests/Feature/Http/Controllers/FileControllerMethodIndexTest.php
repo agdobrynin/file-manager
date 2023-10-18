@@ -6,6 +6,7 @@ use App\Models\File;
 use App\Models\User;
 use App\VO\FileFolderVO;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
@@ -21,7 +22,7 @@ class FileControllerMethodIndexTest extends TestCase
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
         // make files
-        collect(['f-1-1.png', 'f-1-2.png', 'f-1-3.jpg'])->each(function (string $name) use ($root) {
+        collect(['f-1-1.png', 'f-1-2.png', 'f-1-3.jpg', 'f-1-4.doc'])->each(function (string $name) use ($root) {
             File::factory()
                 ->afterMaking(fn(File $file) => $root->appendNode($file))
                 ->isFile()->make(['name' => $name]);
@@ -34,20 +35,51 @@ class FileControllerMethodIndexTest extends TestCase
         });
 
         // How many files contains in root node in database
-        $this->assertCount(4, $root->children);
+        $this->assertCount(5, $root->children);
 
         // set config for page size in files list.
-        Config::set('app.my_files.per_page', 2);
+        Config::set('app.my_files.per_page', 3);
 
         $this->get('/file')
             ->assertOk()
             ->assertInertia(fn(AssertableInertia $page) => $page
                 ->where('parentId', $root->id)
-                ->has('files.data', 2)
-                ->where('files.meta.total', 4)
+                ->has('files.data', 3)
+                // Folder is first in list
+                ->where('files.data.0.isFolder', true)
+                ->where('files.meta.total', 5)
                 ->whereContains('files.links.next', static function (string $value) {
                     return Str::contains($value, '/file?page=2');
                 })
+            );
+        // try to get page 2
+        $this->get('/file?page=2')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->has('files.data', 2)
+                // test fileResource structure
+                ->where('files.data.0', function (Collection $item) {
+                    $expectKeys = collect([
+                        'id',
+                        'isFavorite',
+                        'name',
+                        'disk',
+                        'path',
+                        'parentId',
+                        'isFolder',
+                        'mime',
+                        'size',
+                        'owner',
+                        'createdAt',
+                        'updatedAt',
+                        'createdBy',
+                        'updatedBy',
+                        'deletedAt',
+                    ]);
+
+                    return $item->keys()->diff($expectKeys)->isEmpty();
+                })
+                ->where('files.links.next', null)
             );
     }
 
