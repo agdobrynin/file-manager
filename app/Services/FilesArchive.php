@@ -70,7 +70,8 @@ readonly class FilesArchive implements FilesArchiveInterface
         /** @var File $mainParent */
         $mainParent = $filesSorted->first()->parent;
         $realFileName = $mainParent->isRoot()
-            ? $mainParent->user->name : $mainParent->name;
+            ? $mainParent->user->name
+            : $mainParent->name;
 
         return new DownloadFileDto($realFileName . '.zip', $storagePath);
     }

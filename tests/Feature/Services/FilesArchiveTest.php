@@ -12,6 +12,7 @@ use App\Services\Exceptions\OpenArchiveException;
 use App\Services\FilesArchive;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use LogicException;
 use Mockery\MockInterface;
 use Tests\TestCase;
 use ZipArchive;
@@ -150,5 +151,59 @@ class FilesArchiveTest extends TestCase
 
         $this->assertEquals($user->name . '.zip', $dto->fileName);
         $this->assertEquals($storagePath, $dto->storagePath);
+    }
+
+    public function test_file_content_for_archive_sub_folder(): void
+    {
+        $user = User::factory()->create();
+        Auth::shouldReceive('id')->andReturn($user->id);
+
+        $root = File::makeRootByUser($user);
+
+        $subFolder = File::create([
+            'is_folder' => true, 'name' => 'folder', 'disk' => DiskEnum::LOCAL,
+            'children' => [
+                ['is_folder' => false, 'name' => 'file1.jpg', 'storage_path' => '/f/111.jpg', 'disk' => DiskEnum::LOCAL],
+                ['is_folder' => false, 'name' => 'file2.jpg', 'storage_path' => '/f/222.jpg', 'disk' => DiskEnum::LOCAL],
+            ],
+        ], $root);
+        File::create([
+            'is_folder' => true, 'name' => 'folder2', 'disk' => DiskEnum::LOCAL,
+            'children' => [
+                ['is_folder' => false, 'name' => 'file3.jpg', 'storage_path' => '/f/333.jpg', 'disk' => DiskEnum::LOCAL],
+                ['is_folder' => false, 'name' => 'file4.jpg', 'storage_path' => '/f/444.jpg', 'disk' => DiskEnum::LOCAL],
+            ],
+        ], $subFolder);
+        $subFolder->refresh();
+
+        $mockStorage = $this->partialMock(
+            StorageLocalServiceInterface::class,
+            fn(MockInterface $mock) => $mock->shouldReceive('filesystem->path')->andReturn('/a/aaa.zip')
+        );
+
+        $mockArchive = $this->getMockBuilder(ZipArchive::class)
+            ->onlyMethods(['addFromString'])
+            ->getMock();
+        $mockArchive->expects(self::exactly(4))
+            ->method('addFromString')
+            ->willReturnCallback(function ($fileName) {
+                // Files relative path in archive.
+                if (!in_array($fileName, ['file1.jpg', 'file2.jpg', 'folder2/file3.jpg', 'folder2/file4.jpg'])) {
+                    throw new LogicException('Unexpected file ' . $fileName . ' in archive');
+                }
+
+                return true;
+            });
+
+        $mockFileContent = $this->mock(
+            GetFileContentInterface::class,
+            fn(MockInterface $mock) => $mock->shouldReceive('getContent')
+                ->times(4)->withAnyArgs()->andReturn('file-content-as-string')
+        );
+
+        $dto = (new FilesArchive(archive: $mockArchive, localService: $mockStorage, fileContent: $mockFileContent))
+            ->addFiles($subFolder->children);
+
+        $this->assertEquals($subFolder->name . '.zip', $dto->fileName);
     }
 }
