@@ -250,6 +250,16 @@ class FileControllerMethodIndexTest extends TestCase
             );
     }
 
+    public function test_user_sub_folder_not_found(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        File::makeRootByUser($user);
+
+        $this->actingAs($user)->get('/file/10')
+            ->assertNotFound();
+    }
+
     public function test_user_with_empty_files_with_check_props(): void
     {
         $user = User::factory()->create();
