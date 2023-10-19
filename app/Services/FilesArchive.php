@@ -40,35 +40,24 @@ readonly class FilesArchive implements FilesArchiveInterface
 
         throw_unless($zipIsOpen, OpenArchiveException::class);
 
-        $filesToZip = collect();
-
-        /** @var File $file */
-        foreach ($files as $file) {
-            if ($file->isFolder()) {
-                $subFiles = $file->descendants()
-                    ->withDepth()
-                    ->get()
-                    ->filter(fn(File $file) => !$file->isFolder());
-                $filesToZip->push(...$subFiles->all());
-            } else {
-                $filesToZip->push($file);
+        $addToZip = function ($files, $ancestors = '') use (&$addToZip) {
+            foreach ($files as $file) {
+                if ($file->isFolder() && $file->children()->count()) {
+                    $addToZip($file->children()->get(), $ancestors . $file->name . DIRECTORY_SEPARATOR);
+                } else if (!$file->isFolder()) {
+                    $filePath = $ancestors . $file->name;
+                    $content = $this->fileContent->getContent($file);
+                    $this->archive->addFromString($filePath, $content);
+                }
             }
-        }
+        };
 
-        /** @var Collection<File> $filesSorted */
-        $filesSorted = $filesToZip->sortBy('depth');
-        $partOfAbsolutePath = dirname($filesSorted->first()->path);
-
-        foreach ($filesSorted as $file) {
-            $content = $this->fileContent->getContent($file);
-            $pathInArchive = Str::replaceFirst($partOfAbsolutePath, '', $file->path);
-            $this->archive->addFromString(ltrim($pathInArchive, DIRECTORY_SEPARATOR), $content);
-        }
+        $addToZip($files);
 
         $this->archive->close();
 
         /** @var File $mainParent */
-        $mainParent = $filesSorted->first()->parent;
+        $mainParent = $files->first()->parent;
         $realFileName = $mainParent->isRoot()
             ? $mainParent->user->name
             : $mainParent->name;
