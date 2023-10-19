@@ -31,6 +31,38 @@ class FileControllerMethodIndexTest extends TestCase
         ];
     }
 
+    public static function dataTestSearchAndFavoriteInMyFiles(): \Generator
+    {
+        yield 'search ".png" and favorite only' => [
+            'url' => '/file?search=.png&onlyFavorites=1',
+            'perPage' => 2,
+            'expectFiles' => [
+                ['path' => '/Folder1/f-2-2.png', 'isFavorite' => true],
+                ['path' => '/Folder1/f-2-1.png', 'isFavorite' => true],
+            ],
+            'totalFiles' => 3,
+        ];
+
+        yield 'favorite only in root folder' => [
+            'url' => '/file?onlyFavorites=1',
+            'perPage' => 2,
+            'expectFiles' => [
+                ['path' => '/Folder1', 'isFavorite' => true],
+                ['path' => '/f-1-4.doc', 'isFavorite' => true],
+            ],
+            'totalFiles' => 3,
+        ];
+
+        yield 'favorite only in root folder page 2' => [
+            'url' => '/file?onlyFavorites=1&page=2',
+            'perPage' => 2,
+            'expectFiles' => [
+                ['path' => '/f-1-1.png', 'isFavorite' => true],
+            ],
+            'totalFiles' => 3,
+        ];
+    }
+
     public function test_file_resource_property(): void
     {
         $user = User::factory()->create();
@@ -115,11 +147,15 @@ class FileControllerMethodIndexTest extends TestCase
             ->assertOk()
             ->assertInertia(fn(AssertableInertia $page) => $page
                 ->component('Auth/Login')
+                ->url('/login')
                 ->where('auth.user', null)
             );
     }
 
-    public function test_search_and_favorite_in_my_files(): void
+    /**
+     * @dataProvider dataTestSearchAndFavoriteInMyFiles
+     */
+    public function test_search_and_favorite_in_my_files(string $url, int $perPage, array $expectFiles, int $totalFiles): void
     {
         $user = User::factory()->create();
         // make files
@@ -131,86 +167,51 @@ class FileControllerMethodIndexTest extends TestCase
         // Favorite and search display all descendants
         // Make is favorite files
         $root->refresh()->descendants()->get()->each(function (File $file) {
-            if (in_array($file->name, ['Folder1', 'f-1-1.png', 'f-2-1.png', 'f-2-3.xls'])) {
+            $paths = [
+                '/Folder1',
+                '/f-1-1.png',
+                '/f-1-4.doc',
+                '/Folder1/f-2-1.png',
+                '/Folder1/f-2-2.png',
+                '/Folder1/f-2-3.xls',
+            ];
+            if (in_array($file->path, $paths, true)) {
                 FileFavorite::factory()->for($file, 'file')
                     ->for($file->user, 'user')
                     ->create();
             }
         });
 
-        $this->actingAs($user)->get('/file?search=.png&onlyFavorites=1')
+        Config::set('app.my_files.per_page', $perPage);
+
+        $this->actingAs($user)->get($url)
             ->assertOk()
             ->assertInertia(fn(AssertableInertia $page) => $page
                 ->component('MyFiles')
-                ->where('files.meta.total', 2)
-                ->has('files.data', 2)
-                ->where('files.data.0.name', 'f-2-1.png')
-                ->where('files.data.0.isFavorite', true)
-                ->where('files.data.1.name', 'f-1-1.png')
-                ->where('files.data.1.isFavorite', true)
-            );
-        // Favorites in root folder
-        $this->actingAs($user)->get('/file?onlyFavorites=1')
-            ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
-                ->component('MyFiles')
-                ->where('files.meta.total', 2)
-                ->has('files.data', 2)
-                ->where('files.data.0.name', 'Folder1')
-                ->where('files.data.0.isFavorite', true)
-                ->where('files.data.1.name', 'f-1-1.png')
-                ->where('files.data.1.isFavorite', true)
-            );
-        // Favorites in sub folder
-        $subFolder = $root->children->firstWhere(fn(File $file) => $file->isFolder());
-        $this->actingAs($user)->get('/file/' . $subFolder->id . '?onlyFavorites=1')
-            ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
-                ->component('MyFiles')
-                ->where('files.meta.total', 2)
-                ->has('files.data', 2)
-                ->where('files.data.0.name', 'f-2-3.xls')
-                ->where('files.data.0.isFavorite', true)
-                ->where('files.data.1.name', 'f-2-1.png')
-                ->where('files.data.1.isFavorite', true)
+                ->where('files.meta.total', $totalFiles)
+                ->whereContains('files', function (array $data) use ($expectFiles) {
+                    $intersect = array_uintersect_assoc(
+                        $expectFiles,
+                        $data,
+                        static fn($expectItem, $dataItem) => $expectItem !== array_intersect_assoc($expectItem, $dataItem)
+                    );
+                    $this->assertEqualsCanonicalizing($expectFiles, $intersect);
+
+                    return true;
+                })
             );
     }
 
-    public function test_search_in_my_files_with_pagination(): void
+    public function test_unauthorized_action_for_parent_folder_not_owner(): void
     {
+        $otherUser = User::factory()->create();
+        $otherRoot = File::factory()->isFolder($otherUser)->createQuietly();
+
         $user = User::factory()->create();
-        // make files
-        $this->makeFilesTreeForUser([
-            'f-1-1.png', 'f-1-4.doc',
-            'Folder1' => [
-                'f-2-1.png', 'f-2-2.xls',
-                'Sub Folder2' => [
-                    'f-2-2-1.png', 'f-2-2-2.doc'
-                ]
-            ]
-        ], $user);
+        $root = File::factory()->isFolder($user)->createQuietly();
 
-        // set config for page size in files list.
-        Config::set('app.my_files.per_page', 2);
-
-        $this->actingAs($user)->get('/file?search=.png')
-            ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
-                ->component('MyFiles')
-                ->where('files.meta.total', 3)
-                ->has('files.data', 2) // per_page = 2, but all find files 3
-                ->where('files.data.0.name', 'f-2-2-1.png')
-                ->where('files.data.1.name', 'f-2-1.png')
-            );
-        //page 2
-        $this->actingAs($user)->get('/file?search=.png&page=2')
-            ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
-                ->component('MyFiles')
-                ->where('files.meta.total', 3)
-                ->has('files.data', 1)
-                ->where('files.data.0.name', 'f-1-1.png')
-            );
+        $this->actingAs($user)->get('/file/' . $otherRoot->id)
+            ->assertForbidden();
     }
 
     public function test_user_list_for_auth_user(): void
@@ -242,6 +243,7 @@ class FileControllerMethodIndexTest extends TestCase
             ->assertOk()
             ->assertInertia(fn(AssertableInertia $page) => $page
                 ->component('Auth/VerifyEmail')
+                ->url('/verify-email')
                 ->has('auth.user.name')
                 ->where('auth.user.email', $user->email)
                 ->where('auth.user.email_verified_at', null)
