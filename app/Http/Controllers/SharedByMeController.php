@@ -11,6 +11,7 @@ use App\Http\Requests\FilesListFilterRequest;
 use App\Http\Resources\FileShareResource;
 use App\Models\FileShare;
 use App\Services\MakeDownloadFilesService;
+use App\VO\DownloadFileVO;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
@@ -63,7 +64,13 @@ class SharedByMeController extends Controller
         }
 
         try {
-            $downloadDto = $downloadFilesService->handle($fileShares->get()->pluck('file'));
+            $files = $fileShares->get()->pluck('file');
+            $downloadFile = $downloadFilesService->handle($files);
+            $downloadFileVO = new DownloadFileVO(
+                files: $files,
+                downloadFile: $downloadFile,
+                defaultFileName: 'Files share by me'
+            );
         } catch (Throwable $throwable) {
             $errorMessageDto = new ErrorMessageDto(message: $throwable->getMessage());
 
@@ -71,7 +78,7 @@ class SharedByMeController extends Controller
                 ->json($errorMessageDto, 400);
         }
 
-        return \response()->download($downloadDto->storagePath, $downloadDto->fileName)
+        return \response()->download($downloadFileVO->downloadFile, $downloadFileVO->fileName)
             ->deleteFileAfterSend();
     }
 }

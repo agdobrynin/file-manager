@@ -6,7 +6,6 @@ namespace App\Services;
 use App\Contracts\FilesArchiveInterface;
 use App\Contracts\GetFileContentInterface;
 use App\Contracts\StorageLocalServiceInterface;
-use App\Dto\DownloadFileDto;
 use App\Models\File;
 use App\Services\Exceptions\DownloadEmptyFolderException;
 use App\Services\Exceptions\OpenArchiveException;
@@ -30,8 +29,9 @@ readonly class MakeDownloadFilesService
     /**
      * @param Collection<File>|BaseCollection<File> $files
      * @throws Throwable|OpenArchiveException|DownloadEmptyFolderException|RuntimeException
+     * @return string Full path to download file
      */
-    public function handle(BaseCollection|Collection $files): DownloadFileDto
+    public function handle(BaseCollection|Collection $files): string
     {
         throw_if($files->isEmpty(), message: 'No files for download');
 
@@ -55,9 +55,7 @@ readonly class MakeDownloadFilesService
                     message: 'Can not put file to temporary storage'
                 );
 
-                $storagePath = $this->localService->filesystem()->path($storageFileName);
-
-                return new DownloadFileDto($file->name, $storagePath);
+                return $this->localService->filesystem()->path($storageFileName);
             }
         }
 

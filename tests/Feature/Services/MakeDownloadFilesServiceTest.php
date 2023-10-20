@@ -5,7 +5,6 @@ namespace Tests\Feature\Services;
 use App\Contracts\FilesArchiveInterface;
 use App\Contracts\GetFileContentInterface;
 use App\Contracts\StorageLocalServiceInterface;
-use App\Dto\DownloadFileDto;
 use App\Models\File;
 use App\Models\User;
 use App\Services\Exceptions\DownloadEmptyFolderException;
@@ -87,9 +86,7 @@ class MakeDownloadFilesServiceTest extends TestCase
         $mockArchive = $this->mock(FilesArchiveInterface::class, function (MockInterface $mock) use ($files) {
             $mock->shouldReceive('addFiles')
                 ->with($files)
-                ->andReturn(
-                    new DownloadFileDto('my.zip', '/var/tmp/my.zip')
-                )
+                ->andReturn('/var/tmp/my.zip')
                 ->once();
         });
 
@@ -123,17 +120,13 @@ class MakeDownloadFilesServiceTest extends TestCase
                 ->once();
         });
 
-        $dto = $this->makeSimpleService(
+        $downloadFile = $this->makeSimpleService(
             storageMock: $mockStorage,
             fileContentMock: $fileContentMock,
         )
             ->handle($files);
 
-        $this->assertInstanceOf(DownloadFileDto::class, $dto);
-        $this->assertEquals([
-            'fileName' => $file->name,
-            'storagePath' => $fileTmpName,
-        ], (array)$dto);
+        $this->assertEquals($fileTmpName, $downloadFile);
     }
 
     public function test_empty_folder(): void

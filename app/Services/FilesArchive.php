@@ -6,8 +6,6 @@ namespace App\Services;
 use App\Contracts\FilesArchiveInterface;
 use App\Contracts\GetFileContentInterface;
 use App\Contracts\StorageLocalServiceInterface;
-use App\Dto\DownloadFileDto;
-use App\Models\File;
 use App\Services\Exceptions\FilesCollectionIsEmpty;
 use App\Services\Exceptions\OpenArchiveException;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,10 +26,10 @@ readonly class FilesArchive implements FilesArchiveInterface
 
     /**
      * @param BaseCollection|Collection $files
-     * @return DownloadFileDto
      * @throws OpenArchiveException|FilesCollectionIsEmpty|Throwable
+     * @return string Full path to archive file
      */
-    public function addFiles(Collection|BaseCollection $files): DownloadFileDto
+    public function addFiles(Collection|BaseCollection $files): string
     {
         throw_unless($files->count(), exception: FilesCollectionIsEmpty::class);
 
@@ -56,12 +54,6 @@ readonly class FilesArchive implements FilesArchiveInterface
 
         $this->archive->close();
 
-        /** @var File $mainParent */
-        $mainParent = $files->first()->parent;
-        $realFileName = $mainParent->isRoot()
-            ? $mainParent->user->name
-            : $mainParent->name;
-
-        return new DownloadFileDto($realFileName . '.zip', $storagePath);
+        return $storagePath;
     }
 }

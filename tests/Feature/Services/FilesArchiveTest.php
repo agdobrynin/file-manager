@@ -143,14 +143,13 @@ class FilesArchiveTest extends TestCase
             }
         );
 
-        $dto = ($this->makeService(
+        $downloadFile = ($this->makeService(
             mockArchive: $mockArchive,
             mockFileContent: $mockFileContent,
             mockStorage: $mockStorage,
         ))->addFiles($root->children);
 
-        $this->assertEquals($user->name . '.zip', $dto->fileName);
-        $this->assertEquals($storagePath, $dto->storagePath);
+        $this->assertEquals($storagePath, $downloadFile);
     }
 
     public function test_file_content_for_archive_sub_folder(): void
@@ -201,10 +200,9 @@ class FilesArchiveTest extends TestCase
                 ->times(4)->withAnyArgs()->andReturn('file-content-as-string')
         );
 
-        $dto = (new FilesArchive(archive: $mockArchive, localService: $mockStorage, fileContent: $mockFileContent))
+        $downloadFile = (new FilesArchive(archive: $mockArchive, localService: $mockStorage, fileContent: $mockFileContent))
             ->addFiles($subFolder->children);
 
-        $this->assertEquals($subFolder->name . '.zip', $dto->fileName);
-        $this->assertEquals('/a/aaa.zip', $dto->storagePath);
+        $this->assertEquals('/a/aaa.zip', $downloadFile);
     }
 }

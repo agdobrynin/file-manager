@@ -23,6 +23,7 @@ use App\Models\File;
 use App\Models\FileFavorite;
 use App\Models\FileShare;
 use App\Services\MakeDownloadFilesService;
+use App\VO\DownloadFileVO;
 use App\VO\FileFavoriteVO;
 use App\VO\FileFolderVO;
 use App\VO\FileShareVO;
@@ -117,7 +118,12 @@ class FileController extends Controller
             : $request->requestFiles;
 
         try {
-            $downloadDto = $downloadFilesService->handle($files);
+            $downloadFile = $downloadFilesService->handle($files);
+            $downloadFileVO = new DownloadFileVO(
+                files: $files,
+                downloadFile: $downloadFile,
+                defaultFileName: 'My files'
+            );
         } catch (Throwable $throwable) {
             $errorMessageDto = new ErrorMessageDto(message: $throwable->getMessage());
 
@@ -125,7 +131,7 @@ class FileController extends Controller
                 ->json($errorMessageDto, 400);
         }
 
-        return response()->download($downloadDto->storagePath, $downloadDto->fileName)
+        return response()->download($downloadFileVO->downloadFile, $downloadFileVO->fileName)
             ->deleteFileAfterSend();
     }
 
