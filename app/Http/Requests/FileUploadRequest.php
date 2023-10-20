@@ -60,7 +60,6 @@ class FileUploadRequest extends ParentIdBaseRequest
 
                     $parentFolder = $this->parentFolder ?: File::rootFolderByUser($this->user());
 
-
                     $folders = File::existNames($firstLevelFolders->unique()->toArray(), $this->user(), $parentFolder);
 
                     foreach ($folders->pluck('name')->toArray() as $index => $folder) {
