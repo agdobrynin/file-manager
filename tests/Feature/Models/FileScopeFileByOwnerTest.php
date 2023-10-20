@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class FileScopeFileByOwner extends TestCase
+class FileScopeFileByOwnerTest extends TestCase
 {
     use RefreshDatabase;
 

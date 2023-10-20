@@ -9,6 +9,7 @@ class FileUploadRequest extends ParentIdBaseRequest
 {
     protected const RELATIVE_PATHS_KEY = 'relativePaths';
     protected const FILES_KEY = 'files';
+    protected $stopOnFirstFailure = true;
 
     /**
      * Get the validation rules that apply to the request.
@@ -22,6 +23,10 @@ class FileUploadRequest extends ParentIdBaseRequest
             ->route('file.index', ['parentFolder' => $this->parentFolder]);
 
         return [
+            self::FILES_KEY => [
+                'required',
+                'array',
+            ],
             self::FILES_KEY . '.*' => [
                 'required',
                 'file',
@@ -78,7 +83,9 @@ class FileUploadRequest extends ParentIdBaseRequest
     protected function prepareForValidation(): void
     {
         // Remove lead slash.
-        $relativePathsFixed = array_map(static fn($item) => ltrim($item, '/'), $this->{self::RELATIVE_PATHS_KEY});
+        $relativePathsFixed = is_array($this->{self::RELATIVE_PATHS_KEY})
+            ? array_map(static fn($item) => ltrim($item, '/'), $this->{self::RELATIVE_PATHS_KEY})
+            : [];
 
         $this->merge([
             self::RELATIVE_PATHS_KEY => $relativePathsFixed,
