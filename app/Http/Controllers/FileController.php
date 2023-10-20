@@ -32,6 +32,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
@@ -82,14 +83,23 @@ class FileController extends Controller
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $this->authorize('create', $parentFolder);
 
-        $vo = new UploadFilesVO(...$request->validated());
-        $files = $filesService->upload($parentFolder, $vo->tree);
+        try {
+            $vo = new UploadFilesVO(...$request->validated());
+            $files = $filesService->upload($parentFolder, $vo->tree);
+            $flash = [
+                FlashMessagesEnum::SUCCESS->value,
+                'Upload ' . $files->count() . ' ' . Str::plural('file', $files->count())
+            ];
 
-        foreach ($files as $file) {
-            MoveFileToCloud::dispatch($file);
+            foreach ($files as $file) {
+                MoveFileToCloud::dispatch($file);
+            }
+        } catch (\Throwable $exception) {
+            $flash = [FlashMessagesEnum::ERROR->value, 'Upload files error: ' . $exception->getMessage()];
         }
 
-        return to_route('file.index', ['parentFolder' => $parentFolder]);
+        return to_route('file.index', ['parentFolder' => $parentFolder])
+            ->with(...$flash);
     }
 
     public function destroy(MyFilesActionRequest $request): RedirectResponse

@@ -132,9 +132,6 @@ const uploadFiles = (uploadFiles) => {
 
         fileUploadForm.post(route('file.upload', { parentFolder: page.props.parentId || null }), {
             onSuccess: () => {
-                successMessage(
-                    `Upload ${fileUploadForm.files.length} file${fileUploadForm.files.length > 1 ? 's' : ''}`
-                );
                 emitter.emit(FILES_UPLOADED_SUCCESS);
             },
             onError: errors => {
