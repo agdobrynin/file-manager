@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Http\Controllers;
 
+use App\Jobs\MoveFileToCloud;
 use App\Models\File;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class FileControllerMethodUploadTest extends TestCase
@@ -168,5 +170,60 @@ class FileControllerMethodUploadTest extends TestCase
 
         $this->actingAs($user)->post('/file/upload/' . $otherRoot->id, $data)
             ->assertForbidden();
+    }
+
+    public function test_success(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $root = File::makeRootByUser($user);
+
+        $data = [
+            'files' => [
+                UploadedFile::fake()->image('img.png'),
+                UploadedFile::fake()->image('img.png'),
+                UploadedFile::fake()->image('avatar.jpg'),
+            ],
+            'relativePaths' => [
+                '/folder/img.png',
+                '/img.png',
+                '/avatar.jpg',
+            ],
+        ];
+
+        Queue::fake([MoveFileToCloud::class]);
+
+        $this->actingAs($user)->post('/file/upload', $data)
+            ->assertRedirect('/file/' . $root->id)
+            ->assertSessionHas('success')
+            ->assertSessionMissing('error');
+
+        Queue::assertPushed(MoveFileToCloud::class, 3);
+    }
+
+    public function test_has_throw_in_controller(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $root = File::makeRootByUser($user);
+
+        $data = [
+            'files' => [
+                UploadedFile::fake()->image('img.png'),
+                UploadedFile::fake()->image('img2.png'),
+            ],
+            'relativePaths' => [
+                '/folder/img.png',
+            ],
+        ];
+
+        Queue::fake([MoveFileToCloud::class]);
+
+        $this->actingAs($user)->post('/file/upload', $data)
+            ->assertRedirect('/file/' . $root->id)
+            ->assertSessionHas('error')
+            ->assertSessionMissing('success');
+
+        Queue::assertPushed(MoveFileToCloud::class, 0);
     }
 }
