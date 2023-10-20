@@ -185,7 +185,7 @@ class FileControllerMethodUploadTest extends TestCase
                 UploadedFile::fake()->image('avatar.jpg'),
             ],
             'relativePaths' => [
-                '/folder/img.png',
+                '/My folder🎈/img.png',
                 '/img.png',
                 '/avatar.jpg',
             ],
@@ -199,6 +199,20 @@ class FileControllerMethodUploadTest extends TestCase
             ->assertSessionMissing('error');
 
         Queue::assertPushed(MoveFileToCloud::class, 3);
+
+        $this->assertDatabaseHas(
+            File::class,
+            ['is_folder' => true, 'name' => 'My folder🎈', 'path' => '/My folder🎈', 'parent_id' => $root->id]
+        );
+        $this->assertDatabaseHas(
+            File::class,
+            ['is_folder' => false, 'name' => 'img.png', 'path' => '/img.png', 'parent_id' => $root->id]
+        );
+        // File in sub folder "My folder🎈"
+        $this->assertDatabaseHas(
+            File::class,
+            ['is_folder' => false, 'name' => 'img.png', 'path' => '/My folder🎈/img.png']
+        );
     }
 
     public function test_has_throw_in_controller(): void
@@ -225,5 +239,14 @@ class FileControllerMethodUploadTest extends TestCase
             ->assertSessionMissing('success');
 
         Queue::assertPushed(MoveFileToCloud::class, 0);
+
+        $this->assertDatabaseMissing(
+            File::class,
+            ['is_folder' => false, 'name' => 'img.png', 'path' => '/folder/img.png']
+        );
+        $this->assertDatabaseMissing(
+            File::class,
+            ['is_folder' => false, 'name' => 'img2.png']
+        );
     }
 }
