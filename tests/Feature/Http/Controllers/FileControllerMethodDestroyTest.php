@@ -137,4 +137,57 @@ class FileControllerMethodDestroyTest extends TestCase
             ->assertSessionHasErrors($errors)
             ->assertSessionDoesntHaveErrors($noErrors);
     }
+
+    public function test_delete_all_in_root_success(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $root = File::makeRootByUser($user);
+        $files = File::factory(2)
+            ->afterMaking(fn(File $file) => $root->appendNode($file))
+            ->make();
+        $dataset = $files->toArray();
+
+        foreach ($dataset as $item) {
+            $this->assertDatabaseHas(File::class, $item);
+        }
+
+        $this->actingAs($user)->delete('/file/destroy/' . $root->id, ['all' => true])
+            ->assertRedirect('/file/' . $root->id)
+            ->assertSessionDoesntHaveErrors(['all', 'ids']);
+
+        foreach ($dataset as $item) {
+            $this->assertSoftDeleted(File::class, ['id' => $item['id']]);
+        }
+    }
+
+    public function test_delete_by_ids_success(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $root = File::makeRootByUser($user);
+        $files = File::factory(2)
+            ->afterMaking(fn(File $file) => $root->appendNode($file))
+            ->make();
+
+        $dataset = $files->toArray();
+
+        foreach ($dataset as $item) {
+            $this->assertDatabaseHas(File::class, $item);
+        }
+        // destroy by ids item #2 from datase
+        $this->actingAs($user)->delete(
+            '/file/destroy/' . $root->id,
+            ['all' => false, 'ids' => [$dataset[1]['id']]]
+        )
+            ->assertRedirect('/file/' . $root->id)
+            ->assertSessionDoesntHaveErrors(['all', 'ids']);
+
+        $this->assertNotSoftDeleted(File::class, ['id' => $root->id]);
+        $this->assertNotSoftDeleted(File::class, ['id' => $dataset[0]['id']]);
+
+        $this->assertSoftDeleted(File::class, ['id' => $dataset[1]['id']]);
+    }
 }
