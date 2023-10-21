@@ -198,6 +198,7 @@ class FileControllerMethodUploadTest extends TestCase
             ->assertSessionHas('success')
             ->assertSessionMissing('error');
 
+        Queue::assertPushedOn('upload', MoveFileToCloud::class);
         Queue::assertPushed(MoveFileToCloud::class, 3);
 
         $this->assertDatabaseHas(
