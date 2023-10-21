@@ -128,6 +128,9 @@ class FileControllerMethodDestroyTest extends TestCase
 
         if (($data['ids'] ?? null) instanceof \Closure) {
             $data['ids'] = $data['ids']();
+            foreach ($data['ids'] as $id) {
+                $this->assertDatabaseHas(File::class, ['id' => $id]);
+            }
         }
 
         $this->actingAs($user)->delete('/file/destroy', $data)
