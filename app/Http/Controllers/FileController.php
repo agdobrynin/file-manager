@@ -104,6 +104,11 @@ class FileController extends Controller
 
     public function destroy(MyFilesActionRequest $request): RedirectResponse
     {
+        // Check parent folder is owner
+        if ($request->parentFolder) {
+            $this->authorize('view', $request->parentFolder);
+        }
+
         $dto = new FileIdsDto(...$request->validated());
         $children = $dto->all
             ? $request->parentFolder->children()->get()

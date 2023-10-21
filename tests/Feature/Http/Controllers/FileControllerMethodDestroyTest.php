@@ -177,7 +177,7 @@ class FileControllerMethodDestroyTest extends TestCase
         foreach ($dataset as $item) {
             $this->assertDatabaseHas(File::class, $item);
         }
-        // destroy by ids item #2 from datase
+        // destroy by ids item #2 from dataset
         $this->actingAs($user)->delete(
             '/file/destroy/' . $root->id,
             ['all' => false, 'ids' => [$dataset[1]['id']]]
@@ -189,5 +189,25 @@ class FileControllerMethodDestroyTest extends TestCase
         $this->assertNotSoftDeleted(File::class, ['id' => $dataset[0]['id']]);
 
         $this->assertSoftDeleted(File::class, ['id' => $dataset[1]['id']]);
+    }
+
+    public function test_destroy_with_parent_folder_not_owner(): void
+    {
+        $otherUser = User::factory()->create();
+        $this->actingAs($otherUser);
+
+        $rootOther = File::makeRootByUser($otherUser);
+        $filesOther = File::factory(2)
+            ->afterMaking(fn(File $file) => $rootOther->appendNode($file))
+            ->make();
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        File::makeRootByUser($user);
+
+        $this->actingAs($user)->delete(
+            '/file/destroy/' . $rootOther->id,
+            ['all' => true]
+        )->assertForbidden();
     }
 }
