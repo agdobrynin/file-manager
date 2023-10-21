@@ -21,13 +21,15 @@ class FilesActionRequest extends ParentIdBaseRequest
      */
     public function rules(): array
     {
-        return [
+        return array_merge(parent::rules(), [
             self::ALL_FILES_KEY => 'required|boolean',
             'ids' => [
                 'bail',
                 'required_if:' . self::ALL_FILES_KEY . ',false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
+                    $this->requestFiles = new Collection();
+
                     if ($ids) {
                         $foundFiles = File::fileByOwner($this->user())
                             ->whereIn('id', $ids)
@@ -38,12 +40,10 @@ class FilesActionRequest extends ParentIdBaseRequest
                         }
 
                         $this->requestFiles = $foundFiles;
-                    } else {
-                        $this->requestFiles = new Collection();
                     }
                 }
             ]
-        ];
+        ]);
     }
 
     protected function prepareForValidation(): void
