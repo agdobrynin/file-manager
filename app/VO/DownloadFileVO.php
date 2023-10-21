@@ -47,7 +47,10 @@ readonly class DownloadFileVO
             if ($files->count() === 1) {
                 $fileName = $firstItem->name . '.' . $extension;
             } else {
-                $fileName = $defaultFileName . '.' . $extension;
+                $name = $firstItem->parent->isRoot()
+                    ? $defaultFileName
+                    : $firstItem->parent->name;
+                $fileName = $name . '.' . $extension;
             }
         }
 

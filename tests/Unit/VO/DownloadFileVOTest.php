@@ -44,17 +44,25 @@ class DownloadFileVOTest extends TestCase
 
         $file = tempnam(sys_get_temp_dir(), 'FOO');
         rename($file, $file . '.zip');
+
+        $parent = new File(['is_folder' => true, 'name' => 'Sub folder']);
+        $parent->setParentId(1);
+
         $collection = collect([
             new File(['is_folder' => false, 'name' => 'file1.doc']),
             new File(['is_folder' => false, 'name' => 'image.gif']),
             new File(['is_folder' => true, 'name' => 'My folder']),
         ]);
 
+        foreach ($collection as $item) {
+            $item->setRelation('parent', $parent);
+        }
+
         yield 'download many files' => [
             'files' => $collection,
             'exception' => '',
             'downloadFile' => $file . '.zip',
-            'expectName' => 'my files.zip',
+            'expectName' => 'Sub folder.zip',
             'defaultName' => 'my files'
         ];
     }
