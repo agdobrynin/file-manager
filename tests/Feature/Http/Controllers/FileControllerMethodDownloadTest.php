@@ -77,6 +77,33 @@ class FileControllerMethodDownloadTest extends TestCase
             ->assertHeader('content-type', 'application/zip');
     }
 
+    public function test_download_all_files_in_folder(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $root = File::makeRootByUser($user);
+        $subFolder = File::factory()->isFolder()->create(['name' => 'Sub Folder']);
+        $root->appendNode($subFolder);
+        $files = File::factory(2)
+            ->afterMaking(fn(File $file) => $subFolder->appendNode($file))
+            ->make(['disk' => DiskEnum::LOCAL]);
+        // make storage
+        $storage = Storage::fake(DiskEnum::LOCAL->value);
+        /** @var File $file */
+        foreach ($files as $file) {
+            $storage->put($file->storage_path, 'small content here');
+        }
+
+        $this->actingAs($user)->get('/file/download/' . $subFolder->id . '?all=1')
+            ->assertOk()
+            ->assertHeader(
+                'content-disposition',
+                'attachment; filename="Sub Folder.zip"'
+            )
+            ->assertHeader('content-type', 'application/zip');
+    }
+
     public function test_download_one_file(): void
     {
         $user = User::factory()->create();
