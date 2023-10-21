@@ -127,6 +127,11 @@ class FileController extends Controller
      */
     public function download(MyFilesActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse|JsonResponse
     {
+        // Check parent folder is owner
+        if ($request->parentFolder) {
+            $this->authorize('view', $request->parentFolder);
+        }
+
         $dto = new FileIdsDto(...$request->validated());
         $files = $dto->all
             ? $request->parentFolder->children()->get()
