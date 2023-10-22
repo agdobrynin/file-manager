@@ -3,8 +3,10 @@
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\File;
+use App\Models\FileShare;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class FileControllerMethodShareTest extends TestCase
@@ -111,5 +113,80 @@ class FileControllerMethodShareTest extends TestCase
         $this->actingAs($user)->post('/file/share/', ['ids' => $ids, 'email' => $user->email])
             ->assertSessionHasErrors(['email'])
             ->assertSessionDoesntHaveErrors(['ids', 'all']);
+    }
+
+    public function test_share_success_but_user_not_defined_in_database(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $ids = File::factory(3)
+            ->isFile($user)
+            ->createQuietly()
+            ->pluck('id')
+            ->toArray();
+
+        $this->actingAs($user)
+            ->post('/file/share/', ['ids' => $ids, 'email' => 'nobody@mail.com'])
+            ->assertSessionDoesntHaveErrors(['ids', 'all', 'email'])
+            ->assertSessionHas('success');
+
+        Notification::assertNothingSent();
+
+        foreach ($ids as $id) {
+            $this->assertDatabaseMissing(FileShare::class, ['file_id' => $id]);
+            $this->assertDatabaseHas(File::class, ['id' => $id]);
+        }
+    }
+
+    public function test_share_success_to_user(): void
+    {
+        Notification::fake();
+        $shareForUser = User::factory()->create();
+
+        $user = User::factory()->create();
+        $ids = File::factory(3)
+            ->isFile($user)
+            ->createQuietly()
+            ->pluck('id')
+            ->toArray();
+
+        $this->actingAs($user)
+            ->post('/file/share/', ['ids' => $ids, 'email' => $shareForUser->email])
+            ->assertSessionDoesntHaveErrors(['ids', 'all', 'email'])
+            ->assertSessionHas('success');
+
+        Notification::assertSentTo([$shareForUser], \App\Notifications\FileShare::class);
+
+        foreach ($ids as $id) {
+            $this->assertDatabaseHas(FileShare::class, ['file_id' => $id, 'for_user_id' => $shareForUser->id]);
+            $this->assertDatabaseHas(File::class, ['id' => $id]);
+        }
+    }
+
+    public function test_share_folder_by_all_success_to_user(): void
+    {
+        Notification::fake();
+        $shareForUser = User::factory()->create();
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        /** @var File $folder */
+        $folder = File::factory()->isFolder()->create();
+        $files = File::factory(5)
+            ->afterCreating(fn(File $file) => $folder->appendNode($file))
+            ->isFile($user)->create();
+
+        $this->actingAs($user)
+            ->post('/file/share/' . $folder->id, ['all' => true, 'email' => $shareForUser->email])
+            ->assertSessionDoesntHaveErrors(['ids', 'all', 'email'])
+            ->assertSessionHas('success');
+
+        Notification::assertSentTo([$shareForUser], \App\Notifications\FileShare::class);
+
+        foreach ($files->pluck('id') as $id) {
+            $this->assertDatabaseHas(FileShare::class, ['file_id' => $id, 'for_user_id' => $shareForUser->id]);
+            $this->assertDatabaseHas(File::class, ['id' => $id]);
+        }
     }
 }
