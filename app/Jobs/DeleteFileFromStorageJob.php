@@ -19,7 +19,7 @@ class DeleteFileFromStorageJob implements ShouldQueue
 
     public int $backoff = 10;
 
-    public function __construct(protected DestroyFileFromStorageDto $dto)
+    public function __construct(public readonly DestroyFileFromStorageDto $dto)
     {
     }
 
