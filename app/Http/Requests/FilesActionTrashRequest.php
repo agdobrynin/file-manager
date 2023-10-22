@@ -23,6 +23,7 @@ class FilesActionTrashRequest extends ActionWithAllKeyRequest
 
         return array_merge(parent::rules(), [
             'ids' => [
+                'bail',
                 'required_if:' . self::ALL_FILES_KEY . ',false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
