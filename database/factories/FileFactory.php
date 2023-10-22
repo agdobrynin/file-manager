@@ -39,7 +39,7 @@ class FileFactory extends Factory
             ->for($user, 'userUpdate');
     }
 
-    public function isFile(?User $user = null): Factory
+    public function isFile(?User $user = null): FileFactory|Factory
     {
         $name = Str::random() . '.' . $this->faker->fileExtension();
 
@@ -59,6 +59,13 @@ class FileFactory extends Factory
         }
 
         return $factory;
+    }
+
+    public function deleted(): FileFactory|Factory
+    {
+        return $this->state(fn (array $attributes) => [
+            'deleted_at' => now(),
+        ]);
     }
 
     public function isFolder(?User $user = null): FileFactory|Factory

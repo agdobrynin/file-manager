@@ -104,4 +104,72 @@ class FileTrashControllerMethodRestoreTest extends TestCase
 
         $response->assertSessionDoesntHaveErrors($noErrors);
     }
+
+    public function test_restore_all_success(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $files = collect(
+            [
+                File::factory()->isFile()->deleted()->create(),
+                File::factory()->isFile()->deleted()->create(),
+                File::factory()->isFile()->deleted()->create(),
+            ]
+        );
+
+        $ids = $files->pluck('id')->toArray();
+
+        foreach ($ids as $id) {
+            $this->assertSoftDeleted(File::class, ['id' => $id]);
+        }
+
+        $this->actingAs($user)
+            ->from('/trash')
+            ->post('/trash/restore', ['all' => true])
+            ->assertRedirect('/trash')
+            ->assertSessionMissing('warning')
+            ->assertSessionHas('success');
+
+        foreach ($ids as $id) {
+            $this->assertNotSoftDeleted(File::class, ['id' => $id]);
+        }
+    }
+
+    public function test_restore_file_when_file_already_exist(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        /** @var File $fileInTrash file move to trash */
+        $fileInTrash = File::factory()->isFile()->deleted()->create();
+        $this->assertSoftDeleted(File::class, ['id' => $fileInTrash->id]);
+        /** @var File $file file exist in main list */
+        $file = $fileInTrash->replicate(['deleted_at']);
+        $file->save();
+
+        $this->actingAs($user)
+            ->from('/trash')
+            ->post('/trash/restore', ['ids' => [$fileInTrash->id]])
+            ->assertRedirect('/trash')
+            ->assertSessionHas(['warning', 'success']);
+
+        $this->assertSoftDeleted(File::class, ['id' => $fileInTrash->id]);
+    }
+
+    public function test_restore_file(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        /** @var File $fileInTrash file move to trash */
+        $fileInTrash = File::factory()->isFile()->deleted()->create();
+        $this->assertSoftDeleted(File::class, ['id' => $fileInTrash->id]);
+
+        $this->actingAs($user)
+            ->from('/trash')
+            ->post('/trash/restore', ['ids' => [$fileInTrash->id]])
+            ->assertRedirect('/trash')
+            ->assertSessionHas('success')
+            ->assertSessionMissing('warning');
+
+        $this->assertNotSoftDeleted(File::class, ['id' => $fileInTrash->id]);
+    }
 }
