@@ -85,6 +85,14 @@ class FileTrashControllerMethodIndexTest extends TestCase
             );
     }
 
+    public function test_search_validation(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/trash?search[]=files')
+            ->assertRedirect()
+            ->assertSessionHasErrors('search');
+    }
+
     public function test_trash_has_files_with_pagination_and_check_file_in_trash_resource(): void
     {
         $user = User::factory()->create();
