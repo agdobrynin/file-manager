@@ -6,6 +6,8 @@ use App\Enums\DiskEnum;
 use App\Jobs\DeleteFileFromStorageJob;
 use App\Models\File;
 use App\Models\User;
+use Closure;
+use Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
@@ -17,7 +19,7 @@ class FileTrashControllerMethodDestroyTest extends TestCase
 {
     use RefreshDatabase;
 
-    public static function dataMethodNotAllowed(): \Generator
+    public static function dataMethodNotAllowed(): Generator
     {
         yield 'method get' => ['get'];
         yield 'method post' => ['post'];
@@ -35,7 +37,7 @@ class FileTrashControllerMethodDestroyTest extends TestCase
             ->assertMethodNotAllowed();
     }
 
-    public static function dataForValidation(): \Generator
+    public static function dataForValidation(): Generator
     {
         yield 'all is undefined and ids not set' => [
             'data' => [],
@@ -96,7 +98,7 @@ class FileTrashControllerMethodDestroyTest extends TestCase
     {
         $user = User::factory()->create();
 
-        if (isset($data['ids']) && $data['ids'] instanceof \Closure) {
+        if (isset($data['ids']) && $data['ids'] instanceof Closure) {
             $data['ids'] = $data['ids']();
         }
 
@@ -143,7 +145,7 @@ class FileTrashControllerMethodDestroyTest extends TestCase
         Queue::assertPushed(
             DeleteFileFromStorageJob::class,
             static function (DeleteFileFromStorageJob $job) use ($storagePaths) {
-                return \in_array($job->dto->fileStoragePath, $storagePaths, true)
+                return in_array($job->dto->fileStoragePath, $storagePaths, true)
                     && $job->dto->disk instanceof DiskEnum;
             }
         );
