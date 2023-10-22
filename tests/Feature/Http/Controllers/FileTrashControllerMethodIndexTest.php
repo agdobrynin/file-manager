@@ -158,4 +158,22 @@ class FileTrashControllerMethodIndexTest extends TestCase
                 ->where('auth.user.email_verified_at', null)
             );
     }
+
+    public static function dataMethodAllowed(): \Generator
+    {
+        yield 'method post' => ['post'];
+        yield 'method delete' => ['delete'];
+        yield 'method patch' => ['patch'];
+        yield 'method put' => ['put'];
+    }
+
+    /**
+     * @dataProvider dataMethodAllowed
+     */
+    public function test_method_allowed(string $method): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->{$method}('/trash')
+            ->assertMethodNotAllowed();
+    }
 }
