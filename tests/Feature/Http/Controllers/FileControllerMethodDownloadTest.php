@@ -119,7 +119,7 @@ class FileControllerMethodDownloadTest extends TestCase
         $storage = Storage::fake(DiskEnum::LOCAL->value);
         $storage->put($files[1]->storage_path, fake()->image);
 
-        $this->actingAs($user)->get('/file/download/' . $root->id . '?all=&ids[]=' . $files[1]->id)
+        $this->actingAs($user)->get('/file/download/' . $root->id . '?all=false&ids[]=' . $files[1]->id)
             ->assertOk()
             ->assertHeader(
                 'content-disposition',
