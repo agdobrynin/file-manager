@@ -16,10 +16,10 @@ class FileShareActionRequest extends ActionWithAllKeyRequest
     {
         return array_merge(parent::rules(), [
             'ids' => [
+                'bail',
                 'required_if:' . self::ALL_FILES_KEY . ',false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
-                    if ($ids) {
                         $fileSharCount = FileShare::fileShareForUserOrByUser($this->user())
                             ->whereIn('id', $ids)
                             ->count();
@@ -28,7 +28,6 @@ class FileShareActionRequest extends ActionWithAllKeyRequest
                             $fail('Some file share IDs are not valid.');
                         }
                     }
-                }
             ]
         ]);
     }
