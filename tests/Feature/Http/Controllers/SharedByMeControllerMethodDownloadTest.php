@@ -172,14 +172,50 @@ class SharedByMeControllerMethodDownloadTest extends TestCase
         $storage = Storage::fake($file->disk->value);
         $storage->put($file->storage_path, 'content');
 
-        $queryString = http_build_query(['ids' => [$shareFile->id]]);
-
         $this->actingAs($user)
-            ->get('/share-by-me/download?all=false&' . $queryString)
+            ->get('/share-by-me/download?all=false&ids[]=' . $shareFile->id)
             ->assertOk()
             ->assertHeader(
                 'content-disposition',
                 'attachment; filename=' . $file->name
+            );
+    }
+
+    public function test_download_folder_with_files(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        /** @var FileShare $shareFolder for folder with name "My folder" */
+        $shareFolder = FileShare::factory()
+            ->afterMaking(
+                fn(FileShare $fileShare) => $fileShare->file()
+                    ->associate(File::factory()->isFolder()->create(['name' => 'My folder']))
+            )
+            ->for(User::factory()->create(), 'forUser')
+            ->create();
+        // Add files to share Folder
+        /** @var File $folder */
+        $folder = $shareFolder->file;
+
+        $file1 = File::factory()
+            ->afterCreating(fn(File $file) => $folder->appendNode($file))
+            ->isFile()->create();
+        $file2 = File::factory()
+            ->afterCreating(fn(File $file) => $folder->appendNode($file))
+            ->isFile()->create();
+        // make storage
+        $storage = Storage::fake($file1->disk->value);
+        foreach ([$file1, $file2] as $file) {
+            $storage->put($file->storage_path, 'content');
+        }
+
+        $this->actingAs($user)
+            ->get('/share-by-me/download?all=false&ids[]=' . $shareFolder->id)
+            ->assertOk()
+            ->assertHeader(
+                'content-disposition',
+                'attachment; filename="My folder.zip"'
             );
     }
 }
