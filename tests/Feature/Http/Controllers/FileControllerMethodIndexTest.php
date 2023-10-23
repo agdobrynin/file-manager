@@ -31,6 +31,29 @@ class FileControllerMethodIndexTest extends TestCase
         ];
     }
 
+    /** @dataProvider dataForTestFilesListWithPagination */
+    public function test_files_list_with_pagination(string $url, int $howManyFiles, ?string $nextPage): void
+    {
+        $user = User::factory()->create();
+        // make files
+        $this->makeFilesTreeForUser([
+            'f-1-1.png', 'f-1-2.png', 'f-1-3.jpg', 'f-1-4.doc',
+            'Folder1' => ['f-2-1.png', 'f-2-2.png']
+        ], $user);
+
+        // set config for page size in files list.
+        Config::set('app.my_files.per_page', 3);
+
+        $this->actingAs($user)->get($url)
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->has('files.data', $howManyFiles)
+                // Folder is first in list
+                ->where('files.meta.total', 5)
+                ->where('files.links.next', $nextPage ? Config::get('app.url') . $nextPage : null)
+            );
+    }
+
     public static function dataTestSearchAndFavoriteInMyFiles(): \Generator
     {
         yield 'search ".png" and favorite only' => [
@@ -61,95 +84,6 @@ class FileControllerMethodIndexTest extends TestCase
             ],
             'totalFiles' => 3,
         ];
-    }
-
-    public function test_file_resource_property(): void
-    {
-        $user = User::factory()->create();
-        // make files
-        $this->makeFilesTreeForUser(['f-1-1.png'], $user);
-
-        $this->actingAs($user)->get('/file')
-            ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
-                // test fileResource structure with check types
-                ->whereType('files.data.0.id', 'integer')
-                ->whereType('files.data.0.isFavorite', 'boolean')
-                ->whereType('files.data.0.name', 'string')
-                ->whereType('files.data.0.disk', 'string')
-                ->whereType('files.data.0.path', 'string')
-                ->whereType('files.data.0.parentId', 'integer')
-                ->whereType('files.data.0.isFolder', 'boolean')
-                ->whereType('files.data.0.mime', ['string', 'null'])
-                ->whereType('files.data.0.size', ['integer', 'null'])
-                ->whereType('files.data.0.owner', 'string')
-                ->whereType('files.data.0.createdAt', 'string')
-                ->whereType('files.data.0.updatedAt', 'string')
-                ->whereType('files.data.0.createdBy', 'integer')
-                ->whereType('files.data.0.updatedBy', 'integer')
-                ->whereType('files.data.0.deletedAt', ['string', 'null'])
-                // check ancestors props
-                ->whereType('ancestors.data.0.id', 'integer')
-                ->whereType('ancestors.data.0.isFolder', 'boolean')
-                ->whereType('ancestors.data.0.name', 'string')
-                ->whereType('ancestors.data.0.parentId', ['integer', 'null'])
-            );
-    }
-
-    protected function makeFilesTreeForUser(array $names, User $user): File
-    {
-        $this->actingAs($user);
-        $root = File::makeRootByUser($user);
-
-        $makeFilesTree = static function (array $names, File $parent) use (&$makeFilesTree) {
-            foreach ($names as $key => $name) {
-                if (is_array($name)) {
-                    $folder = File::create((new FileFolderVO(name: $key))->toArray(), $parent);
-                    $makeFilesTree($name, $folder);
-                } else {
-                    File::factory()->afterMaking(fn(File $file) => $parent->appendNode($file))
-                        ->isFile()->make(['name' => $name]);
-                }
-            }
-        };
-
-        $makeFilesTree($names, $root);
-
-        return $root;
-    }
-
-    /** @dataProvider dataForTestFilesListWithPagination */
-    public function test_files_list_with_pagination(string $url, int $howManyFiles, ?string $nextPage): void
-    {
-        $user = User::factory()->create();
-        // make files
-        $this->makeFilesTreeForUser([
-            'f-1-1.png', 'f-1-2.png', 'f-1-3.jpg', 'f-1-4.doc',
-            'Folder1' => ['f-2-1.png', 'f-2-2.png']
-        ], $user);
-
-        // set config for page size in files list.
-        Config::set('app.my_files.per_page', 3);
-
-        $this->actingAs($user)->get($url)
-            ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
-                ->has('files.data', $howManyFiles)
-                // Folder is first in list
-                ->where('files.meta.total', 5)
-                ->where('files.links.next', $nextPage ? Config::get('app.url') . $nextPage : null)
-            );
-    }
-
-    public function test_not_auth_user_redirect_to_login(): void
-    {
-        $this->followingRedirects()->get('/file')
-            ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
-                ->component('Auth/Login')
-                ->url('/login')
-                ->where('auth.user', null)
-            );
     }
 
     /**
@@ -199,6 +133,50 @@ class FileControllerMethodIndexTest extends TestCase
 
                     return true;
                 })
+            );
+    }
+
+    public function test_file_resource_property(): void
+    {
+        $user = User::factory()->create();
+        // make files
+        $this->makeFilesTreeForUser(['f-1-1.png'], $user);
+
+        $this->actingAs($user)->get('/file')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                // test fileResource structure with check types
+                ->whereType('files.data.0.id', 'integer')
+                ->whereType('files.data.0.isFavorite', 'boolean')
+                ->whereType('files.data.0.name', 'string')
+                ->whereType('files.data.0.disk', 'string')
+                ->whereType('files.data.0.path', 'string')
+                ->whereType('files.data.0.parentId', 'integer')
+                ->whereType('files.data.0.isFolder', 'boolean')
+                ->whereType('files.data.0.mime', ['string', 'null'])
+                ->whereType('files.data.0.size', ['integer', 'null'])
+                ->whereType('files.data.0.owner', 'string')
+                ->whereType('files.data.0.createdAt', 'string')
+                ->whereType('files.data.0.updatedAt', 'string')
+                ->whereType('files.data.0.createdBy', 'integer')
+                ->whereType('files.data.0.updatedBy', 'integer')
+                ->whereType('files.data.0.deletedAt', ['string', 'null'])
+                // check ancestors props
+                ->whereType('ancestors.data.0.id', 'integer')
+                ->whereType('ancestors.data.0.isFolder', 'boolean')
+                ->whereType('ancestors.data.0.name', 'string')
+                ->whereType('ancestors.data.0.parentId', ['integer', 'null'])
+            );
+    }
+
+    public function test_not_auth_user_redirect_to_login(): void
+    {
+        $this->followingRedirects()->get('/file')
+            ->assertOk()
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->component('Auth/Login')
+                ->url('/login')
+                ->where('auth.user', null)
             );
     }
 
@@ -306,5 +284,27 @@ class FileControllerMethodIndexTest extends TestCase
 
         $this->actingAs($user)->get('/file')
             ->assertNotFound();
+    }
+
+    protected function makeFilesTreeForUser(array $names, User $user): File
+    {
+        $this->actingAs($user);
+        $root = File::makeRootByUser($user);
+
+        $makeFilesTree = static function (array $names, File $parent) use (&$makeFilesTree) {
+            foreach ($names as $key => $name) {
+                if (is_array($name)) {
+                    $folder = File::create((new FileFolderVO(name: $key))->toArray(), $parent);
+                    $makeFilesTree($name, $folder);
+                } else {
+                    File::factory()->afterMaking(fn(File $file) => $parent->appendNode($file))
+                        ->isFile()->make(['name' => $name]);
+                }
+            }
+        };
+
+        $makeFilesTree($names, $root);
+
+        return $root;
     }
 }
