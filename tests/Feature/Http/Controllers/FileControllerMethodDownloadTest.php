@@ -21,6 +21,16 @@ class FileControllerMethodDownloadTest extends TestCase
         yield 'method patch' => ['method' => 'patch'];
     }
 
+    /**
+     * @dataProvider dataMethodAvailable
+     */
+    public function test_method_available(string $method): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->{$method}('/file/download')
+            ->assertMethodNotAllowed();
+    }
+
     public function test_download_can_not_read_source_files(): void
     {
         $user = User::factory()->create();
@@ -167,16 +177,6 @@ class FileControllerMethodDownloadTest extends TestCase
 
         $this->actingAs($user)->get('/file/download/' . $rootOther->id . '?all=1')
             ->assertForbidden();
-    }
-
-    /**
-     * @dataProvider dataMethodAvailable
-     */
-    public function test_method_available(string $method): void
-    {
-        $this->actingAs(User::factory()->create())
-            ->{$method}('/file/download')
-            ->assertMethodNotAllowed();
     }
 
     public function test_patent_folder_not_found(): void
