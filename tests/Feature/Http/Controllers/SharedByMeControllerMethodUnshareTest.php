@@ -8,6 +8,7 @@ use App\Models\User;
 use Closure;
 use Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Tests\TestCase;
 
 class SharedByMeControllerMethodUnshareTest extends TestCase
@@ -108,5 +109,83 @@ class SharedByMeControllerMethodUnshareTest extends TestCase
         if ($noErrors) {
             $response->assertSessionDoesntHaveErrors($noErrors);
         }
+    }
+
+    public function test_unshare_all(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $files = collect();
+        /** @var Collection<FileShare> $fileShares */
+        $fileShares = FileShare::factory(2)
+            ->afterMaking(
+                fn(FileShare $fileShare) => $fileShare->file()
+                    ->associate(
+                        tap(
+                            File::factory()->isFile()->create(),
+                            static fn(File $file) => $files->add($file)
+                        )
+                    )
+            )
+            ->for(User::factory()->create(), 'forUser')
+            ->create();
+
+        foreach ($fileShares as $fileShare) {
+            $this->assertDatabaseHas(FileShare::class, $fileShare->withoutRelations()->toArray());
+        }
+
+        $data = ['all' => true];
+
+        $this->actingAs($user)
+            ->from('/share-by-me')
+            ->delete('/share-by-me/unshare', $data)
+            ->assertRedirect('/share-by-me')
+            ->assertSessionHasNoErrors();
+
+        foreach ($fileShares as $fileShare) {
+            $this->assertDatabaseMissing(FileShare::class, $fileShare->withoutRelations()->toArray());
+        }
+
+        foreach ($files as $file) {
+            $this->assertCount(0, $file->fileShare);
+        }
+    }
+
+    public function test_unshare_single_file(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $files = collect();
+        /** @var Collection<FileShare> $fileShares */
+        $fileShares = FileShare::factory(2)
+            ->afterMaking(
+                fn(FileShare $fileShare) => $fileShare->file()
+                    ->associate(
+                        tap(
+                            File::factory()->isFile()->create(),
+                            static fn(File $file) => $files->add($file)
+                        )
+                    )
+            )
+            ->for(User::factory()->create(), 'forUser')
+            ->create();
+
+        foreach ($fileShares as $fileShare) {
+            $this->assertDatabaseHas(FileShare::class, $fileShare->withoutRelations()->toArray());
+        }
+
+        $this->actingAs($user)
+            ->from('/share-by-me')
+            ->delete('/share-by-me/unshare', ['ids' => [$fileShares[0]->id]])
+            ->assertRedirect('/share-by-me')
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseMissing(FileShare::class, $fileShares[0]->withoutRelations()->toArray());
+        $this->assertDatabaseHas(FileShare::class, $fileShares[1]->withoutRelations()->toArray());
+
+        $this->assertCount(0, $files[0]->fileShare);
+        $this->assertCount(1, $files[1]->fileShare);
     }
 }
