@@ -8,6 +8,7 @@ use App\Models\User;
 use Closure;
 use Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SharedByMeControllerMethodDownloadTest extends TestCase
@@ -150,5 +151,35 @@ class SharedByMeControllerMethodDownloadTest extends TestCase
             ->get('/share-by-me/download?all=false&' . $queryString)
             ->assertStatus(400)
             ->assertJsonStructure(['message', 'errors']);
+    }
+
+    public function test_download_single_file(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        /** @var FileShare $shareFile */
+        $shareFile = FileShare::factory()
+            ->afterMaking(
+                fn(FileShare $fileShare) => $fileShare->file()
+                    ->associate(File::factory()->isFile()->create())
+            )
+            ->for(User::factory()->create(), 'forUser')
+            ->create();
+        // make store for file
+        /** @var File $file */
+        $file = $shareFile->file;
+        $storage = Storage::fake($file->disk->value);
+        $storage->put($file->storage_path, 'content');
+
+        $queryString = http_build_query(['ids' => [$shareFile->id]]);
+
+        $this->actingAs($user)
+            ->get('/share-by-me/download?all=false&' . $queryString)
+            ->assertOk()
+            ->assertHeader(
+                'content-disposition',
+                'attachment; filename=' . $file->name
+            );
     }
 }
