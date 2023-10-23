@@ -72,7 +72,9 @@ class FileTrashController extends Controller
             : $request->requestFiles;
 
         $destroyedCollection = $filesDestroy->destroy($files)
-            ->each(fn(DestroyFileFromStorageDto $destroyDto) => DeleteFileFromStorageJob::dispatch($destroyDto));
+            ->each(function (DestroyFileFromStorageDto $destroyDto) {
+                return DeleteFileFromStorageJob::dispatch($destroyDto);
+            });
 
         return to_route('trash.index')->with(
             FlashMessagesEnum::SUCCESS->value,

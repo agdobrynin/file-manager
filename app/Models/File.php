@@ -6,6 +6,7 @@ use App\Dto\FilesListFilterDto;
 use App\Dto\MyFilesListFilterDto;
 use App\Enums\DiskEnum;
 use App\Traits\HasCreatorAndUpdater;
+use App\VO\FileFolderVO;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -135,12 +136,7 @@ class File extends Model
         try {
             return self::rootFolderByUser($user);
         } catch (ModelNotFoundException $exception) {
-            $file = self::make([
-                'name' => $user->email,
-                'is_folder' => true,
-                'disk' => DiskEnum::LOCAL,
-            ]);
-
+            $file = self::make((new FileFolderVO($user->email))->toArray());
             $file->makeRoot()->save();
 
             return $file;
@@ -155,6 +151,7 @@ class File extends Model
         return self::query()
             ->whereIsRoot()
             ->where('created_by', $user?->getAuthIdentifier())
+            ->where('is_folder', true)
             ->firstOrFail();
     }
 
@@ -172,20 +169,29 @@ class File extends Model
     {
         parent::boot();
 
-        static::creating(static function (File $model) {
-            if (!$model->isRoot()) {
-                $separator = str_ends_with($model->parent->path ?? '', DIRECTORY_SEPARATOR)
-                    ? ''
-                    : DIRECTORY_SEPARATOR;
+        static::creating(static fn(File $model) => self::makePath($model));
+        static::saving(static fn(File $model) => self::makePath($model));
+    }
 
-                $model->path = $model->parent->path . $separator . $model->name;
-            }
-        });
+    protected static function makePath(File $model): void
+    {
+        if (!$model->isRoot()) {
+            $separator = str_ends_with($model->parent->path ?? '', DIRECTORY_SEPARATOR)
+                ? ''
+                : DIRECTORY_SEPARATOR;
+
+            $model->path = $model->parent?->path . $separator . $model->name;
+        }
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function userUpdate(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     public function favorite(): HasOne
@@ -205,7 +211,7 @@ class File extends Model
 
     public function isFolder(): bool
     {
-        return (bool)$this->is_folder;
+        return $this->is_folder;
     }
 
     public function scopeFilesList(Builder $builder, User $user, MyFilesListFilterDto $dto, File $folder): Builder
@@ -216,9 +222,12 @@ class File extends Model
             $builder->where('parent_id', $folder->id);
         }
 
+        if ($dto->onlyFavorites) {
+            $builder->whereHas('favorite');
+        }
+
         return $builder->whereNotNull('parent_id')
             ->with(['favorite'])
-            ->when($dto->onlyFavorites, fn() => $builder->whereHas('favorite'))
             ->where('created_by', '=', $user->getAuthIdentifier())
             ->with(['favorite'])
             ->orderBy('is_folder', 'desc')

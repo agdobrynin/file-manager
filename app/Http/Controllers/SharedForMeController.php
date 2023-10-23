@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Dto\ErrorMessageDto;
 use App\Dto\FileIdsDto;
 use App\Dto\FilesListFilterDto;
 use App\Http\Requests\FileShareActionRequest;
@@ -9,6 +10,8 @@ use App\Http\Requests\FilesListFilterRequest;
 use App\Http\Resources\FileShareResource;
 use App\Models\FileShare;
 use App\Services\MakeDownloadFilesService;
+use App\VO\DownloadFileVO;
+use Illuminate\Http\JsonResponse;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -30,7 +33,7 @@ class SharedForMeController extends Controller
     /**
      * @throws Throwable
      */
-    public function download(FileShareActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse
+    public function download(FileShareActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse|JsonResponse
     {
         $dto = new FileIdsDto(...$request->validated());
         $fileShares = FileShare::fileShareForUser($request->user())->with('file');
@@ -39,9 +42,22 @@ class SharedForMeController extends Controller
             $fileShares = $fileShares->whereIn('id', $dto->ids);
         }
 
-        $downloadDto = $downloadFilesService->handle($fileShares->get()->pluck('file'));
+        try {
+            $files = $fileShares->get()->pluck('file');
+            $downloadFile = $downloadFilesService->handle($files);
+            $downloadFileVO = new DownloadFileVO(
+                files: $files,
+                downloadFile: $downloadFile,
+                defaultFileName: 'Files share for me'
+            );
+        } catch (Throwable $throwable) {
+            $errorMessageDto = new ErrorMessageDto(message: $throwable->getMessage());
 
-        return response()->download($downloadDto->storagePath, $downloadDto->fileName)
+            return \response()
+                ->json($errorMessageDto, 400);
+        }
+
+        return response()->download($downloadFileVO->downloadFile, $downloadFileVO->fileName)
             ->deleteFileAfterSend();
     }
 }

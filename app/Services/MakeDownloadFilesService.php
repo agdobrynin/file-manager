@@ -3,25 +3,25 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\StorageByDiskTypeServiceInterface;
+use App\Contracts\FilesArchiveInterface;
+use App\Contracts\GetFileContentInterface;
 use App\Contracts\StorageLocalServiceInterface;
-use App\Dto\DownloadFileDto;
 use App\Models\File;
 use App\Services\Exceptions\DownloadEmptyFolderException;
 use App\Services\Exceptions\OpenArchiveException;
+use App\Services\Exceptions\PutFileForDownloadException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
-use ZipArchive;
 
 readonly class MakeDownloadFilesService
 {
     public function __construct(
-        private ZipArchive                        $archive,
-        private StorageLocalServiceInterface      $localService,
-        private StorageByDiskTypeServiceInterface $storageByModelService,
+        private StorageLocalServiceInterface $localService,
+        private GetFileContentInterface      $fileContent,
+        private FilesArchiveInterface        $archive,
     )
     {
     }
@@ -29,8 +29,9 @@ readonly class MakeDownloadFilesService
     /**
      * @param Collection<File>|BaseCollection<File> $files
      * @throws Throwable|OpenArchiveException|DownloadEmptyFolderException|RuntimeException
+     * @return string Full path to download file
      */
-    public function handle(BaseCollection|Collection $files): DownloadFileDto
+    public function handle(BaseCollection|Collection $files): string
     {
         throw_if($files->isEmpty(), message: 'No files for download');
 
@@ -46,60 +47,18 @@ readonly class MakeDownloadFilesService
 
             if (!$file->isFolder()) {
                 $storageFileName = Str::random(32);
+                $content = $this->fileContent->getContent($file);
 
-                throw_unless($this->localService->filesystem()->put($storageFileName, $this->getContent($file)));
+                throw_unless(
+                    $this->localService->filesystem()->put($storageFileName, $content),
+                    PutFileForDownloadException::class,
+                    message: 'Can not put file to temporary storage'
+                );
 
-                $storagePath = $this->localService->filesystem()->path($storageFileName);
-
-                return new DownloadFileDto($file->name, $storagePath);
+                return $this->localService->filesystem()->path($storageFileName);
             }
         }
 
-        $storagePath = $this->localService->filesystem()->path(Str::random(32) . '.zip');
-
-        throw_unless(
-            $this->archive->open($storagePath, ZipArchive::CREATE | ZipArchive::OVERWRITE),
-            OpenArchiveException::class
-        );
-
-        $this->addToZip($files);
-        $this->archive->close();
-
-        /** @var File $file */
-        $file = $files->first();
-
-        if ($files->count() === 1 && $file->isFolder()) {
-            $realFileName = $file->name;
-        } else {
-            $realFileName = $file->parent->isRoot()
-                ? $file->user->name
-                : $file->parent->name;
-        }
-
-        return new DownloadFileDto($realFileName . '.zip', $storagePath);
-    }
-
-    private function getContent(File $file): string
-    {
-        return $this->storageByModelService
-            ->resolve($file->disk)
-            ->filesystem()
-            ->get($file->storage_path);
-    }
-
-    /**
-     * @param BaseCollection<File>|Collection<File> $files
-     */
-    private function addToZip(BaseCollection|Collection $files, string $ancestors = ''): void
-    {
-        foreach ($files as $file) {
-            if ($file->isFolder() && $file->children()->count()) {
-                $this->addToZip($file->children()->get(), $ancestors . $file->name . DIRECTORY_SEPARATOR);
-            } else if (!$file->isFolder()) {
-                $filePath = $ancestors . $file->name;
-
-                $this->archive->addFromString($filePath, $this->getContent($file));
-            }
-        }
+        return $this->archive->addFiles($files);
     }
 }

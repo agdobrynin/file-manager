@@ -13,9 +13,9 @@ readonly class FileVO implements ModelAttributeInterface
         public string   $name,
         public string   $mime,
         public int      $size,
-        public DiskEnum $disk,
-        public ?string  $path,
-        public ?string  $storagePath,
+        public ?string  $path = null,
+        public ?string  $storagePath = null,
+        public DiskEnum $disk = DiskEnum::LOCAL,
     )
     {
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\UploadTreeFilesServiceInterface;
+use App\Dto\ErrorMessageDto;
 use App\Dto\FavoriteIdDto;
 use App\Dto\FileIdsDto;
 use App\Dto\MyFilesListFilterDto;
@@ -22,13 +23,16 @@ use App\Models\File;
 use App\Models\FileFavorite;
 use App\Models\FileShare;
 use App\Services\MakeDownloadFilesService;
+use App\VO\DownloadFileVO;
 use App\VO\FileFavoriteVO;
 use App\VO\FileFolderVO;
 use App\VO\FileShareVO;
 use App\VO\UploadFilesVO;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
@@ -79,18 +83,32 @@ class FileController extends Controller
         $parentFolder = $request->parentFolder ?: File::rootFolderByUser($request->user());
         $this->authorize('create', $parentFolder);
 
-        $vo = new UploadFilesVO(...$request->validated());
-        $files = $filesService->upload($parentFolder, $vo->tree);
+        try {
+            $vo = new UploadFilesVO(...$request->validated());
+            $files = $filesService->upload($parentFolder, $vo->tree);
+            $flash = [
+                FlashMessagesEnum::SUCCESS->value,
+                'Upload ' . $files->count() . ' ' . Str::plural('file', $files->count())
+            ];
 
-        foreach ($files as $file) {
-            MoveFileToCloud::dispatch($file);
+            foreach ($files as $file) {
+                MoveFileToCloud::dispatch($file);
+            }
+        } catch (\Throwable $exception) {
+            $flash = [FlashMessagesEnum::ERROR->value, 'Upload files error: ' . $exception->getMessage()];
         }
 
-        return to_route('file.index', ['parentFolder' => $parentFolder]);
+        return to_route('file.index', ['parentFolder' => $parentFolder])
+            ->with(...$flash);
     }
 
     public function destroy(MyFilesActionRequest $request): RedirectResponse
     {
+        // Check parent folder is owner
+        if ($request->parentFolder) {
+            $this->authorize('view', $request->parentFolder);
+        }
+
         $dto = new FileIdsDto(...$request->validated());
         $children = $dto->all
             ? $request->parentFolder->children()->get()
@@ -107,16 +125,33 @@ class FileController extends Controller
     /**
      * @throws Throwable
      */
-    public function download(MyFilesActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse
+    public function download(MyFilesActionRequest $request, MakeDownloadFilesService $downloadFilesService): BinaryFileResponse|JsonResponse
     {
+        // Check parent folder is owner
+        if ($request->parentFolder) {
+            $this->authorize('view', $request->parentFolder);
+        }
+
         $dto = new FileIdsDto(...$request->validated());
         $files = $dto->all
             ? $request->parentFolder->children()->get()
             : $request->requestFiles;
 
-        $downloadDto = $downloadFilesService->handle($files);
+        try {
+            $downloadFile = $downloadFilesService->handle($files);
+            $downloadFileVO = new DownloadFileVO(
+                files: $files,
+                downloadFile: $downloadFile,
+                defaultFileName: 'My files'
+            );
+        } catch (Throwable $throwable) {
+            $errorMessageDto = new ErrorMessageDto(message: $throwable->getMessage());
 
-        return response()->download($downloadDto->storagePath, $downloadDto->fileName)
+            return \response()
+                ->json($errorMessageDto, 400);
+        }
+
+        return response()->download($downloadFileVO->downloadFile, $downloadFileVO->fileName)
             ->deleteFileAfterSend();
     }
 

@@ -1,5 +1,5 @@
 <template>
-    <Head title="My files"/>
+    <Head title="My trash"/>
 
     <AuthenticatedLayout class="relative">
         <div class="mb-4 border p-2 rounded-md z-10 flex flex-wrap justify-between items-center gap-4">

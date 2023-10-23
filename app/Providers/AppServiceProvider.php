@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\FilesArchiveInterface;
 use App\Contracts\FilesDestroyServiceInterface;
+use App\Contracts\GetFileContentInterface;
 use App\Contracts\MoveFileBetweenStorageInterface;
 use App\Contracts\StorageByDiskTypeServiceInterface;
 use App\Contracts\StorageCloudServiceInterface;
@@ -10,7 +12,9 @@ use App\Contracts\StorageLocalServiceInterface;
 use App\Contracts\UploadTreeFilesServiceInterface;
 use App\Enums\DiskEnum;
 use App\Jobs\MoveFileToCloud;
+use App\Services\FilesArchive;
 use App\Services\FilesDestroyService;
+use App\Services\GetFileContent;
 use App\Services\MoveFileBetweenStorage;
 use App\Services\StorageByDiskTypeService;
 use App\Services\StorageService;
@@ -23,6 +27,23 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        RateLimiter::for(MoveFileToCloud::class, static function (object $job) {
+            [
+                'decay_minutes' => $decayMinutes,
+                'max_attempts' => $maxAttempts
+            ] = config('upload_files.move_to_cloud');
+
+            /** @var MoveFileToCloud $job */
+            return Limit::perMinutes($decayMinutes ?? 1, $maxAttempts ?? 6)
+                ->by($job->file->created_by);
+        });
+    }
+
     /**
      * Register any application services.
      */
@@ -57,6 +78,16 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
+            GetFileContentInterface::class,
+            GetFileContent::class,
+        );
+
+        $this->app->singleton(
+            FilesArchiveInterface::class,
+            FilesArchive::class,
+        );
+
+        $this->app->singleton(
             FilesDestroyServiceInterface::class,
             FilesDestroyService::class
         );
@@ -64,22 +95,5 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->isLocal()) {
             $this->app->register(IdeHelperServiceProvider::class);
         }
-    }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        RateLimiter::for(MoveFileToCloud::class, static function (object $job) {
-            [
-                'decay_minutes' => $decayMinutes,
-                'max_attempts' => $maxAttempts
-            ] = config('upload_files.move_to_cloud');
-
-            /** @var MoveFileToCloud $job */
-            return Limit::perMinutes($decayMinutes ?? 1, $maxAttempts ?? 6)
-                ->by($job->file->created_by);
-        });
     }
 }

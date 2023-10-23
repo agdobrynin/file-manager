@@ -37,8 +37,7 @@ readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
         foreach ($files as $key => $item) {
             if ($item instanceof UploadedFile || $item instanceof File) {
                 $separator = str_starts_with($parentFolder->path ?? '/', DIRECTORY_SEPARATOR)
-                    ? ''
-                    : DIRECTORY_SEPARATOR;
+                    ? '' : DIRECTORY_SEPARATOR;
 
                 $destinationDirectoryStorage = 'files' .
                     DIRECTORY_SEPARATOR .
@@ -52,22 +51,20 @@ readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
                     name: $item->getClientOriginalName(),
                     mime: $item->getClientMimeType(),
                     size: $item->getSize(),
-                    disk: $this->storageService->disk(),
-                    path: null,
                     storagePath: $storagePath,
+                    disk: $this->storageService->disk(),
                 );
 
                 /** @var Model $file */
-                $file = Model::query()->make($fileVO->toArray());
-                $file->appendToNode($parentFolder)
-                    ->save();
+                $file = $parentFolder->children()
+                    ->save(Model::make($fileVO->toArray()));
 
                 $models->add($file);
             } elseif (is_array($item)) {
                 $folderVO = new FileFolderVO($key);
                 /** @var Model $folder */
-                $folder = Model::query()->make($folderVO->toArray());
-                $parentFolder->appendNode($folder);
+                $folder = $parentFolder->children()
+                    ->save(Model::make($folderVO->toArray()));
 
                 $this->make($folder, $item, $models);
             }

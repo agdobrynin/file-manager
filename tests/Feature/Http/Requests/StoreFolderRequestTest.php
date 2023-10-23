@@ -2,12 +2,9 @@
 
 namespace Tests\Feature\Http\Requests;
 
-use App\Enums\DiskEnum;
 use App\Http\Requests\StoreFolderRequest;
 use App\Models\File;
 use App\Models\User;
-use App\VO\FileFolderVO;
-use App\VO\FileVO;
 use Generator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,7 +19,7 @@ class StoreFolderRequestTest extends TestCase
     public static function data(): Generator
     {
         yield 'folder name with invalid symbols #1' => [
-            'data' => ['name' => 'Folder<folder>'],
+            'data' => ['name' => 'Folder<folder'],
             'passed' => false,
             'errors key' => ['name']
         ];
@@ -40,7 +37,7 @@ class StoreFolderRequestTest extends TestCase
         ];
 
         yield 'folder name with invalid symbols #4' => [
-            'data' => ['name' => 'Folder | folder'],
+            'data' => ['name' => 'Folder > folder'],
             'passed' => false,
             'errors key' => ['name']
         ];
@@ -115,7 +112,7 @@ class StoreFolderRequestTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
-        $folder = File::make((new FileFolderVO(name: 'Папка 1'))->toArray());
+        $folder = File::factory()->isFolder()->make(['name' => 'Папка 1']);
         $root->appendNode($folder);
 
         $request = StoreFolderRequest::create('/file/create/' . $root->id, 'POST');
@@ -133,15 +130,7 @@ class StoreFolderRequestTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
-        $fileVO = new FileVO(
-            name: 'Папка 1',
-            mime: 'image/jpg',
-            size: 1000,
-            disk: DiskEnum::LOCAL,
-            path: 'path',
-            storagePath: 'path',
-        );
-        $file = File::make($fileVO->toArray());
+        $file = File::factory()->isFile()->make();
         $root->appendNode($file);
 
         $request = StoreFolderRequest::create('/file/create/' . $file->id, 'POST');
