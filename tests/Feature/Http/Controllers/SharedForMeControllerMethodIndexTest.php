@@ -92,4 +92,73 @@ class SharedForMeControllerMethodIndexTest extends TestCase
                 ->where('files.meta.total', 3)
             );
     }
+
+    public function test_file_share_search_and_pagination(): void
+    {
+        // Share by $otherUser for some users (for test display share only for me)
+        $otherUser = User::factory()->create();
+        // Make file share with file name end with '.pdf' for other user.
+        FileShare::factory()
+            ->count(3)
+            ->afterMaking(
+                fn(FileShare $fileShare) => $fileShare->file()
+                    ->associate(
+                        File::factory()->for($otherUser, 'user')
+                            ->for($otherUser, 'userUpdate')
+                            ->create(['name' => fake()->uuid . '.pdf'])
+                    )
+            )
+            ->for(User::factory()->create(), 'forUser')
+            ->createQuietly();
+
+        // Share for me
+        $userMe = User::factory()->create();
+        // Share from user
+        $userFrom = User::factory()->create();
+        // Share files with name like "*.pdf" <-- use it for search
+        FileShare::factory()
+            ->count(3)
+            ->afterMaking(
+                fn(FileShare $fileShare) => $fileShare->file()
+                    ->associate(
+                        File::factory()
+                            ->for($userFrom, 'user')
+                            ->for($userFrom, 'userUpdate')
+                            ->create(['name' => fake()->uuid . '.pdf'])
+                    )
+            )
+            ->for($userMe, 'forUser')
+            ->createQuietly();
+        // Add random files with share for me
+        FileShare::factory()
+            ->count(3)
+            ->afterMaking(
+                fn(FileShare $fileShare) => $fileShare->file()
+                    ->associate(
+                        File::factory()
+                            ->for($userFrom, 'user')
+                            ->for($userFrom, 'userUpdate')
+                            ->create()
+                    )
+            )
+            ->for($userMe, 'forUser')
+            ->createQuietly();
+
+        // All file share in database for other user, and for me.
+        $this->assertDatabaseCount(FileShare::class, 9);
+
+        Config::set('app.share_for_me.per_page', 2);
+
+        $this->actingAs($userMe)
+            ->get('/share-for-me?search=.pdf') // <-- search query string ".pdf"
+            ->assertInertia(fn(AssertableInertia $page) => $page
+                ->component('SharedForMe')
+                // Pagination info
+                ->has('files.data', 2)
+                ->where('files.meta.total', 3)
+                ->where('files.links.next', Config('app.url') . '/share-for-me?search=.pdf&page=2')
+                ->where('files.data.0.name', fn(string $name) => str_ends_with($name, '.pdf'))
+                ->where('files.data.1.name', fn(string $name) => str_ends_with($name, '.pdf'))
+            );
+    }
 }
