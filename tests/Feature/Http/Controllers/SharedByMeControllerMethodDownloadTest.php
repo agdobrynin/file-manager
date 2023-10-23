@@ -109,4 +109,46 @@ class SharedByMeControllerMethodDownloadTest extends TestCase
             $response->assertSessionDoesntHaveErrors($noErrors);
         }
     }
+
+    public static function dataDownloadWithErrors(): Generator
+    {
+        yield 'file can not load from store' => [
+            fn() => FileShare::factory()
+                ->afterMaking(
+                    fn(FileShare $fileShare) => $fileShare->file()
+                        ->associate(File::factory()->isFile()->create())
+                )
+                ->for(User::factory()->create(), 'forUser')
+                ->create()
+                ->pluck('id')
+                ->toArray()
+        ];
+
+        yield 'empty folder' => [
+            fn() => FileShare::factory()
+                ->afterMaking(
+                    fn(FileShare $fileShare) => $fileShare->file()
+                        ->associate(File::factory()->isFolder()->create())
+                )
+                ->for(User::factory()->create(), 'forUser')
+                ->create()
+                ->pluck('id')
+                ->toArray()
+        ];
+    }
+
+    /**
+     * @dataProvider dataDownloadWithErrors
+     */
+    public function test_download_with_errors(Closure $initShareId): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $queryString = http_build_query(['ids' => $initShareId()]);
+
+        $this->actingAs($user)
+            ->get('/share-by-me/download?all=false&' . $queryString)
+            ->assertStatus(400)
+            ->assertJsonStructure(['message', 'errors']);
+    }
 }
