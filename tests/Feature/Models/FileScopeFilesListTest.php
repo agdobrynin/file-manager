@@ -33,14 +33,14 @@ class FileScopeFilesListTest extends TestCase
      */
     protected function makeTestDataset(): object
     {
-        $randFileParams = static fn(string $suffix = null) => (new FileVO(
-            name: fake()->name . ($suffix ?: ''),
+        $randFileParams = static fn (string $suffix = null) => (new FileVO(
+            name: fake()->name.($suffix ?: ''),
             mime: fake()->mimeType(),
             size: 100,
         ))->toArray();
 
-        $randFolderParams = static fn(string $prefix = null) => (new FileFolderVO(
-            ($prefix ?: '') . fake()->name)
+        $randFolderParams = static fn (string $prefix = null) => (new FileFolderVO(
+            ($prefix ?: '').fake()->name)
         )->toArray();
 
         // User #1 branch
@@ -58,11 +58,11 @@ class FileScopeFilesListTest extends TestCase
         $subFolder = File::create([
             ...$randFolderParams('Folder '),
             'children' => [
-                [... $randFileParams('.jpg')],
-                [... $randFileParams('.jpg')],
-                [... $randFileParams('.jpg')],
-                [... $randFileParams('.png')],
-                [... $randFolderParams()],
+                [...$randFileParams('.jpg')],
+                [...$randFileParams('.jpg')],
+                [...$randFileParams('.jpg')],
+                [...$randFileParams('.png')],
+                [...$randFolderParams()],
             ],
         ], $root2);
         /** @var File $fileTrash file move to trash */
@@ -79,7 +79,8 @@ class FileScopeFilesListTest extends TestCase
         // Delete one item
         $fileTrash->delete();
 
-        return new class($user1, $user2, $subFolder, $root1, $root2) {
+        return new class($user1, $user2, $subFolder, $root1, $root2)
+        {
             public function __construct(
                 public User $user1,
                 public User $user2,
@@ -87,8 +88,7 @@ class FileScopeFilesListTest extends TestCase
                 public File $rootUser1,
                 public File $rootUser2,
 
-            )
-            {
+            ) {
             }
         };
     }

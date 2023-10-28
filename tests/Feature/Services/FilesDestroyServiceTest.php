@@ -33,15 +33,15 @@ class FilesDestroyServiceTest extends TestCase
         /** @var File $root */
         $root = File::factory()->isFolder()->create(['name' => $user->email]);
         $filesInRoot = File::factory(3)
-            ->state(new Sequence(fn() => ['storage_path' => '/files/' . $root->id . '/' . Str::uuid()]))
-            ->afterCreating(fn(File $file) => $file->appendToNode($root)->save())
+            ->state(new Sequence(fn () => ['storage_path' => '/files/'.$root->id.'/'.Str::uuid()]))
+            ->afterCreating(fn (File $file) => $file->appendToNode($root)->save())
             ->create();
         $subFolder = File::factory()->isFolder()
-            ->afterCreating(fn(File $file) => $file->appendToNode($root)->save())
+            ->afterCreating(fn (File $file) => $file->appendToNode($root)->save())
             ->create();
         $filesInSubFolder = File::factory(2)
-            ->state(new Sequence(fn() => ['storage_path' => '/files/' . $subFolder->id . '/' . Str::uuid()]))
-            ->afterCreating(fn(File $file) => $file->appendToNode($subFolder)->save())
+            ->state(new Sequence(fn () => ['storage_path' => '/files/'.$subFolder->id.'/'.Str::uuid()]))
+            ->afterCreating(fn (File $file) => $file->appendToNode($subFolder)->save())
             ->create();
 
         $this->assertDatabaseHas(File::class, $subFolder->toArray());

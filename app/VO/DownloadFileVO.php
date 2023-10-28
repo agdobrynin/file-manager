@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\VO;
@@ -13,6 +14,7 @@ use Throwable;
 readonly class DownloadFileVO
 {
     public string $fileName;
+
     public string $downloadFile;
 
     /**
@@ -31,7 +33,7 @@ readonly class DownloadFileVO
         throw_unless(
             is_file($downloadFile),
             exception: DownloadFileNotFound::class,
-            message: 'File ' . $downloadFile . ' not found'
+            message: 'File '.$downloadFile.' not found'
         );
 
         $this->downloadFile = $downloadFile;
@@ -39,18 +41,18 @@ readonly class DownloadFileVO
         /** @var File $firstItem */
         $firstItem = $files->first();
 
-        if ($files->count() === 1 && !$firstItem->isFolder()) {
+        if ($files->count() === 1 && ! $firstItem->isFolder()) {
             $fileName = $firstItem->name;
         } else {
             $extension = pathinfo($downloadFile, PATHINFO_EXTENSION);
 
             if ($files->count() === 1) {
-                $fileName = $firstItem->name . '.' . $extension;
+                $fileName = $firstItem->name.'.'.$extension;
             } else {
                 $name = $firstItem->parent->isRoot()
                     ? $defaultFileName
                     : $firstItem->parent->name;
-                $fileName = $name . '.' . $extension;
+                $fileName = $name.'.'.$extension;
             }
         }
 

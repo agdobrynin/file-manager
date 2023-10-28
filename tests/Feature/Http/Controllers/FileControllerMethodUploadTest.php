@@ -35,7 +35,7 @@ class FileControllerMethodUploadTest extends TestCase
         yield 'data relative path is empty' => [
             'data' => [
                 'files' => [UploadedFile::fake()->image('img.png')],
-                'relativePaths' => []
+                'relativePaths' => [],
             ],
             'errors' => ['relativePaths'],
             'noErrors' => ['files'],
@@ -44,7 +44,7 @@ class FileControllerMethodUploadTest extends TestCase
         yield 'data relative path is string' => [
             'data' => [
                 'files' => [UploadedFile::fake()->image('img.png')],
-                'relativePaths' => '/folder/img.png'
+                'relativePaths' => '/folder/img.png',
             ],
             'errors' => ['relativePaths'],
             'noErrors' => ['files'],
@@ -56,7 +56,7 @@ class FileControllerMethodUploadTest extends TestCase
                     UploadedFile::fake()->image('img.png'),
                     UploadedFile::fake()->image('img1.png'),
                 ],
-                'relativePaths' => ['/folder/img.png', 'folder1/img1.png']
+                'relativePaths' => ['/folder/img.png', 'folder1/img1.png'],
             ],
             'errors' => ['relativePaths'],
             'noErrors' => ['files'],
@@ -66,7 +66,7 @@ class FileControllerMethodUploadTest extends TestCase
         yield 'param "files" in request is not file' => [
             'data' => [
                 'files' => ['abc'],
-                'relativePaths' => ['/folder/img.png']
+                'relativePaths' => ['/folder/img.png'],
             ],
             'errors' => ['files.0'],
             'noErrors' => ['relativePaths'],
@@ -80,9 +80,8 @@ class FileControllerMethodUploadTest extends TestCase
         array $data,
         array $errors,
         array $noErrors,
-        ?int  $maxFiles = null,
-    ): void
-    {
+        int $maxFiles = null,
+    ): void {
         $user = User::factory()->create();
         $this->actingAs($user);
         File::makeRootByUser($user);
@@ -146,7 +145,7 @@ class FileControllerMethodUploadTest extends TestCase
             ],
         ];
 
-        $this->actingAs($user)->post('/file/upload/' . $root->id, $data)
+        $this->actingAs($user)->post('/file/upload/'.$root->id, $data)
             ->assertRedirect()
             ->assertSessionHasErrors(['folder.0' => 'Folder "folder" already exist'])
             ->assertSessionHasErrors(['file.0' => 'File "img.png" already exist'])
@@ -168,7 +167,7 @@ class FileControllerMethodUploadTest extends TestCase
             'relativePaths' => ['/img.png'],
         ];
 
-        $this->actingAs($user)->post('/file/upload/' . $otherRoot->id, $data)
+        $this->actingAs($user)->post('/file/upload/'.$otherRoot->id, $data)
             ->assertForbidden();
     }
 
@@ -194,7 +193,7 @@ class FileControllerMethodUploadTest extends TestCase
         Queue::fake([MoveFileToCloud::class]);
 
         $this->actingAs($user)->post('/file/upload', $data)
-            ->assertRedirect('/file/' . $root->id)
+            ->assertRedirect('/file/'.$root->id)
             ->assertSessionHas('success')
             ->assertSessionMissing('error');
 
@@ -235,7 +234,7 @@ class FileControllerMethodUploadTest extends TestCase
         Queue::fake([MoveFileToCloud::class]);
 
         $this->actingAs($user)->post('/file/upload', $data)
-            ->assertRedirect('/file/' . $root->id)
+            ->assertRedirect('/file/'.$root->id)
             ->assertSessionHas('error')
             ->assertSessionMissing('success');
 

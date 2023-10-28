@@ -38,7 +38,7 @@ class SharedForMeController extends Controller
         $dto = new FileIdsDto(...$request->validated());
         $fileShares = FileShare::fileShareForUser($request->user())->with('file');
 
-        if (!$dto->all) {
+        if (! $dto->all) {
             $fileShares = $fileShares->whereIn('id', $dto->ids);
         }
 

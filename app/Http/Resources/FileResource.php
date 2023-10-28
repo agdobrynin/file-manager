@@ -16,7 +16,7 @@ class FileResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'isFavorite' => !!$this->favorite,
+            'isFavorite' => (bool) $this->favorite,
             'name' => $this->name,
             'disk' => $this->disk,
             'path' => $this->path,

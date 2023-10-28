@@ -14,6 +14,7 @@ use Tests\TestCase;
 class GetFileContentTest extends TestCase
 {
     use RefreshDatabase;
+
     public function test_get_file_content(): void
     {
         $file = File::factory()->isFile(User::factory()->create())->createQuietly();

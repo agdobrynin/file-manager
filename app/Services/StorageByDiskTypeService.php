@@ -14,8 +14,7 @@ final readonly class StorageByDiskTypeService implements StorageByDiskTypeServic
     public function __construct(
         private StorageLocalServiceInterface $localService,
         private StorageCloudServiceInterface $cloudService,
-    )
-    {
+    ) {
     }
 
     public function resolve(DiskEnum $diskEnum): StorageServiceInterface

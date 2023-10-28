@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -35,7 +36,7 @@ readonly class MoveFileBetweenStorage implements MoveFileBetweenStorageInterface
 
         // Remove all empty directory in from storage
         foreach (collect($this->from->filesystem()->allDirectories())->reverse() as $directory) {
-            if (0 === count($this->from->filesystem()->allFiles($directory))) {
+            if (count($this->from->filesystem()->allFiles($directory)) === 0) {
                 $this->from->filesystem()->deleteDirectory($directory);
             }
         }

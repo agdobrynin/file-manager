@@ -50,12 +50,11 @@ class FileControllerMethodShareTest extends TestCase
         yield 'all is set "false" ids set from other owner' => [
             'data' => [
                 'all' => false,
-                'ids' => fn() => File::factory(3)
+                'ids' => fn () => File::factory(3)
                     ->isFile(User::factory()->create())
                     ->createQuietly()
                     ->pluck('id')
-                    ->toArray()
-                ,
+                    ->toArray(),
             ],
             'errors' => ['ids' => 'Some file IDs are not valid.', 'email'],
             'noErrors' => ['all'],
@@ -65,7 +64,7 @@ class FileControllerMethodShareTest extends TestCase
             'data' => [
                 'all' => false,
                 'ids' => [],
-                'email' => 'aaa'
+                'email' => 'aaa',
             ],
             'errors' => ['email' => 'The email field must be a valid email address.'],
             'noErrors' => ['all'],
@@ -75,7 +74,7 @@ class FileControllerMethodShareTest extends TestCase
             'data' => [
                 'all' => false,
                 'ids' => [],
-                'email' => 'aaa@aaa'
+                'email' => 'aaa@aaa',
             ],
             'errors' => ['email' => 'The email field must be a valid email address.'],
             'noErrors' => ['all'],
@@ -174,11 +173,11 @@ class FileControllerMethodShareTest extends TestCase
         /** @var File $folder */
         $folder = File::factory()->isFolder()->create();
         $files = File::factory(5)
-            ->afterCreating(fn(File $file) => $folder->appendNode($file))
+            ->afterCreating(fn (File $file) => $folder->appendNode($file))
             ->isFile($user)->create();
 
         $this->actingAs($user)
-            ->post('/file/share/' . $folder->id, ['all' => true, 'email' => $shareForUser->email])
+            ->post('/file/share/'.$folder->id, ['all' => true, 'email' => $shareForUser->email])
             ->assertSessionDoesntHaveErrors(['ids', 'all', 'email'])
             ->assertSessionHas('success');
 

@@ -16,7 +16,7 @@ class FileControllerMethodCreateTest extends TestCase
     {
         $this->followingRedirects()->post('/file/create')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/Login')
                 ->url('/login')
                 ->where('auth.user', null)
@@ -29,7 +29,7 @@ class FileControllerMethodCreateTest extends TestCase
 
         $this->followingRedirects()->actingAs($user)->post('/file/create')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/VerifyEmail')
                 ->url('/verify-email')
                 ->where('auth.user.id', $user->id)
@@ -43,7 +43,7 @@ class FileControllerMethodCreateTest extends TestCase
         $otherRoot = File::makeRootByUser($otherUser);
         $user = User::factory()->create();
 
-        $this->actingAs($user)->post('/file/create/' . $otherRoot->id, ['name' => 'Folder'])
+        $this->actingAs($user)->post('/file/create/'.$otherRoot->id, ['name' => 'Folder'])
             ->assertForbidden();
     }
 
@@ -102,7 +102,7 @@ class FileControllerMethodCreateTest extends TestCase
         yield 'folder with this name already exist' => [
             'data' => ['name' => 'My folder'],
             'errors' => ['name'],
-            'initDb' => fn(File $root) => $root->appendNode(File::factory()->isFolder()->make(['name' => 'My folder']))
+            'initDb' => fn (File $root) => $root->appendNode(File::factory()->isFolder()->make(['name' => 'My folder'])),
         ];
     }
 
@@ -110,11 +110,10 @@ class FileControllerMethodCreateTest extends TestCase
      * @dataProvider dataValidation
      */
     public function test_request_validation(
-        array     $data,
-        array     $errors,
-        ?\Closure $initDb = null,
-    ): void
-    {
+        array $data,
+        array $errors,
+        \Closure $initDb = null,
+    ): void {
         $user = User::factory()->create();
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
@@ -145,9 +144,9 @@ class FileControllerMethodCreateTest extends TestCase
 
         $this->actingAs($user)
             ->followingRedirects()
-            ->post('/file/create/' . $folder->id, ['name' => 'Abc'])
+            ->post('/file/create/'.$folder->id, ['name' => 'Abc'])
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->where('parentId', $folder->id)
                 ->where('ancestors.data.1.name', 'Abc')
                 ->where('ancestors.data.1.id', $folder->id)

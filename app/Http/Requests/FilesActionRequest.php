@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 class FilesActionRequest extends ParentIdBaseRequest
 {
     protected const ALL_FILES_KEY = 'all';
+
     /**
      * @var Collection<File>
      */
@@ -25,7 +26,7 @@ class FilesActionRequest extends ParentIdBaseRequest
             self::ALL_FILES_KEY => 'required|boolean',
             'ids' => [
                 'bail',
-                'required_if:' . self::ALL_FILES_KEY . ',false',
+                'required_if:'.self::ALL_FILES_KEY.',false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
                     $this->requestFiles = new Collection();
@@ -41,8 +42,8 @@ class FilesActionRequest extends ParentIdBaseRequest
 
                         $this->requestFiles = $foundFiles;
                     }
-                }
-            ]
+                },
+            ],
         ]);
     }
 

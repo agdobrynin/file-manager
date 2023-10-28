@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\VO;
@@ -8,16 +9,14 @@ use App\Enums\DiskEnum;
 
 readonly class FileVO implements ModelAttributeInterface
 {
-
     public function __construct(
-        public string   $name,
-        public string   $mime,
-        public int      $size,
-        public ?string  $path = null,
-        public ?string  $storagePath = null,
+        public string $name,
+        public string $mime,
+        public int $size,
+        public ?string $path = null,
+        public ?string $storagePath = null,
         public DiskEnum $disk = DiskEnum::LOCAL,
-    )
-    {
+    ) {
     }
 
     public function toArray(): array

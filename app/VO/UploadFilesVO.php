@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\VO;
@@ -19,8 +20,7 @@ readonly class UploadFilesVO
     public function __construct(
         array $files,
         array $relativePaths,
-    )
-    {
+    ) {
         throw_unless(
             count($files) === count($relativePaths),
             message: 'The number of elements of the input arrays must be equal to.'
@@ -29,7 +29,7 @@ readonly class UploadFilesVO
         foreach ($files as $file) {
             throw_unless(
                 $file instanceof UploadedFile,
-                message: 'All uploaded file must be instance of ' . UploadedFile::class
+                message: 'All uploaded file must be instance of '.UploadedFile::class
             );
         }
 
@@ -46,7 +46,7 @@ readonly class UploadFilesVO
             $currentNode = &$tree;
 
             foreach ($parts as $i => $part) {
-                if (!isset($currentNode[$part])) {
+                if (! isset($currentNode[$part])) {
                     $currentNode[$part] = [];
                 }
 

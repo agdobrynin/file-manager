@@ -17,7 +17,8 @@ class FileShare extends Notification implements ShouldQueue
 
     /**
      * Create a new notification instance.
-     * @param Collection<File> $files
+     *
+     * @param  Collection<File>  $files
      */
     public function __construct(public readonly Collection $files, public readonly User $formUser)
     {
@@ -39,17 +40,17 @@ class FileShare extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $simpleMessage = (new MailMessage)
-            ->greeting('Hello ' . $notifiable->name . '.')
-            ->line('User ' . $this->formUser->name .
-                ' share for you ' .
-                $this->files->count() .
-                Str::plural(' item', $this->files->count()) . ':');
+            ->greeting('Hello '.$notifiable->name.'.')
+            ->line('User '.$this->formUser->name.
+                ' share for you '.
+                $this->files->count().
+                Str::plural(' item', $this->files->count()).':');
 
         $fileList = [];
 
         foreach ($this->files as $file) {
-            $fileList[] = '* ' . ($file->isFolder() ? 'Folder' : 'File') .
-                ' "[' . $file->name . '](' . route('share_for_me.index', ['search' => $file->name]) . ')"';
+            $fileList[] = '* '.($file->isFolder() ? 'Folder' : 'File').
+                ' "['.$file->name.']('.route('share_for_me.index', ['search' => $file->name]).')"';
         }
 
         return $simpleMessage->lines($fileList)

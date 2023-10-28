@@ -13,10 +13,10 @@ class MyFilesActionRequest extends FilesActionRequest
                 if ($this->parentFolder === null && $this->input(self::ALL_FILES_KEY)) {
                     $validator->errors()->add(
                         self::ALL_FILES_KEY,
-                        'When parameter "' . self::ALL_FILES_KEY . '" is true route parameter "parentFolder" is required.'
+                        'When parameter "'.self::ALL_FILES_KEY.'" is true route parameter "parentFolder" is required.'
                     );
                 }
-            }
+            },
         ];
     }
 }

@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int $file_id
  * @property int $for_user_id
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FileShare query()
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static Builder fileShareByFileOwner(User $user)
  * @method static Builder fileShareForUser(User $user)
  * @method static Builder fileShareForUserOrByUser(User $user);
+ *
  * @mixin \Eloquent
  */
 class FileShare extends Model
@@ -80,7 +82,7 @@ class FileShare extends Model
                         return $query->where(
                             'name',
                             'like',
-                            '%' . $dto->search . '%'
+                            '%'.$dto->search.'%'
                         );
                     }
                 );
@@ -107,7 +109,7 @@ class FileShare extends Model
 
     public function scopeFileShareForUserOrByUser(Builder $builder, User $user): Builder
     {
-        return $builder->whereHas('file.user', function (Builder $b) use($user) {
+        return $builder->whereHas('file.user', function (Builder $b) use ($user) {
             return $b->where('id', $user->getAuthIdentifier());
         })->orWhere('for_user_id', $user->getAuthIdentifier());
     }

@@ -31,7 +31,7 @@ class MoveFileBetweenStorageTest extends TestCase
     }
 
     /** @dataProvider data */
-    public function test_service(bool $copySuccess, ?string $exception = null): void
+    public function test_service(bool $copySuccess, string $exception = null): void
     {
         $user = User::factory()->create();
         $file = File::factory()->isFile($user)->createQuietly([

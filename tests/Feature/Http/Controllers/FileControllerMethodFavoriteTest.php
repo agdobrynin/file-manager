@@ -56,7 +56,7 @@ class FileControllerMethodFavoriteTest extends TestCase
     {
         $this->followingRedirects()->patch('/file/favorite')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/Login')
                 ->url('/login')
                 ->where('auth.user', null)
@@ -69,7 +69,7 @@ class FileControllerMethodFavoriteTest extends TestCase
             ->actingAs(User::factory()->unverified()->create())
             ->patch('/file/favorite')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/VerifyEmail')
                 ->url('/verify-email')
                 ->whereType('auth.user.id', 'integer')

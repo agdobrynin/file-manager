@@ -197,5 +197,5 @@ return [
     ],
     'share_for_me' => [
         'per_page' => env('SHARE_FOR_ME_PER_PAGE', 10),
-    ]
+    ],
 ];

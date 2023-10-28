@@ -38,10 +38,10 @@ class FileControllerMethodDownloadTest extends TestCase
 
         $root = File::makeRootByUser($user);
         File::factory(2)
-            ->afterMaking(fn(File $file) => $root->appendNode($file))
+            ->afterMaking(fn (File $file) => $root->appendNode($file))
             ->make();
 
-        $this->actingAs($user)->get('/file/download/' . $root->id . '?all=1')
+        $this->actingAs($user)->get('/file/download/'.$root->id.'?all=1')
             ->assertStatus(400)
             ->assertJsonStructure(['message', 'errors']);
     }
@@ -55,7 +55,7 @@ class FileControllerMethodDownloadTest extends TestCase
         $subFolder = File::factory()->isFolder()->create(['name' => 'Sub Folder']);
         $root->appendNode($subFolder);
 
-        $this->actingAs($user)->get('/file/download/' . $root->id . '?all=&ids[]=' . $subFolder->id)
+        $this->actingAs($user)->get('/file/download/'.$root->id.'?all=&ids[]='.$subFolder->id)
             ->assertStatus(400)
             ->assertJsonStructure(['message', 'errors']);
     }
@@ -69,7 +69,7 @@ class FileControllerMethodDownloadTest extends TestCase
         $subFolder = File::factory()->isFolder()->create(['name' => 'Sub Folder']);
         $root->appendNode($subFolder);
         $files = File::factory(2)
-            ->afterMaking(fn(File $file) => $subFolder->appendNode($file))
+            ->afterMaking(fn (File $file) => $subFolder->appendNode($file))
             ->make(['disk' => DiskEnum::LOCAL]);
         // make storage
         $storage = Storage::fake(DiskEnum::LOCAL->value);
@@ -78,7 +78,7 @@ class FileControllerMethodDownloadTest extends TestCase
             $storage->put($file->storage_path, 'small content here');
         }
 
-        $this->actingAs($user)->get('/file/download/' . $root->id . '?all=&ids[]=' . $subFolder->id)
+        $this->actingAs($user)->get('/file/download/'.$root->id.'?all=&ids[]='.$subFolder->id)
             ->assertOk()
             ->assertHeader(
                 'content-disposition',
@@ -96,7 +96,7 @@ class FileControllerMethodDownloadTest extends TestCase
         $subFolder = File::factory()->isFolder()->create(['name' => 'Sub Folder']);
         $root->appendNode($subFolder);
         $files = File::factory(2)
-            ->afterMaking(fn(File $file) => $subFolder->appendNode($file))
+            ->afterMaking(fn (File $file) => $subFolder->appendNode($file))
             ->make(['disk' => DiskEnum::LOCAL]);
         // make storage
         $storage = Storage::fake(DiskEnum::LOCAL->value);
@@ -105,7 +105,7 @@ class FileControllerMethodDownloadTest extends TestCase
             $storage->put($file->storage_path, 'small content here');
         }
 
-        $this->actingAs($user)->get('/file/download/' . $subFolder->id . '?all=1')
+        $this->actingAs($user)->get('/file/download/'.$subFolder->id.'?all=1')
             ->assertOk()
             ->assertHeader(
                 'content-disposition',
@@ -121,7 +121,7 @@ class FileControllerMethodDownloadTest extends TestCase
 
         $root = File::makeRootByUser($user);
         $files = File::factory(2)
-            ->afterMaking(fn(File $file) => $root->appendNode($file))
+            ->afterMaking(fn (File $file) => $root->appendNode($file))
             ->make([
                 'disk' => DiskEnum::LOCAL,
             ]);
@@ -129,11 +129,11 @@ class FileControllerMethodDownloadTest extends TestCase
         $storage = Storage::fake(DiskEnum::LOCAL->value);
         $storage->put($files[1]->storage_path, fake()->image);
 
-        $this->actingAs($user)->get('/file/download/' . $root->id . '?all=false&ids[]=' . $files[1]->id)
+        $this->actingAs($user)->get('/file/download/'.$root->id.'?all=false&ids[]='.$files[1]->id)
             ->assertOk()
             ->assertHeader(
                 'content-disposition',
-                'attachment; filename=' . $files[1]->name
+                'attachment; filename='.$files[1]->name
             );
     }
 
@@ -144,7 +144,7 @@ class FileControllerMethodDownloadTest extends TestCase
 
         $root = File::makeRootByUser($user);
         $files = File::factory(2)
-            ->afterMaking(fn(File $file) => $root->appendNode($file))
+            ->afterMaking(fn (File $file) => $root->appendNode($file))
             ->make(['disk' => DiskEnum::LOCAL]);
         // make storage
         $storage = Storage::fake(DiskEnum::LOCAL->value);
@@ -153,7 +153,7 @@ class FileControllerMethodDownloadTest extends TestCase
             $storage->put($file->storage_path, 'small content here');
         }
 
-        $this->actingAs($user)->get('/file/download/' . $root->id . '?all=1')
+        $this->actingAs($user)->get('/file/download/'.$root->id.'?all=1')
             ->assertOk()
             ->assertHeader(
                 'content-disposition',
@@ -169,13 +169,13 @@ class FileControllerMethodDownloadTest extends TestCase
 
         $rootOther = File::makeRootByUser($otherUser);
         File::factory(2)
-            ->afterMaking(fn(File $file) => $rootOther->appendNode($file))
+            ->afterMaking(fn (File $file) => $rootOther->appendNode($file))
             ->make();
 
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $this->actingAs($user)->get('/file/download/' . $rootOther->id . '?all=1')
+        $this->actingAs($user)->get('/file/download/'.$rootOther->id.'?all=1')
             ->assertForbidden();
     }
 
@@ -193,7 +193,7 @@ class FileControllerMethodDownloadTest extends TestCase
         $this->followingRedirects()
             ->get('/file/download')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/Login')
                 ->url('/login')
                 ->where('auth.user', null)
@@ -208,7 +208,7 @@ class FileControllerMethodDownloadTest extends TestCase
             ->actingAs($user)
             ->get('/file/download')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/VerifyEmail')
                 ->url('/verify-email')
                 ->where('auth.user.id', $user->id)

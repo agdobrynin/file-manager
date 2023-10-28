@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -17,23 +18,22 @@ use ZipArchive;
 readonly class FilesArchive implements FilesArchiveInterface
 {
     public function __construct(
-        private ZipArchive                   $archive,
+        private ZipArchive $archive,
         private StorageLocalServiceInterface $localService,
-        private GetFileContentInterface      $fileContent,
-    )
-    {
+        private GetFileContentInterface $fileContent,
+    ) {
     }
 
     /**
-     * @param BaseCollection|Collection $files
-     * @throws OpenArchiveException|FilesCollectionIsEmpty|Throwable
      * @return string Full path to archive file
+     *
+     * @throws OpenArchiveException|FilesCollectionIsEmpty|Throwable
      */
     public function addFiles(Collection|BaseCollection $files): string
     {
         throw_unless($files->count(), exception: FilesCollectionIsEmpty::class);
 
-        $storagePath = $this->localService->filesystem()->path(Str::random(32) . '.zip');
+        $storagePath = $this->localService->filesystem()->path(Str::random(32).'.zip');
         $zipIsOpen = $this->archive->open($storagePath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
         throw_unless($zipIsOpen, OpenArchiveException::class);
@@ -41,9 +41,9 @@ readonly class FilesArchive implements FilesArchiveInterface
         $addToZip = function ($files, $ancestors = '') use (&$addToZip) {
             foreach ($files as $file) {
                 if ($file->isFolder() && $file->children()->count()) {
-                    $addToZip($file->children()->get(), $ancestors . $file->name . DIRECTORY_SEPARATOR);
-                } else if (!$file->isFolder()) {
-                    $filePath = $ancestors . $file->name;
+                    $addToZip($file->children()->get(), $ancestors.$file->name.DIRECTORY_SEPARATOR);
+                } elseif (! $file->isFolder()) {
+                    $filePath = $ancestors.$file->name;
                     $content = $this->fileContent->getContent($file);
                     $this->archive->addFromString($filePath, $content);
                 }

@@ -29,7 +29,7 @@ class FileScopeFilesInTrashTest extends TestCase
     {
         $params = $this->makeDataset();
         //delete 2 children items.
-        $params->root->children()->each(fn(File $file) => $file->deleteQuietly());
+        $params->root->children()->each(fn (File $file) => $file->deleteQuietly());
 
         $query = File::filesInTrash($params->user);
 
@@ -55,8 +55,8 @@ class FileScopeFilesInTrashTest extends TestCase
 
     protected function makeDataset(): object
     {
-        $randFolder = static fn(string $name = '') => (new FileFolderVO($name ?: fake()->name))->toArray();
-        $randFile = static fn(string $name = '') => (new FileVO(name: $name ?: fake()->name, mime: fake()->mimeType(), size: fake()->numberBetween(10, 100)))->toArray();
+        $randFolder = static fn (string $name = '') => (new FileFolderVO($name ?: fake()->name))->toArray();
+        $randFile = static fn (string $name = '') => (new FileVO(name: $name ?: fake()->name, mime: fake()->mimeType(), size: fake()->numberBetween(10, 100)))->toArray();
 
         $user1 = User::factory()->create();
         Auth::setUser($user1);
@@ -80,12 +80,12 @@ class FileScopeFilesInTrashTest extends TestCase
         ], $rootForUser2);
         File::create($randFile(), $rootForUser2);
 
-        return new class($rootForUser2, $user2) {
+        return new class($rootForUser2, $user2)
+        {
             public function __construct(
                 public File $root,
                 public User $user,
-            )
-            {
+            ) {
             }
         };
     }

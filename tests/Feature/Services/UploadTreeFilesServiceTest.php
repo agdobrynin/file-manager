@@ -72,7 +72,7 @@ class UploadTreeFilesServiceTest extends TestCase
             ['name' => 'pdf.pdf', 'disk' => 'local', 'path' => '/pdf.pdf', 'is_folder' => false, 'parent_id' => $root->id]
         );
         //Images in subdirectory
-        $root->children->firstWhere(fn(File $file) => $file->isFolder())
+        $root->children->firstWhere(fn (File $file) => $file->isFolder())
             ->children
             ->each(function (File $file) {
                 $this->assertStringStartsWith('/images/img-', $file->path);

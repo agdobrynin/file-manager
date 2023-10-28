@@ -11,12 +11,12 @@ class StrTest extends TestCase
     {
         yield '#1' => [
             'input' => '200',
-            'equal' => 200
+            'equal' => 200,
         ];
 
         yield '#2' => [
             'input' => '100k',
-            'equal' => 100 * 1024
+            'equal' => 100 * 1024,
         ];
 
         yield '#3' => [
@@ -38,7 +38,6 @@ class StrTest extends TestCase
             'input' => '5 Mb',
             'equal' => null,
         ];
-
 
         yield '#7' => [
             'input' => '',
@@ -73,27 +72,27 @@ class StrTest extends TestCase
     {
         yield '#1' => [
             'input' => 1_000,
-            'equal' => '1000 bytes'
+            'equal' => '1000 bytes',
         ];
 
         yield '#2' => [
             'input' => 0,
-            'equal' => ''
+            'equal' => '',
         ];
 
         yield '#3' => [
             'input' => 5_000,
-            'equal' => '4.88 kB'
+            'equal' => '4.88 kB',
         ];
 
         yield '#4' => [
             'input' => 50_000,
-            'equal' => '48.83 kB'
+            'equal' => '48.83 kB',
         ];
 
         yield '#5' => [
             'input' => 150_000_000,
-            'equal' => '143.05 MB'
+            'equal' => '143.05 MB',
         ];
     }
 

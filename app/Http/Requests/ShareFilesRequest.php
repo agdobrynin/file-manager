@@ -26,7 +26,7 @@ class ShareFilesRequest extends MyFilesActionRequest
                     if ($this->user()->email === $this->shareToUser?->email) {
                         $fail('Can not share files to yourself.');
                     }
-                }
+                },
             ],
         ]);
     }

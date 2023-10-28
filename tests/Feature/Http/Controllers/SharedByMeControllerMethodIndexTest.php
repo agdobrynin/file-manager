@@ -21,7 +21,7 @@ class SharedByMeControllerMethodIndexTest extends TestCase
         FileShare::factory()
             ->count(3)
             ->afterMaking(
-                fn(FileShare $fileShare) => $fileShare->file()
+                fn (FileShare $fileShare) => $fileShare->file()
                     ->associate(File::factory()->isFile($otherUser)->create())
             )
             ->for(User::factory()->create(), 'forUser')
@@ -39,7 +39,7 @@ class SharedByMeControllerMethodIndexTest extends TestCase
 
         $fileShares = FileShare::factory()
             ->count(3)
-            ->afterMaking(fn(FileShare $fileShare) => $fileShare->file()->associate($files->random()))
+            ->afterMaking(fn (FileShare $fileShare) => $fileShare->file()->associate($files->random()))
             ->for(User::factory()->create(), 'forUser')
             ->create();
 
@@ -47,7 +47,7 @@ class SharedByMeControllerMethodIndexTest extends TestCase
 
         $this->actingAs($user)
             ->get('/share-by-me')
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('SharedByMe')
                 ->url('/share-by-me')
                 ->where('auth.user.id', $user->id)
@@ -64,7 +64,7 @@ class SharedByMeControllerMethodIndexTest extends TestCase
                 ->where('files.data.0.shareForUser', $fileShares[0]->forUser->name)
                 // Pagination info
                 ->has('files.data', 2)
-                ->where('files.links.next', Config('app.url') . '/share-by-me?page=2')
+                ->where('files.links.next', Config('app.url').'/share-by-me?page=2')
                 ->where('files.meta.total', 3)
             );
     }
@@ -78,7 +78,7 @@ class SharedByMeControllerMethodIndexTest extends TestCase
             ->afterMaking(
                 function (FileShare $fileShare) {
                     $file = File::factory()->create(
-                        ['name' => 'file-' . fake()->uuid]
+                        ['name' => 'file-'.fake()->uuid]
                     );
                     $fileShare->file()->associate($file);
                 }
@@ -88,7 +88,7 @@ class SharedByMeControllerMethodIndexTest extends TestCase
         // Other file share
         FileShare::factory(10)
             ->afterMaking(
-                fn(FileShare $fileShare) => $fileShare->file()->associate(File::factory()->create())
+                fn (FileShare $fileShare) => $fileShare->file()->associate(File::factory()->create())
             )
             ->for(User::factory()->create(), 'forUser')
             ->create();
@@ -97,13 +97,13 @@ class SharedByMeControllerMethodIndexTest extends TestCase
 
         $this->actingAs($user)
             ->get('/share-by-me?search=file-')
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 // Pagination info
                 ->has('files.data', 2)
-                ->where('files.links.next', Config('app.url') . '/share-by-me?search=file-&page=2')
+                ->where('files.links.next', Config('app.url').'/share-by-me?search=file-&page=2')
                 ->where('files.meta.total', 3)
-                ->where('files.data.0.name', fn(string $name) => str_starts_with($name, 'file-'))
-                ->where('files.data.1.name', fn(string $name) => str_starts_with($name, 'file-'))
+                ->where('files.data.0.name', fn (string $name) => str_starts_with($name, 'file-'))
+                ->where('files.data.1.name', fn (string $name) => str_starts_with($name, 'file-'))
             );
 
         $this->assertDatabaseCount(FileShare::class, 13);
@@ -117,7 +117,7 @@ class SharedByMeControllerMethodIndexTest extends TestCase
             ->actingAs($user)
             ->get('/share-by-me')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/VerifyEmail')
                 ->url('/verify-email')
                 ->where('auth.user.id', $user->id)
@@ -128,7 +128,7 @@ class SharedByMeControllerMethodIndexTest extends TestCase
     {
         $this->followingRedirects()->get('/share-by-me')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/Login')
                 ->url('/login')
                 ->where('auth.user', null)

@@ -26,7 +26,7 @@ class FileControllerMethodDestroyTest extends TestCase
         $this->followingRedirects()
             ->delete('/file/destroy')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/Login')
                 ->url('/login')
                 ->where('auth.user', null)
@@ -41,7 +41,7 @@ class FileControllerMethodDestroyTest extends TestCase
             ->actingAs($user)
             ->delete('/file/destroy')
             ->assertOk()
-            ->assertInertia(fn(AssertableInertia $page) => $page
+            ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Auth/VerifyEmail')
                 ->url('/verify-email')
                 ->where('auth.user.id', $user->id)
@@ -145,7 +145,7 @@ class FileControllerMethodDestroyTest extends TestCase
 
         $root = File::makeRootByUser($user);
         $files = File::factory(2)
-            ->afterMaking(fn(File $file) => $root->appendNode($file))
+            ->afterMaking(fn (File $file) => $root->appendNode($file))
             ->make();
         $dataset = $files->toArray();
 
@@ -153,8 +153,8 @@ class FileControllerMethodDestroyTest extends TestCase
             $this->assertDatabaseHas(File::class, $item);
         }
 
-        $this->actingAs($user)->delete('/file/destroy/' . $root->id, ['all' => true])
-            ->assertRedirect('/file/' . $root->id)
+        $this->actingAs($user)->delete('/file/destroy/'.$root->id, ['all' => true])
+            ->assertRedirect('/file/'.$root->id)
             ->assertSessionDoesntHaveErrors(['all', 'ids']);
 
         foreach ($dataset as $item) {
@@ -169,7 +169,7 @@ class FileControllerMethodDestroyTest extends TestCase
 
         $root = File::makeRootByUser($user);
         $files = File::factory(2)
-            ->afterMaking(fn(File $file) => $root->appendNode($file))
+            ->afterMaking(fn (File $file) => $root->appendNode($file))
             ->make();
 
         $dataset = $files->toArray();
@@ -179,10 +179,10 @@ class FileControllerMethodDestroyTest extends TestCase
         }
         // destroy by ids item #2 from dataset
         $this->actingAs($user)->delete(
-            '/file/destroy/' . $root->id,
+            '/file/destroy/'.$root->id,
             ['all' => false, 'ids' => [$dataset[1]['id']]]
         )
-            ->assertRedirect('/file/' . $root->id)
+            ->assertRedirect('/file/'.$root->id)
             ->assertSessionDoesntHaveErrors(['all', 'ids']);
 
         $this->assertNotSoftDeleted(File::class, ['id' => $root->id]);
@@ -198,7 +198,7 @@ class FileControllerMethodDestroyTest extends TestCase
 
         $rootOther = File::makeRootByUser($otherUser);
         $filesOther = File::factory(2)
-            ->afterMaking(fn(File $file) => $rootOther->appendNode($file))
+            ->afterMaking(fn (File $file) => $rootOther->appendNode($file))
             ->make();
 
         $user = User::factory()->create();
@@ -206,7 +206,7 @@ class FileControllerMethodDestroyTest extends TestCase
         File::makeRootByUser($user);
 
         $this->actingAs($user)->delete(
-            '/file/destroy/' . $rootOther->id,
+            '/file/destroy/'.$rootOther->id,
             ['all' => true]
         )->assertForbidden();
     }

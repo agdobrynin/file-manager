@@ -8,7 +8,9 @@ use Closure;
 class FileUploadRequest extends ParentIdBaseRequest
 {
     protected const RELATIVE_PATHS_KEY = 'relativePaths';
+
     protected const FILES_KEY = 'files';
+
     protected $stopOnFirstFailure = true;
 
     /**
@@ -27,7 +29,7 @@ class FileUploadRequest extends ParentIdBaseRequest
                 'required',
                 'array',
             ],
-            self::FILES_KEY . '.*' => [
+            self::FILES_KEY.'.*' => [
                 'required',
                 'file',
             ],
@@ -38,7 +40,8 @@ class FileUploadRequest extends ParentIdBaseRequest
                     $maxCountFiles = config('upload_files.upload.max_files');
 
                     if ($maxCountFiles < count($values)) {
-                        $fail('Maximum available ' . $maxCountFiles . ' files for upload.');
+                        $fail('Maximum available '.$maxCountFiles.' files for upload.');
+
                         return;
                     }
 
@@ -63,13 +66,13 @@ class FileUploadRequest extends ParentIdBaseRequest
                     $folders = File::existNames($firstLevelFolders->unique()->toArray(), $this->user(), $parentFolder);
 
                     foreach ($folders->pluck('name')->toArray() as $index => $folder) {
-                        $this->validator->errors()->add('folder.' . $index, 'Folder "' . $folder . '" already exist');
+                        $this->validator->errors()->add('folder.'.$index, 'Folder "'.$folder.'" already exist');
                     }
 
                     $files = File::existNames($firstLevelFiles->unique()->toArray(), $this->user(), $parentFolder);
 
                     foreach ($files->pluck('name')->toArray() as $index => $file) {
-                        $this->validator->errors()->add('file.' . $index, 'File "' . $file . '" already exist');
+                        $this->validator->errors()->add('file.'.$index, 'File "'.$file.'" already exist');
                     }
                 },
             ],
@@ -83,7 +86,7 @@ class FileUploadRequest extends ParentIdBaseRequest
     {
         // Remove lead slash.
         $relativePathsFixed = is_array($this->{self::RELATIVE_PATHS_KEY})
-            ? array_map(static fn($item) => ltrim($item, '/'), $this->{self::RELATIVE_PATHS_KEY})
+            ? array_map(static fn ($item) => ltrim($item, '/'), $this->{self::RELATIVE_PATHS_KEY})
             : [];
 
         $this->merge([

@@ -13,7 +13,7 @@ class FavoriteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return (bool)$this->user();
+        return (bool) $this->user();
     }
 
     /**
@@ -29,11 +29,11 @@ class FavoriteRequest extends FormRequest
                 'required',
                 'integer',
                 function (string $attribute, int $id, Closure $fail) {
-                    if (!File::find($id)?->isOwnedByUser($this->user())) {
-                        $fail('Invalid file ID ' . $id . ' for auth user.');
+                    if (! File::find($id)?->isOwnedByUser($this->user())) {
+                        $fail('Invalid file ID '.$id.' for auth user.');
                     }
-                }
-            ]
+                },
+            ],
         ];
     }
 }

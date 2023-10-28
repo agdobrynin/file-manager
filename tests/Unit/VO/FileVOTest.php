@@ -24,7 +24,7 @@ class FileVOTest extends TestCase
                 'disk' => DiskEnum::LOCAL,
                 'path' => null,
                 'storage_path' => null,
-            ]
+            ],
         ];
 
         yield 'set #2' => [
@@ -44,7 +44,7 @@ class FileVOTest extends TestCase
                 'disk' => DiskEnum::CLOUD,
                 'path' => '/my-file.jpg',
                 'storage_path' => '/files/1/QweRed.jpg',
-            ]
+            ],
         ];
     }
 

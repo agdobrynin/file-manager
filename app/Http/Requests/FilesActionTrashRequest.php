@@ -24,7 +24,7 @@ class FilesActionTrashRequest extends ActionWithAllKeyRequest
         return array_merge(parent::rules(), [
             'ids' => [
                 'bail',
-                'required_if:' . self::ALL_FILES_KEY . ',false',
+                'required_if:'.self::ALL_FILES_KEY.',false',
                 'array',
                 function (string $attribute, array $ids, $fail) {
                     $foundFiles = File::fileByOwner($this->user())
@@ -37,8 +37,8 @@ class FilesActionTrashRequest extends ActionWithAllKeyRequest
                     }
 
                     $this->requestFiles = $foundFiles;
-                }
-            ]
+                },
+            ],
         ]);
     }
 }
