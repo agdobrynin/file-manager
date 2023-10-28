@@ -56,11 +56,13 @@ class FileController extends Controller
         $ancestors = FileAncestorsResource::collection([...$parentFolder->ancestors, $parentFolder]);
 
         return inertia(
-            'MyFiles', [
+            'MyFiles',
+            [
                 'parentId' => $parentFolder->id,
                 'files' => $fileResourceCollection,
                 'ancestors' => $ancestors,
-            ]);
+            ]
+        );
     }
 
     public function create(StoreFolderRequest $request): RedirectResponse
@@ -115,7 +117,7 @@ class FileController extends Controller
             ? $request->parentFolder->children()->get()
             : $request->requestFiles;
 
-        $children->each(function (File $file) {
+        $children->each(function (File $file): void {
             $this->authorize('delete', $file);
             $file->deleteQuietly();
         });
@@ -164,7 +166,7 @@ class FileController extends Controller
         $favorite = FileFavorite::firstOrCreate($favorite->toArray());
         $flash = [FlashMessagesEnum::SUCCESS->value, 'File added to favorites'];
 
-        if ($favorite->wasRecentlyCreated === false) {
+        if (false === $favorite->wasRecentlyCreated) {
             $favorite->delete();
             $flash = [FlashMessagesEnum::INFO->value, 'File delete from favorites'];
         }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Requests;
 
 use App\Http\Requests\StoreFolderRequest;

@@ -36,12 +36,12 @@ readonly class MakeDownloadFilesService
     {
         throw_if($files->isEmpty(), message: 'No files for download');
 
-        if ($files->count() === 1) {
+        if (1 === $files->count()) {
             /** @var File $file */
             $file = $files->first();
 
             throw_if(
-                $file->isFolder() && $file->children()->count() === 0,
+                $file->isFolder() && 0 === $file->children()->count(),
                 DownloadEmptyFolderException::class,
                 message: 'Folder "'.$files->first()->name.'" is empty',
             );

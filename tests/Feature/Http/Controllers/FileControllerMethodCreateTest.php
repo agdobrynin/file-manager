@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\File;
@@ -16,10 +18,11 @@ class FileControllerMethodCreateTest extends TestCase
     {
         $this->followingRedirects()->post('/file/create')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Auth/Login')
-                ->url('/login')
-                ->where('auth.user', null)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('Auth/Login')
+                    ->url('/login')
+                    ->where('auth.user', null)
             );
     }
 
@@ -29,10 +32,11 @@ class FileControllerMethodCreateTest extends TestCase
 
         $this->followingRedirects()->actingAs($user)->post('/file/create')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Auth/VerifyEmail')
-                ->url('/verify-email')
-                ->where('auth.user.id', $user->id)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('Auth/VerifyEmail')
+                    ->url('/verify-email')
+                    ->where('auth.user.id', $user->id)
             );
     }
 
@@ -146,13 +150,14 @@ class FileControllerMethodCreateTest extends TestCase
             ->followingRedirects()
             ->post('/file/create/'.$folder->id, ['name' => 'Abc'])
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->where('parentId', $folder->id)
-                ->where('ancestors.data.1.name', 'Abc')
-                ->where('ancestors.data.1.id', $folder->id)
-                ->where('files.data.0.name', 'Abc')
-                ->where('files.data.0.path', '/Abc/Abc')
-                ->where('files.data.0.parentId', $folder->id)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->where('parentId', $folder->id)
+                    ->where('ancestors.data.1.name', 'Abc')
+                    ->where('ancestors.data.1.id', $folder->id)
+                    ->where('files.data.0.name', 'Abc')
+                    ->where('files.data.0.path', '/Abc/Abc')
+                    ->where('files.data.0.parentId', $folder->id)
             );
 
         $this->assertDatabaseHas(

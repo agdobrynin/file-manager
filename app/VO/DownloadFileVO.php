@@ -41,12 +41,12 @@ readonly class DownloadFileVO
         /** @var File $firstItem */
         $firstItem = $files->first();
 
-        if ($files->count() === 1 && ! $firstItem->isFolder()) {
+        if (1 === $files->count() && ! $firstItem->isFolder()) {
             $fileName = $firstItem->name;
         } else {
             $extension = pathinfo($downloadFile, PATHINFO_EXTENSION);
 
-            if ($files->count() === 1) {
+            if (1 === $files->count()) {
                 $fileName = $firstItem->name.'.'.$extension;
             } else {
                 $name = $firstItem->parent->isRoot()

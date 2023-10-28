@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Dto\FilesListFilterDto;
@@ -76,8 +78,9 @@ class FileShare extends Model
     {
         return $builder
             ->whereHas('file')
-            ->when($dto->search, function (Builder $builder) use ($dto) {
-                $builder->whereHas('file',
+            ->when($dto->search, function (Builder $builder) use ($dto): void {
+                $builder->whereHas(
+                    'file',
                     function (Builder $query) use ($dto) {
                         return $query->where(
                             'name',

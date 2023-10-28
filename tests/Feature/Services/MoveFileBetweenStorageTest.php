@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Services;
 
 use App\Contracts\StorageCloudServiceInterface;
@@ -46,7 +48,7 @@ class MoveFileBetweenStorageTest extends TestCase
 
         $storageTo = $this->mock(
             StorageLocalServiceInterface::class,
-            function (MockInterface $mock) use ($file, $copySuccess, $exception) {
+            function (MockInterface $mock) use ($file, $copySuccess, $exception): void {
                 $mock->shouldReceive('filesystem->put')
                     ->with($file->storage_path, '')
                     // success copy to cloud
@@ -61,7 +63,7 @@ class MoveFileBetweenStorageTest extends TestCase
 
         $storageFrom = $this->mock(
             StorageCloudServiceInterface::class,
-            function (MockInterface $mock) use ($file, $exception) {
+            function (MockInterface $mock) use ($file, $exception): void {
                 // Get content of file
                 $mock->shouldReceive('filesystem->get')
                     ->with($file->storage_path)

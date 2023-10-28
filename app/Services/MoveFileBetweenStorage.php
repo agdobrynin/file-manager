@@ -36,7 +36,7 @@ readonly class MoveFileBetweenStorage implements MoveFileBetweenStorageInterface
 
         // Remove all empty directory in from storage
         foreach (collect($this->from->filesystem()->allDirectories())->reverse() as $directory) {
-            if (count($this->from->filesystem()->allFiles($directory)) === 0) {
+            if (0 === count($this->from->filesystem()->allFiles($directory))) {
                 $this->from->filesystem()->deleteDirectory($directory);
             }
         }

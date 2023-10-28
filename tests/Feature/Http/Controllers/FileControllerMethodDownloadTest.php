@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Controllers;
 
 use App\Enums\DiskEnum;
@@ -193,10 +195,11 @@ class FileControllerMethodDownloadTest extends TestCase
         $this->followingRedirects()
             ->get('/file/download')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Auth/Login')
-                ->url('/login')
-                ->where('auth.user', null)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('Auth/Login')
+                    ->url('/login')
+                    ->where('auth.user', null)
             );
     }
 
@@ -208,10 +211,11 @@ class FileControllerMethodDownloadTest extends TestCase
             ->actingAs($user)
             ->get('/file/download')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Auth/VerifyEmail')
-                ->url('/verify-email')
-                ->where('auth.user.id', $user->id)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('Auth/VerifyEmail')
+                    ->url('/verify-email')
+                    ->where('auth.user.id', $user->id)
             );
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Models;
 
 use App\Dto\MyFilesListFilterDto;
@@ -40,7 +42,8 @@ class FileScopeFilesListTest extends TestCase
         ))->toArray();
 
         $randFolderParams = static fn (string $prefix = null) => (new FileFolderVO(
-            ($prefix ?: '').fake()->name)
+            ($prefix ?: '').fake()->name
+        )
         )->toArray();
 
         // User #1 branch
@@ -87,7 +90,6 @@ class FileScopeFilesListTest extends TestCase
                 public File $subFolderUser2,
                 public File $rootUser1,
                 public File $rootUser2,
-
             ) {
             }
         };

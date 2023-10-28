@@ -19,7 +19,7 @@ final readonly class FilesDestroyService implements FilesDestroyServiceInterface
     {
         $filteredCollection = $collection->whereInstanceOf(File::class);
 
-        if ($filteredCollection->count() === 0) {
+        if (0 === $filteredCollection->count()) {
             return collect();
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Models;
 
 use App\Dto\FilesListFilterDto;
@@ -40,7 +42,7 @@ class FileScopeFilesInTrashTest extends TestCase
     public function test_files_in_trash_with_search(): void
     {
         $params = $this->makeDataset();
-        $params->root->descendants()->each(function (File $file) {
+        $params->root->descendants()->each(function (File $file): void {
             if (str_starts_with($file->name, 'image')) {
                 $file->deleteQuietly();
             }

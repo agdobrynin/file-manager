@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Services;
 
 use App\Contracts\GetFileContentInterface;
@@ -32,7 +34,7 @@ class FilesArchiveTest extends TestCase
 
         $mockStorage = $this->mock(
             StorageLocalServiceInterface::class,
-            function (MockInterface $mock) use ($storagePath) {
+            function (MockInterface $mock) use ($storagePath): void {
                 $mock->shouldReceive('filesystem->path')
                     ->andReturn($storagePath)
                     ->once();
@@ -41,7 +43,7 @@ class FilesArchiveTest extends TestCase
 
         $mockArchive = $this->mock(
             ZipArchive::class,
-            function (MockInterface $mock) use ($storagePath) {
+            function (MockInterface $mock) use ($storagePath): void {
                 $mock->shouldReceive('open')
                     ->with($storagePath, ZipArchive::CREATE | ZipArchive::OVERWRITE)
                     ->andReturnFalse();
@@ -103,7 +105,7 @@ class FilesArchiveTest extends TestCase
 
         $mockStorage = $this->mock(
             StorageLocalServiceInterface::class,
-            function (MockInterface $mock) use ($storagePath) {
+            function (MockInterface $mock) use ($storagePath): void {
                 $mock->shouldReceive('filesystem->path')
                     ->andReturn($storagePath)
                     ->once();
@@ -112,7 +114,7 @@ class FilesArchiveTest extends TestCase
 
         $mockArchive = $this->mock(
             ZipArchive::class,
-            function (MockInterface $mock) use ($storagePath) {
+            function (MockInterface $mock) use ($storagePath): void {
                 $mock->shouldReceive('open')
                     ->with($storagePath, ZipArchive::CREATE | ZipArchive::OVERWRITE)
                     ->andReturnTrue();
@@ -135,7 +137,7 @@ class FilesArchiveTest extends TestCase
 
         $mockFileContent = $this->mock(
             GetFileContentInterface::class,
-            function (MockInterface $mock) {
+            function (MockInterface $mock): void {
                 $mock->shouldReceive('getContent')
                     ->withAnyArgs()
                     ->andReturn('file-content-as-string');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\File;
@@ -26,7 +28,7 @@ class FilesActionTrashRequest extends ActionWithAllKeyRequest
                 'bail',
                 'required_if:'.self::ALL_FILES_KEY.',false',
                 'array',
-                function (string $attribute, array $ids, $fail) {
+                function (string $attribute, array $ids, $fail): void {
                     $foundFiles = File::fileByOwner($this->user())
                         ->onlyTrashed()
                         ->whereIn('id', $ids)

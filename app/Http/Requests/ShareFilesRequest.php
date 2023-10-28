@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\User;
@@ -20,7 +22,7 @@ class ShareFilesRequest extends MyFilesActionRequest
             'email' => [
                 'required',
                 'email:rfc,strict',
-                function (string $attr, string $email, Closure $fail) {
+                function (string $attr, string $email, Closure $fail): void {
                     $this->shareToUser = User::firstWhere('email', $email);
 
                     if ($this->user()->email === $this->shareToUser?->email) {

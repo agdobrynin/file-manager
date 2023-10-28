@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Models;
 
 use App\Dto\FilesListFilterDto;
@@ -197,7 +199,7 @@ class FileShareTest extends TestCase
             ->for($user2, 'userUpdate')
             ->createQuietly()
             ->slice(0, 2)
-            ->each(function (File $file) use ($user1) {
+            ->each(function (File $file) use ($user1): void {
                 FileShare::factory()
                     ->for($user1, 'forUser')
                     ->for($file)

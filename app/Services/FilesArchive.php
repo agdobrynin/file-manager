@@ -38,7 +38,7 @@ readonly class FilesArchive implements FilesArchiveInterface
 
         throw_unless($zipIsOpen, OpenArchiveException::class);
 
-        $addToZip = function ($files, $ancestors = '') use (&$addToZip) {
+        $addToZip = function ($files, $ancestors = '') use (&$addToZip): void {
             foreach ($files as $file) {
                 if ($file->isFolder() && $file->children()->count()) {
                     $addToZip($file->children()->get(), $ancestors.$file->name.DIRECTORY_SEPARATOR);

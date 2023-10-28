@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\File;
@@ -46,11 +48,12 @@ class FileControllerMethodIndexTest extends TestCase
 
         $this->actingAs($user)->get($url)
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->has('files.data', $howManyFiles)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->has('files.data', $howManyFiles)
                 // Folder is first in list
-                ->where('files.meta.total', 5)
-                ->where('files.links.next', $nextPage ? Config::get('app.url').$nextPage : null)
+                    ->where('files.meta.total', 5)
+                    ->where('files.links.next', $nextPage ? Config::get('app.url').$nextPage : null)
             );
     }
 
@@ -100,7 +103,7 @@ class FileControllerMethodIndexTest extends TestCase
 
         // Favorite and search display all descendants
         // Make is favorite files
-        $root->refresh()->descendants()->get()->each(function (File $file) {
+        $root->refresh()->descendants()->get()->each(function (File $file): void {
             $paths = [
                 '/Folder1',
                 '/f-1-1.png',
@@ -120,19 +123,20 @@ class FileControllerMethodIndexTest extends TestCase
 
         $this->actingAs($user)->get($url)
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('MyFiles')
-                ->where('files.meta.total', $totalFiles)
-                ->whereContains('files', function (array $data) use ($expectFiles) {
-                    $intersect = array_uintersect_assoc(
-                        $expectFiles,
-                        $data,
-                        static fn ($expectItem, $dataItem) => $expectItem !== array_intersect_assoc($expectItem, $dataItem)
-                    );
-                    $this->assertEqualsCanonicalizing($expectFiles, $intersect);
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('MyFiles')
+                    ->where('files.meta.total', $totalFiles)
+                    ->whereContains('files', function (array $data) use ($expectFiles) {
+                        $intersect = array_uintersect_assoc(
+                            $expectFiles,
+                            $data,
+                            static fn ($expectItem, $dataItem) => $expectItem !== array_intersect_assoc($expectItem, $dataItem)
+                        );
+                        $this->assertEqualsCanonicalizing($expectFiles, $intersect);
 
-                    return true;
-                })
+                        return true;
+                    })
             );
     }
 
@@ -144,28 +148,29 @@ class FileControllerMethodIndexTest extends TestCase
 
         $this->actingAs($user)->get('/file')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
                 // test fileResource structure with check types
-                ->whereType('files.data.0.id', 'integer')
-                ->whereType('files.data.0.isFavorite', 'boolean')
-                ->whereType('files.data.0.name', 'string')
-                ->whereType('files.data.0.disk', 'string')
-                ->whereType('files.data.0.path', 'string')
-                ->whereType('files.data.0.parentId', 'integer')
-                ->whereType('files.data.0.isFolder', 'boolean')
-                ->whereType('files.data.0.mime', ['string', 'null'])
-                ->whereType('files.data.0.size', ['integer', 'null'])
-                ->whereType('files.data.0.owner', 'string')
-                ->whereType('files.data.0.createdAt', 'string')
-                ->whereType('files.data.0.updatedAt', 'string')
-                ->whereType('files.data.0.createdBy', 'integer')
-                ->whereType('files.data.0.updatedBy', 'integer')
-                ->whereType('files.data.0.deletedAt', ['string', 'null'])
+                    ->whereType('files.data.0.id', 'integer')
+                    ->whereType('files.data.0.isFavorite', 'boolean')
+                    ->whereType('files.data.0.name', 'string')
+                    ->whereType('files.data.0.disk', 'string')
+                    ->whereType('files.data.0.path', 'string')
+                    ->whereType('files.data.0.parentId', 'integer')
+                    ->whereType('files.data.0.isFolder', 'boolean')
+                    ->whereType('files.data.0.mime', ['string', 'null'])
+                    ->whereType('files.data.0.size', ['integer', 'null'])
+                    ->whereType('files.data.0.owner', 'string')
+                    ->whereType('files.data.0.createdAt', 'string')
+                    ->whereType('files.data.0.updatedAt', 'string')
+                    ->whereType('files.data.0.createdBy', 'integer')
+                    ->whereType('files.data.0.updatedBy', 'integer')
+                    ->whereType('files.data.0.deletedAt', ['string', 'null'])
                 // check ancestors props
-                ->whereType('ancestors.data.0.id', 'integer')
-                ->whereType('ancestors.data.0.isFolder', 'boolean')
-                ->whereType('ancestors.data.0.name', 'string')
-                ->whereType('ancestors.data.0.parentId', ['integer', 'null'])
+                    ->whereType('ancestors.data.0.id', 'integer')
+                    ->whereType('ancestors.data.0.isFolder', 'boolean')
+                    ->whereType('ancestors.data.0.name', 'string')
+                    ->whereType('ancestors.data.0.parentId', ['integer', 'null'])
             );
     }
 
@@ -173,10 +178,11 @@ class FileControllerMethodIndexTest extends TestCase
     {
         $this->followingRedirects()->get('/file')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Auth/Login')
-                ->url('/login')
-                ->where('auth.user', null)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('Auth/Login')
+                    ->url('/login')
+                    ->where('auth.user', null)
             );
     }
 
@@ -205,10 +211,11 @@ class FileControllerMethodIndexTest extends TestCase
 
         $this->actingAs($user)->get('/file')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('MyFiles')
-                ->where('parentId', $root->id)
-                ->has('files.data', 0)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('MyFiles')
+                    ->where('parentId', $root->id)
+                    ->has('files.data', 0)
             );
     }
 
@@ -219,12 +226,13 @@ class FileControllerMethodIndexTest extends TestCase
         $this->actingAs($user)->followingRedirects()
             ->get('/file')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Auth/VerifyEmail')
-                ->url('/verify-email')
-                ->has('auth.user.name')
-                ->where('auth.user.email', $user->email)
-                ->where('auth.user.email_verified_at', null)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('Auth/VerifyEmail')
+                    ->url('/verify-email')
+                    ->has('auth.user.name')
+                    ->where('auth.user.email', $user->email)
+                    ->where('auth.user.email_verified_at', null)
             );
     }
 
@@ -246,21 +254,22 @@ class FileControllerMethodIndexTest extends TestCase
 
         $this->get('/file')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('MyFiles')
-                ->where('parentId', $root->id)
-                ->has('ancestors.data.0', function (AssertableInertia $item) use ($root) {
-                    $item->where('parentId', null)
-                        ->where('id', $root->id)
-                        ->where('isFolder', true)
-                        ->etc();
-                })
-                ->where('auth.user.id', $user->id)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('MyFiles')
+                    ->where('parentId', $root->id)
+                    ->has('ancestors.data.0', function (AssertableInertia $item) use ($root): void {
+                        $item->where('parentId', null)
+                            ->where('id', $root->id)
+                            ->where('isFolder', true)
+                            ->etc();
+                    })
+                    ->where('auth.user.id', $user->id)
                 // list of files is empty
-                ->has('files.data', 0)
+                    ->has('files.data', 0)
                 // has pagination info
-                ->has('files.links.next')
-                ->has('files.meta.total')
+                    ->has('files.links.next')
+                    ->has('files.meta.total')
             );
     }
 
@@ -272,9 +281,10 @@ class FileControllerMethodIndexTest extends TestCase
 
         $this->get('/file/'.$root->id)
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('MyFiles')
-                ->where('parentId', $root->id)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('MyFiles')
+                    ->where('parentId', $root->id)
             );
     }
 
@@ -291,7 +301,7 @@ class FileControllerMethodIndexTest extends TestCase
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
 
-        $makeFilesTree = static function (array $names, File $parent) use (&$makeFilesTree) {
+        $makeFilesTree = static function (array $names, File $parent) use (&$makeFilesTree): void {
             foreach ($names as $key => $name) {
                 if (is_array($name)) {
                     $folder = File::create((new FileFolderVO(name: $key))->toArray(), $parent);

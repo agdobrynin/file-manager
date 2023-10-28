@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\File;
@@ -47,25 +49,26 @@ class SharedByMeControllerMethodIndexTest extends TestCase
 
         $this->actingAs($user)
             ->get('/share-by-me')
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('SharedByMe')
-                ->url('/share-by-me')
-                ->where('auth.user.id', $user->id)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('SharedByMe')
+                    ->url('/share-by-me')
+                    ->where('auth.user.id', $user->id)
                 // FileShareResource::class
-                ->where('files.data.0.id', $fileShares[0]->id)
-                ->where('files.data.0.name', $fileShares[0]->file->name)
-                ->where('files.data.0.disk', $fileShares[0]->file->disk->value)
-                ->where('files.data.0.path', $fileShares[0]->file->path)
-                ->where('files.data.0.parentId', $fileShares[0]->file->parent_id)
-                ->where('files.data.0.isFolder', $fileShares[0]->file->isFolder())
-                ->where('files.data.0.mime', $fileShares[0]->file->mime)
-                ->where('files.data.0.size', $fileShares[0]->file->size)
-                ->where('files.data.0.owner', $fileShares[0]->file->owner)
-                ->where('files.data.0.shareForUser', $fileShares[0]->forUser->name)
+                    ->where('files.data.0.id', $fileShares[0]->id)
+                    ->where('files.data.0.name', $fileShares[0]->file->name)
+                    ->where('files.data.0.disk', $fileShares[0]->file->disk->value)
+                    ->where('files.data.0.path', $fileShares[0]->file->path)
+                    ->where('files.data.0.parentId', $fileShares[0]->file->parent_id)
+                    ->where('files.data.0.isFolder', $fileShares[0]->file->isFolder())
+                    ->where('files.data.0.mime', $fileShares[0]->file->mime)
+                    ->where('files.data.0.size', $fileShares[0]->file->size)
+                    ->where('files.data.0.owner', $fileShares[0]->file->owner)
+                    ->where('files.data.0.shareForUser', $fileShares[0]->forUser->name)
                 // Pagination info
-                ->has('files.data', 2)
-                ->where('files.links.next', Config('app.url').'/share-by-me?page=2')
-                ->where('files.meta.total', 3)
+                    ->has('files.data', 2)
+                    ->where('files.links.next', Config('app.url').'/share-by-me?page=2')
+                    ->where('files.meta.total', 3)
             );
     }
 
@@ -76,7 +79,7 @@ class SharedByMeControllerMethodIndexTest extends TestCase
         // File share with name start with 'file-'
         FileShare::factory(3)
             ->afterMaking(
-                function (FileShare $fileShare) {
+                function (FileShare $fileShare): void {
                     $file = File::factory()->create(
                         ['name' => 'file-'.fake()->uuid]
                     );
@@ -97,13 +100,14 @@ class SharedByMeControllerMethodIndexTest extends TestCase
 
         $this->actingAs($user)
             ->get('/share-by-me?search=file-')
-            ->assertInertia(fn (AssertableInertia $page) => $page
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
                 // Pagination info
-                ->has('files.data', 2)
-                ->where('files.links.next', Config('app.url').'/share-by-me?search=file-&page=2')
-                ->where('files.meta.total', 3)
-                ->where('files.data.0.name', fn (string $name) => str_starts_with($name, 'file-'))
-                ->where('files.data.1.name', fn (string $name) => str_starts_with($name, 'file-'))
+                    ->has('files.data', 2)
+                    ->where('files.links.next', Config('app.url').'/share-by-me?search=file-&page=2')
+                    ->where('files.meta.total', 3)
+                    ->where('files.data.0.name', fn (string $name) => str_starts_with($name, 'file-'))
+                    ->where('files.data.1.name', fn (string $name) => str_starts_with($name, 'file-'))
             );
 
         $this->assertDatabaseCount(FileShare::class, 13);
@@ -117,10 +121,11 @@ class SharedByMeControllerMethodIndexTest extends TestCase
             ->actingAs($user)
             ->get('/share-by-me')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Auth/VerifyEmail')
-                ->url('/verify-email')
-                ->where('auth.user.id', $user->id)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('Auth/VerifyEmail')
+                    ->url('/verify-email')
+                    ->where('auth.user.id', $user->id)
             );
     }
 
@@ -128,10 +133,11 @@ class SharedByMeControllerMethodIndexTest extends TestCase
     {
         $this->followingRedirects()->get('/share-by-me')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Auth/Login')
-                ->url('/login')
-                ->where('auth.user', null)
+            ->assertInertia(
+                fn (AssertableInertia $page) => $page
+                    ->component('Auth/Login')
+                    ->url('/login')
+                    ->where('auth.user', null)
             );
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\File;
@@ -36,7 +38,7 @@ class FileUploadRequest extends ParentIdBaseRequest
             self::RELATIVE_PATHS_KEY => [
                 'required',
                 'array',
-                function (string $attribute, array $values, Closure $fail) {
+                function (string $attribute, array $values, Closure $fail): void {
                     $maxCountFiles = config('upload_files.upload.max_files');
 
                     if ($maxCountFiles < count($values)) {
