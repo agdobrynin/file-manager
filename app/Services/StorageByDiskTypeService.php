@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Contracts\StorageByDiskTypeServiceInterface;
@@ -14,8 +16,7 @@ final readonly class StorageByDiskTypeService implements StorageByDiskTypeServic
     public function __construct(
         private StorageLocalServiceInterface $localService,
         private StorageCloudServiceInterface $cloudService,
-    )
-    {
+    ) {
     }
 
     public function resolve(DiskEnum $diskEnum): StorageServiceInterface

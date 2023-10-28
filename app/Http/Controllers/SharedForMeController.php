@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Dto\ErrorMessageDto;
@@ -38,7 +40,7 @@ class SharedForMeController extends Controller
         $dto = new FileIdsDto(...$request->validated());
         $fileShares = FileShare::fileShareForUser($request->user())->with('file');
 
-        if (!$dto->all) {
+        if (! $dto->all) {
             $fileShares = $fileShares->whereIn('id', $dto->ids);
         }
 

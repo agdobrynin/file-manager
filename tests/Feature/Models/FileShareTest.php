@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Models;
 
 use App\Dto\FilesListFilterDto;
@@ -31,7 +33,7 @@ class FileShareTest extends TestCase
         $filesForUser1 = File::factory(5)
             ->isFolder($user1)
             ->sequence(
-                fn(Sequence $sequence) => (new FileFolderVO(name: 'Folder #' . $sequence->index))->toArray()
+                fn (Sequence $sequence) => (new FileFolderVO(name: 'Folder #'.$sequence->index))->toArray()
             )->createQuietly();
         // Make 2 share for user 1
         FileShare::factory()->for($user1, 'forUser')->for($filesForUser1[0])
@@ -58,7 +60,7 @@ class FileShareTest extends TestCase
         File::factory(20)
             ->isFile($user1)
             ->state(
-                (new FileVO(name: fake()->title . '.png', mime: 'image/image', size: 1))->toArray(),
+                (new FileVO(name: fake()->title.'.png', mime: 'image/image', size: 1))->toArray(),
             )
             ->has(fileShare::factory()->for($user2, 'forUser'))
             ->createQuietly();
@@ -68,8 +70,8 @@ class FileShareTest extends TestCase
             ->for($user2)
             ->for($user2, 'userUpdate')
             ->state(new Sequence(
-                (new FileFolderVO(name: 'Folder ' . fake()->randomDigit()))->toArray(),
-                (new FileVO(name: fake()->title . '.png', mime: 'image/image', size: 1))->toArray(),
+                (new FileFolderVO(name: 'Folder '.fake()->randomDigit()))->toArray(),
+                (new FileVO(name: fake()->title.'.png', mime: 'image/image', size: 1))->toArray(),
             ))
             ->has(fileShare::factory()->for($user1, 'forUser'))
             ->createQuietly();
@@ -94,7 +96,7 @@ class FileShareTest extends TestCase
         $files = File::factory(5)
             ->isFile($user1)
             ->state(new Sequence(
-                fn(Sequence $sequence) => ['name' => 'File #' . $sequence->index]
+                fn (Sequence $sequence) => ['name' => 'File #'.$sequence->index]
             ))->createQuietly();
         // Make 2 share for user 1
         FileShare::factory()->for($user2, 'forUser')->for($files[0])
@@ -197,7 +199,7 @@ class FileShareTest extends TestCase
             ->for($user2, 'userUpdate')
             ->createQuietly()
             ->slice(0, 2)
-            ->each(function (File $file) use ($user1) {
+            ->each(function (File $file) use ($user1): void {
                 FileShare::factory()
                     ->for($user1, 'forUser')
                     ->for($file)

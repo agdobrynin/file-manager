@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Controllers;
@@ -55,11 +56,13 @@ class FileController extends Controller
         $ancestors = FileAncestorsResource::collection([...$parentFolder->ancestors, $parentFolder]);
 
         return inertia(
-            'MyFiles', [
-            'parentId' => $parentFolder->id,
-            'files' => $fileResourceCollection,
-            'ancestors' => $ancestors,
-        ]);
+            'MyFiles',
+            [
+                'parentId' => $parentFolder->id,
+                'files' => $fileResourceCollection,
+                'ancestors' => $ancestors,
+            ]
+        );
     }
 
     public function create(StoreFolderRequest $request): RedirectResponse
@@ -88,14 +91,14 @@ class FileController extends Controller
             $files = $filesService->upload($parentFolder, $vo->tree);
             $flash = [
                 FlashMessagesEnum::SUCCESS->value,
-                'Upload ' . $files->count() . ' ' . Str::plural('file', $files->count())
+                'Upload '.$files->count().' '.Str::plural('file', $files->count()),
             ];
 
             foreach ($files as $file) {
                 MoveFileToCloud::dispatch($file);
             }
         } catch (\Throwable $exception) {
-            $flash = [FlashMessagesEnum::ERROR->value, 'Upload files error: ' . $exception->getMessage()];
+            $flash = [FlashMessagesEnum::ERROR->value, 'Upload files error: '.$exception->getMessage()];
         }
 
         return to_route('file.index', ['parentFolder' => $parentFolder])
@@ -114,7 +117,7 @@ class FileController extends Controller
             ? $request->parentFolder->children()->get()
             : $request->requestFiles;
 
-        $children->each(function (File $file) {
+        $children->each(function (File $file): void {
             $this->authorize('delete', $file);
             $file->deleteQuietly();
         });
@@ -185,10 +188,10 @@ class FileController extends Controller
                 ->get()
                 ->keyBy('file_id');
             /** @var Collection<File> $shareFiles */
-            $shareFiles = $files->reject(fn(File $file) => $filesShare->has($file->id));
+            $shareFiles = $files->reject(fn (File $file) => $filesShare->has($file->id));
             /** @var Collection<FileShareVO> $insertData */
             $insertData = $shareFiles->reduce(
-                fn(Collection $c, File $file) => $c->add((new FileShareVO($request->shareToUser, $file))->toArray()),
+                fn (Collection $c, File $file) => $c->add((new FileShareVO($request->shareToUser, $file))->toArray()),
                 collect()
             );
 

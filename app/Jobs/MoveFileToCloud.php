@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Jobs;
@@ -27,10 +28,9 @@ class MoveFileToCloud implements ShouldQueue
      */
     public function __construct(
         public readonly File $file,
-        public readonly int  $maxRetries = 100,
-        public readonly int  $backoffMinutesFactor = 5,
-    )
-    {
+        public readonly int $maxRetries = 100,
+        public readonly int $backoffMinutesFactor = 5,
+    ) {
         $this->onQueue('upload');
     }
 
@@ -41,6 +41,7 @@ class MoveFileToCloud implements ShouldQueue
 
     /**
      * Execute the job.
+     *
      * @throws Throwable
      */
     public function handle(MoveFileBetweenStorageInterface $moveFileBetweenStorage): void
@@ -58,7 +59,7 @@ class MoveFileToCloud implements ShouldQueue
             $randomMinutes = random_int(1, $this->backoffMinutesFactor > 1 ? $this->backoffMinutesFactor : 2);
 
             $this->delay(now()->addMinutes($randomMinutes));
-            ++$this->currentRetryCount;
+            $this->currentRetryCount++;
 
             dispatch($this);
         }

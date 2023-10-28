@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\File;
@@ -28,31 +30,31 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
         yield 'empty params' => [
             'data' => [],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "all = false" but not set param "ids"' => [
             'data' => ['all' => false],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "all = false" but param "ids" is string' => [
             'data' => ['all' => false, 'ids' => ''],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "all = false" but param "ids" is empty' => [
             'data' => ['all' => false, 'ids' => []],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "all = false" param "ids"' => [
             'data' => ['all' => false, 'ids' => [1, 2, 3]],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "ids" not owner' => [
@@ -61,7 +63,7 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
                     'all' => false,
                     'ids' => FileShare::factory()
                         ->afterMaking(
-                            fn(FileShare $fileShare) => $fileShare->file()
+                            fn (FileShare $fileShare) => $fileShare->file()
                                 ->associate(
                                     File::factory()->isFile(User::factory()->create())
                                         ->createQuietly()
@@ -70,11 +72,11 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
                         ->for(User::factory()->create(), 'forUser')
                         ->create()
                         ->pluck('id')
-                        ->toArray()
+                        ->toArray(),
                 ];
             },
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
     }
 
@@ -100,7 +102,7 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
         }
 
         $response = $this->actingAs($user)
-            ->get('/share-for-me/download?' . http_build_query($data));
+            ->get('/share-for-me/download?'.http_build_query($data));
 
         if ($errors) {
             $response->assertSessionHasErrors($errors);
@@ -114,27 +116,27 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
     public static function dataDownloadWithErrors(): Generator
     {
         yield 'file can not load from store' => [
-            fn() => FileShare::factory()
+            fn () => FileShare::factory()
                 ->afterMaking(
-                    fn(FileShare $fileShare) => $fileShare->file()
+                    fn (FileShare $fileShare) => $fileShare->file()
                         ->associate(File::factory()->isFile()->create())
                 )
                 ->for(User::factory()->create(), 'forUser')
                 ->create()
                 ->pluck('id')
-                ->toArray()
+                ->toArray(),
         ];
 
         yield 'empty folder' => [
-            fn() => FileShare::factory()
+            fn () => FileShare::factory()
                 ->afterMaking(
-                    fn(FileShare $fileShare) => $fileShare->file()
+                    fn (FileShare $fileShare) => $fileShare->file()
                         ->associate(File::factory()->isFolder()->create())
                 )
                 ->for(User::factory()->create(), 'forUser')
                 ->create()
                 ->pluck('id')
-                ->toArray()
+                ->toArray(),
         ];
     }
 
@@ -148,7 +150,7 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
         $queryString = http_build_query(['ids' => $initShareId()]);
 
         $this->actingAs($user)
-            ->get('/share-for-me/download?all=false&' . $queryString)
+            ->get('/share-for-me/download?all=false&'.$queryString)
             ->assertStatus(400)
             ->assertJsonStructure(['message', 'errors']);
     }
@@ -161,7 +163,7 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
         /** @var FileShare $shareFile */
         $shareFile = FileShare::factory()
             ->afterMaking(
-                fn(FileShare $fileShare) => $fileShare->file()
+                fn (FileShare $fileShare) => $fileShare->file()
                     ->associate(
                         File::factory()->isFile()
                             ->for($userFrom, 'user')
@@ -178,11 +180,11 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
         $storage->put($file->storage_path, 'content');
 
         $this->actingAs($userMe)
-            ->get('/share-for-me/download?all=false&ids[]=' . $shareFile->id)
+            ->get('/share-for-me/download?all=false&ids[]='.$shareFile->id)
             ->assertOk()
             ->assertHeader(
                 'content-disposition',
-                'attachment; filename=' . $file->name
+                'attachment; filename='.$file->name
             );
     }
 
@@ -195,7 +197,7 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
         /** @var FileShare $shareFolder for folder with name "My folder" */
         $shareFolder = FileShare::factory()
             ->afterMaking(
-                fn(FileShare $fileShare) => $fileShare->file()
+                fn (FileShare $fileShare) => $fileShare->file()
                     ->associate(
                         File::factory()
                             ->isFolder()
@@ -224,7 +226,7 @@ class SharedForMeControllerMethodDownloadTest extends TestCase
         }
 
         $this->actingAs($userMe)
-            ->get('/share-for-me/download?all=false&ids[]=' . $shareFolder->id)
+            ->get('/share-for-me/download?all=false&ids[]='.$shareFolder->id)
             ->assertOk()
             ->assertHeader(
                 'content-disposition',

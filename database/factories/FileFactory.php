@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\DiskEnum;
@@ -21,7 +23,7 @@ class FileFactory extends Factory
      */
     public function definition(): array
     {
-        $name = Str::random() . '.' . $this->faker->fileExtension();
+        $name = Str::random().'.'.$this->faker->fileExtension();
 
         return [
             'name' => $name,
@@ -29,7 +31,7 @@ class FileFactory extends Factory
             'path' => null,
             'disk' => DiskEnum::LOCAL,
             'size' => fake()->numberBetween(10, 200),
-            'storage_path' => '/files/' . $name
+            'storage_path' => '/files/'.$name,
         ];
     }
 
@@ -39,16 +41,16 @@ class FileFactory extends Factory
             ->for($user, 'userUpdate');
     }
 
-    public function isFile(?User $user = null): FileFactory|Factory
+    public function isFile(User $user = null): FileFactory|Factory
     {
-        $name = Str::random() . '.' . $this->faker->fileExtension();
+        $name = Str::random().'.'.$this->faker->fileExtension();
 
         $vo = new FileVO(
             name: $name,
             mime: $this->faker->mimeType(),
             size: 100,
             path: $name,
-            storagePath: 'file/' . $name,
+            storagePath: 'file/'.$name,
         );
 
         $factory = $this->state($vo->toArray());
@@ -68,7 +70,7 @@ class FileFactory extends Factory
         ]);
     }
 
-    public function isFolder(?User $user = null): FileFactory|Factory
+    public function isFolder(User $user = null): FileFactory|Factory
     {
         $vo = new FileFolderVO(
             name: $this->faker->name,

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -11,14 +12,14 @@ use Illuminate\Database\Eloquent\Collection;
 final readonly class FilesDestroyService implements FilesDestroyServiceInterface
 {
     /**
-     * @param Collection<File> $collection
+     * @param  Collection<File>  $collection
      * @return \Illuminate\Support\Collection<DestroyFileFromStorageDto>
      */
     public function destroy(Collection $collection): \Illuminate\Support\Collection
     {
         $filteredCollection = $collection->whereInstanceOf(File::class);
 
-        if ($filteredCollection->count() === 0) {
+        if (0 === $filteredCollection->count()) {
             return collect();
         }
 
@@ -27,7 +28,7 @@ final readonly class FilesDestroyService implements FilesDestroyServiceInterface
         foreach ($filteredCollection as $file) {
             if ($file->isFolder()) {
                 $filesForDelete->push(
-                    ...$file->descendants()->get()->filter(fn(File $f) => !$f->isFolder())
+                    ...$file->descendants()->get()->filter(fn (File $f) => ! $f->isFolder())
                 );
             } else {
                 $filesForDelete->push($file);
@@ -45,7 +46,7 @@ final readonly class FilesDestroyService implements FilesDestroyServiceInterface
             $collectionDto->push($dto);
         }
 
-        $filteredCollection->each(fn(File $file) => $file->forceDelete());
+        $filteredCollection->each(fn (File $file) => $file->forceDelete());
 
         return $collectionDto;
     }

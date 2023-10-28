@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Dto\FilesListFilterDto;
@@ -44,6 +46,7 @@ use Kalnoy\Nestedset\NodeTrait;
  * @property-read \App\Models\FileFavorite|null $favorite
  * @property-read File|null $parent
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Kalnoy\Nestedset\Collection<int, static> all($columns = ['*'])
  * @method static \Kalnoy\Nestedset\QueryBuilder|File ancestorsAndSelf($id, array $columns = [])
  * @method static \Kalnoy\Nestedset\QueryBuilder|File ancestorsOf($id, array $columns = [])
@@ -110,11 +113,12 @@ use Kalnoy\Nestedset\NodeTrait;
  * @method static Builder filesList(User $user, MyFilesListFilterDto $dto, File $folder)
  * @method static Builder filesInTrash(User $user, ?FilesListFilterDto $dto = null)
  * @method static Builder fileByOwner(User $user)
+ *
  * @mixin \Eloquent
  */
 class File extends Model
 {
-    use HasFactory, NodeTrait, SoftDeletes, HasCreatorAndUpdater;
+    use HasCreatorAndUpdater, HasFactory, NodeTrait, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -169,18 +173,18 @@ class File extends Model
     {
         parent::boot();
 
-        static::creating(static fn(File $model) => self::makePath($model));
-        static::saving(static fn(File $model) => self::makePath($model));
+        static::creating(static fn (File $model) => self::makePath($model));
+        static::saving(static fn (File $model) => self::makePath($model));
     }
 
     protected static function makePath(File $model): void
     {
-        if (!$model->isRoot()) {
+        if (! $model->isRoot()) {
             $separator = str_ends_with($model->parent->path ?? '', DIRECTORY_SEPARATOR)
                 ? ''
                 : DIRECTORY_SEPARATOR;
 
-            $model->path = $model->parent?->path . $separator . $model->name;
+            $model->path = $model->parent?->path.$separator.$model->name;
         }
     }
 
@@ -235,7 +239,7 @@ class File extends Model
             ->orderBy('files.id', 'desc');
     }
 
-    public function scopeFilesInTrash(Builder $builder, User $user, ?FilesListFilterDto $dto = null): Builder
+    public function scopeFilesInTrash(Builder $builder, User $user, FilesListFilterDto $dto = null): Builder
     {
         $builder->onlyTrashed();
 
@@ -257,14 +261,14 @@ class File extends Model
     protected function owner(): Attribute
     {
         return Attribute::make(
-            get: fn(mixed $value, array $attr) => $attr['created_by'] === Auth::id() ? 'me' : $this->user->name
+            get: fn (mixed $value, array $attr) => $attr['created_by'] === Auth::id() ? 'me' : $this->user->name
         );
     }
 
     protected function disk(): Attribute
     {
         return Attribute::make(
-            set: static fn(DiskEnum $value) => $value->value,
+            set: static fn (DiskEnum $value) => $value->value,
         );
     }
 }

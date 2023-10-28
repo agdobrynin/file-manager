@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Services;
 
 use App\Contracts\GetFileContentInterface;
@@ -27,12 +29,12 @@ class FilesArchiveTest extends TestCase
             ->forUser($user)
             ->createQuietly();
 
-        $zipFile = Str::random(32) . '.zip';
-        $storagePath = '/var/tmp/' . $zipFile;
+        $zipFile = Str::random(32).'.zip';
+        $storagePath = '/var/tmp/'.$zipFile;
 
         $mockStorage = $this->mock(
             StorageLocalServiceInterface::class,
-            function (MockInterface $mock) use ($storagePath) {
+            function (MockInterface $mock) use ($storagePath): void {
                 $mock->shouldReceive('filesystem->path')
                     ->andReturn($storagePath)
                     ->once();
@@ -41,7 +43,7 @@ class FilesArchiveTest extends TestCase
 
         $mockArchive = $this->mock(
             ZipArchive::class,
-            function (MockInterface $mock) use ($storagePath) {
+            function (MockInterface $mock) use ($storagePath): void {
                 $mock->shouldReceive('open')
                     ->with($storagePath, ZipArchive::CREATE | ZipArchive::OVERWRITE)
                     ->andReturnFalse();
@@ -57,11 +59,10 @@ class FilesArchiveTest extends TestCase
     }
 
     protected function makeService(
-        ?MockInterface $mockArchive = null,
-        ?MockInterface $mockFileContent = null,
-        ?MockInterface $mockStorage = null
-    ): FilesArchive
-    {
+        MockInterface $mockArchive = null,
+        MockInterface $mockFileContent = null,
+        MockInterface $mockStorage = null
+    ): FilesArchive {
         $mockArchive = $mockArchive ?: $this->mock(ZipArchive::class);
         $mockFileContent = $mockFileContent ?: $this->mock(GetFileContentInterface::class);
         $mockStorage = $mockStorage ?: $this->mock(StorageLocalServiceInterface::class);
@@ -96,15 +97,15 @@ class FilesArchiveTest extends TestCase
         ], $root);
 
         File::create([
-            'is_folder' => false, 'name' => 'file3.jpg', 'storage_path' => '/f/333.jpg', 'disk' => DiskEnum::LOCAL
+            'is_folder' => false, 'name' => 'file3.jpg', 'storage_path' => '/f/333.jpg', 'disk' => DiskEnum::LOCAL,
         ], $root);
 
-        $zipFile = Str::random(32) . '.zip';
-        $storagePath = '/var/tmp/' . $zipFile;
+        $zipFile = Str::random(32).'.zip';
+        $storagePath = '/var/tmp/'.$zipFile;
 
         $mockStorage = $this->mock(
             StorageLocalServiceInterface::class,
-            function (MockInterface $mock) use ($storagePath) {
+            function (MockInterface $mock) use ($storagePath): void {
                 $mock->shouldReceive('filesystem->path')
                     ->andReturn($storagePath)
                     ->once();
@@ -113,7 +114,7 @@ class FilesArchiveTest extends TestCase
 
         $mockArchive = $this->mock(
             ZipArchive::class,
-            function (MockInterface $mock) use ($storagePath) {
+            function (MockInterface $mock) use ($storagePath): void {
                 $mock->shouldReceive('open')
                     ->with($storagePath, ZipArchive::CREATE | ZipArchive::OVERWRITE)
                     ->andReturnTrue();
@@ -136,7 +137,7 @@ class FilesArchiveTest extends TestCase
 
         $mockFileContent = $this->mock(
             GetFileContentInterface::class,
-            function (MockInterface $mock) {
+            function (MockInterface $mock): void {
                 $mock->shouldReceive('getContent')
                     ->withAnyArgs()
                     ->andReturn('file-content-as-string');
@@ -177,7 +178,7 @@ class FilesArchiveTest extends TestCase
 
         $mockStorage = $this->partialMock(
             StorageLocalServiceInterface::class,
-            fn(MockInterface $mock) => $mock->shouldReceive('filesystem->path')->andReturn('/a/aaa.zip')
+            fn (MockInterface $mock) => $mock->shouldReceive('filesystem->path')->andReturn('/a/aaa.zip')
         );
 
         $mockArchive = $this->getMockBuilder(ZipArchive::class)
@@ -187,8 +188,8 @@ class FilesArchiveTest extends TestCase
             ->method('addFromString')
             ->willReturnCallback(function ($fileName) {
                 // Files relative path in archive.
-                if (!in_array($fileName, ['file1.jpg', 'file2.jpg', 'folder2/file3.jpg', 'folder2/file4.jpg'])) {
-                    throw new LogicException('Unexpected file ' . $fileName . ' in archive');
+                if (! in_array($fileName, ['file1.jpg', 'file2.jpg', 'folder2/file3.jpg', 'folder2/file4.jpg'])) {
+                    throw new LogicException('Unexpected file '.$fileName.' in archive');
                 }
 
                 return true;
@@ -196,7 +197,7 @@ class FilesArchiveTest extends TestCase
 
         $mockFileContent = $this->mock(
             GetFileContentInterface::class,
-            fn(MockInterface $mock) => $mock->shouldReceive('getContent')
+            fn (MockInterface $mock) => $mock->shouldReceive('getContent')
                 ->times(4)->withAnyArgs()->andReturn('file-content-as-string')
         );
 

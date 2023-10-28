@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -20,9 +21,9 @@ readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
     }
 
     /**
-     * @param Model $parentFolder
-     * @param array<string, UploadedFile[]|File[]|string> $files Binary tree with files and folders.
+     * @param  array<string, UploadedFile[]|File[]|string>  $files Binary tree with files and folders.
      * @return Collection<Model>
+     *
      * @throws Throwable
      */
     public function upload(Model $parentFolder, array $files): Collection
@@ -39,10 +40,10 @@ readonly class UploadTreeFilesService implements UploadTreeFilesServiceInterface
                 $separator = str_starts_with($parentFolder->path ?? '/', DIRECTORY_SEPARATOR)
                     ? '' : DIRECTORY_SEPARATOR;
 
-                $destinationDirectoryStorage = 'files' .
-                    DIRECTORY_SEPARATOR .
-                    $parentFolder->created_by .
-                    $separator .
+                $destinationDirectoryStorage = 'files'.
+                    DIRECTORY_SEPARATOR.
+                    $parentFolder->created_by.
+                    $separator.
                     $parentFolder->path;
 
                 $storagePath = $this->storageService->upload($item, $destinationDirectoryStorage);

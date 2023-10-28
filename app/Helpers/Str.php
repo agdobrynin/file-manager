@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Helpers;
@@ -16,7 +17,7 @@ class Str
             'k', 'kb' => $from * 1024,
             'm', 'mb' => $from * (1024 ** 2),
             'g', 'gb' => $from * (1024 ** 3),
-            default => $from ? (int)$from : null,
+            default => $from ? (int) $from : null,
         };
     }
 
@@ -24,9 +25,9 @@ class Str
     {
         $base = log($bytes) / log(1024);
         if ($base > 0) {
-            $units = array(' bytes', ' kB', ' MB', ' GB', ' TB');
+            $units = [' bytes', ' kB', ' MB', ' GB', ' TB'];
 
-            return round(1024 ** ($base - floor($base)), 2) . $units[floor($base)];
+            return round(1024 ** ($base - floor($base)), 2).$units[floor($base)];
         }
 
         return '';

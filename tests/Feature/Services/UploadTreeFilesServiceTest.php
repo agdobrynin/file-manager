@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Services;
 
 use App\Contracts\StorageServiceInterface;
@@ -46,7 +48,7 @@ class UploadTreeFilesServiceTest extends TestCase
             ],
         ];
 
-        $storage = $this->mock(StorageServiceInterface::class, function (MockInterface $mock) {
+        $storage = $this->mock(StorageServiceInterface::class, function (MockInterface $mock): void {
             $filesCount = 4; // count of files in $files variable.
 
             $mock->shouldReceive('upload')
@@ -72,9 +74,9 @@ class UploadTreeFilesServiceTest extends TestCase
             ['name' => 'pdf.pdf', 'disk' => 'local', 'path' => '/pdf.pdf', 'is_folder' => false, 'parent_id' => $root->id]
         );
         //Images in subdirectory
-        $root->children->firstWhere(fn(File $file) => $file->isFolder())
+        $root->children->firstWhere(fn (File $file) => $file->isFolder())
             ->children
-            ->each(function (File $file) {
+            ->each(function (File $file): void {
                 $this->assertStringStartsWith('/images/img-', $file->path);
                 $this->assertEquals(DiskEnum::LOCAL, $file->disk);
             });

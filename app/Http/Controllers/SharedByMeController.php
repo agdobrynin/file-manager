@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Dto\ErrorMessageDto;
@@ -47,7 +49,7 @@ class SharedByMeController extends Controller
         return to_route('share_by_me.index')
             ->with(
                 FlashMessagesEnum::INFO->value,
-                $deleteCount . ' ' . Str::plural('file', $deleteCount) . ' disabled from sharing'
+                $deleteCount.' '.Str::plural('file', $deleteCount).' disabled from sharing'
             );
     }
 
@@ -59,7 +61,7 @@ class SharedByMeController extends Controller
         $dto = new FileIdsDto(...$request->validated());
         $fileShares = FileShare::fileShareByFileOwner($request->user())->with('file');
 
-        if (!$dto->all) {
+        if (! $dto->all) {
             $fileShares = $fileShares->whereIn('id', $dto->ids);
         }
 

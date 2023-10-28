@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\VO;
 
 use App\VO\UploadFilesVO;
@@ -34,7 +36,7 @@ class UploadFilesVOTest extends TestCase
 
         yield 'success' => [
             'files' => [$f3, $f4, $f5, $f1, $f2],
-            'relativePaths' => ['folder1/1-1.jpg', 'folder1/1-2.jpg', 'folder2/2-1.jpg', '1.jpg', '2.jpg',],
+            'relativePaths' => ['folder1/1-1.jpg', 'folder1/1-2.jpg', 'folder2/2-1.jpg', '1.jpg', '2.jpg'],
             'exception' => null,
             'tree' => [
                 '1.jpg' => $f1,
@@ -44,8 +46,8 @@ class UploadFilesVOTest extends TestCase
                     '1-2.jpg' => $f4,
                 ],
                 'folder2' => [
-                    '2-1.jpg' => $f5
-                ]
+                    '2-1.jpg' => $f5,
+                ],
             ],
         ];
     }
@@ -54,12 +56,11 @@ class UploadFilesVOTest extends TestCase
      * @throws Throwable
      */
     public function test_upload_files_vo(
-        array   $files,
-        array   $relativePaths,
-        ?string $exception = null,
-        ?array  $tree = null,
-    ): void
-    {
+        array $files,
+        array $relativePaths,
+        string $exception = null,
+        array $tree = null,
+    ): void {
         if ($exception) {
             $this->expectException($exception);
         }

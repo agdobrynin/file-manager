@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Controllers;
@@ -54,7 +55,7 @@ class FileTrashController extends Controller
             }
         }
 
-        $flashes[FlashMessagesEnum::SUCCESS->value] = $restoredCount . Str::plural(' file', $restoredCount) .
+        $flashes[FlashMessagesEnum::SUCCESS->value] = $restoredCount.Str::plural(' file', $restoredCount).
             ' restored successfully';
 
         if ($policyException) {
@@ -78,7 +79,7 @@ class FileTrashController extends Controller
 
         return to_route('trash.index')->with(
             FlashMessagesEnum::SUCCESS->value,
-            $destroyedCollection->count() . Str::plural(' file', $destroyedCollection->count()) . ' destroyed successfully'
+            $destroyedCollection->count().Str::plural(' file', $destroyedCollection->count()).' destroyed successfully'
         );
     }
 }

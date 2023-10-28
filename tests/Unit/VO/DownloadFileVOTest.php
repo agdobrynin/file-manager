@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\VO;
 
 use App\Models\File;
@@ -33,17 +35,17 @@ class DownloadFileVOTest extends TestCase
         ];
 
         $file = tempnam(sys_get_temp_dir(), 'FOO');
-        rename($file, $file . '.zip');
+        rename($file, $file.'.zip');
 
         yield 'download single folder' => [
             'files' => collect([new File(['is_folder' => true, 'name' => 'My folder'])]),
             'exception' => '',
-            'downloadFile' => $file . '.zip',
+            'downloadFile' => $file.'.zip',
             'expectName' => 'My folder.zip',
         ];
 
         $file = tempnam(sys_get_temp_dir(), 'FOO');
-        rename($file, $file . '.zip');
+        rename($file, $file.'.zip');
 
         $parent = new File(['is_folder' => true, 'name' => 'Sub folder']);
         $parent->setParentId(1);
@@ -61,9 +63,9 @@ class DownloadFileVOTest extends TestCase
         yield 'download many files' => [
             'files' => $collection,
             'exception' => '',
-            'downloadFile' => $file . '.zip',
+            'downloadFile' => $file.'.zip',
             'expectName' => 'Sub folder.zip',
-            'defaultName' => 'my files'
+            'defaultName' => 'my files',
         ];
     }
 
@@ -72,12 +74,11 @@ class DownloadFileVOTest extends TestCase
      */
     public function test_download_value_object(
         Collection $files,
-        string     $exception = '',
-        string     $downloadFile = '',
-        string     $expectName = '',
-        string     $defaultName = '',
-    ): void
-    {
+        string $exception = '',
+        string $downloadFile = '',
+        string $expectName = '',
+        string $defaultName = '',
+    ): void {
         if ($exception) {
             $this->expectException($exception);
         }

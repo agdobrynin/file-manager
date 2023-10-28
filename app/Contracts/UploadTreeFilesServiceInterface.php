@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Contracts;
@@ -13,9 +14,9 @@ use Throwable;
 interface UploadTreeFilesServiceInterface
 {
     /**
-     * @param Model $parentFolder
-     * @param array<string, UploadedFile[]|File[]|string> $files Binary tree with files and folders.
+     * @param  array<string, UploadedFile[]|File[]|string>  $files Binary tree with files and folders.
      * @return Collection<Model>
+     *
      * @throws RuntimeException|Throwable
      */
     public function upload(Model $parentFolder, array $files): Collection;

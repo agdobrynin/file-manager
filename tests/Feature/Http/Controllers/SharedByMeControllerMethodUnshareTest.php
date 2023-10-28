@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\File;
@@ -28,31 +30,31 @@ class SharedByMeControllerMethodUnshareTest extends TestCase
         yield 'empty params' => [
             'data' => [],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "all = false" but not set param "ids"' => [
             'data' => ['all' => false],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "all = false" but param "ids" is string' => [
             'data' => ['all' => false, 'ids' => ''],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "all = false" but param "ids" is empty' => [
             'data' => ['all' => false, 'ids' => []],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "all = false" param "ids"' => [
             'data' => ['all' => false, 'ids' => [1, 2, 3]],
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
 
         yield 'param "ids" not owner' => [
@@ -61,7 +63,7 @@ class SharedByMeControllerMethodUnshareTest extends TestCase
                     'all' => false,
                     'ids' => FileShare::factory()
                         ->afterMaking(
-                            fn(FileShare $fileShare) => $fileShare->file()
+                            fn (FileShare $fileShare) => $fileShare->file()
                                 ->associate(
                                     File::factory()->isFile(User::factory()->create())
                                         ->createQuietly()
@@ -70,11 +72,11 @@ class SharedByMeControllerMethodUnshareTest extends TestCase
                         ->for(User::factory()->create(), 'forUser')
                         ->create()
                         ->pluck('id')
-                        ->toArray()
+                        ->toArray(),
                 ];
             },
             'errors' => ['ids'],
-            'noErrors' => ['all']
+            'noErrors' => ['all'],
         ];
     }
 
@@ -120,11 +122,11 @@ class SharedByMeControllerMethodUnshareTest extends TestCase
         /** @var Collection<FileShare> $fileShares */
         $fileShares = FileShare::factory(2)
             ->afterMaking(
-                fn(FileShare $fileShare) => $fileShare->file()
+                fn (FileShare $fileShare) => $fileShare->file()
                     ->associate(
                         tap(
                             File::factory()->isFile()->create(),
-                            static fn(File $file) => $files->add($file)
+                            static fn (File $file) => $files->add($file)
                         )
                     )
             )
@@ -161,11 +163,11 @@ class SharedByMeControllerMethodUnshareTest extends TestCase
         /** @var Collection<FileShare> $fileShares */
         $fileShares = FileShare::factory(2)
             ->afterMaking(
-                fn(FileShare $fileShare) => $fileShare->file()
+                fn (FileShare $fileShare) => $fileShare->file()
                     ->associate(
                         tap(
                             File::factory()->isFile()->create(),
-                            static fn(File $file) => $files->add($file)
+                            static fn (File $file) => $files->add($file)
                         )
                     )
             )

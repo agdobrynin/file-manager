@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Services;
 
 use App\Contracts\FilesArchiveInterface;
@@ -24,13 +26,13 @@ class MakeDownloadFilesServiceTest extends TestCase
         $file = File::factory()->isFile(User::factory()->create())->createQuietly();
         $files = collect([$file]);
 
-        $mockStorage = $this->mock(StorageLocalServiceInterface::class, function (MockInterface $mock) use ($file) {
+        $mockStorage = $this->mock(StorageLocalServiceInterface::class, function (MockInterface $mock): void {
             $mock->shouldReceive('filesystem->put')
                 ->andReturnFalse()
                 ->once();
         });
 
-        $mockGetFileContent = $this->mock(GetFileContentInterface::class, function (MockInterface $mock) use ($file) {
+        $mockGetFileContent = $this->mock(GetFileContentInterface::class, function (MockInterface $mock) use ($file): void {
             $mock->shouldReceive('getContent')
                 ->with($file)
                 ->andReturn('file-content')
@@ -47,11 +49,10 @@ class MakeDownloadFilesServiceTest extends TestCase
     }
 
     protected function makeSimpleService(
-        ?MockInterface $archive = null,
-        ?MockInterface $storageMock = null,
-        ?MockInterface $fileContentMock = null,
-    ): MakeDownloadFilesService
-    {
+        MockInterface $archive = null,
+        MockInterface $storageMock = null,
+        MockInterface $fileContentMock = null,
+    ): MakeDownloadFilesService {
         $archive = $archive ?: $this->mock(FilesArchiveInterface::class);
         $storage = $storageMock ?: $this->mock(StorageLocalServiceInterface::class);
         $fileContentMock = $fileContentMock ?: $this->mock(GetFileContentInterface::class);
@@ -70,20 +71,20 @@ class MakeDownloadFilesServiceTest extends TestCase
         $file2 = File::factory()->isFile($user)->createQuietly();
         $files = collect([$file, $file2]);
 
-        $mockStorage = $this->mock(StorageLocalServiceInterface::class, function (MockInterface $mock) {
+        $mockStorage = $this->mock(StorageLocalServiceInterface::class, function (MockInterface $mock): void {
             $mock->shouldReceive('filesystem->put')
                 ->andReturnFalse()
                 ->never();
         });
 
-        $mockGetFileContent = $this->mock(GetFileContentInterface::class, function (MockInterface $mock) use ($file) {
+        $mockGetFileContent = $this->mock(GetFileContentInterface::class, function (MockInterface $mock) use ($file): void {
             $mock->shouldReceive('getContent')
                 ->with($file)
                 ->andReturn('file-content')
                 ->never();
         });
 
-        $mockArchive = $this->mock(FilesArchiveInterface::class, function (MockInterface $mock) use ($files) {
+        $mockArchive = $this->mock(FilesArchiveInterface::class, function (MockInterface $mock) use ($files): void {
             $mock->shouldReceive('addFiles')
                 ->with($files)
                 ->andReturn('/var/tmp/my.zip')
@@ -104,7 +105,7 @@ class MakeDownloadFilesServiceTest extends TestCase
         $files = collect([$file]);
         $fileTmpName = Str::random(40);
 
-        $mockStorage = $this->mock(StorageLocalServiceInterface::class, function (MockInterface $mock) use ($file, $fileTmpName) {
+        $mockStorage = $this->mock(StorageLocalServiceInterface::class, function (MockInterface $mock) use ($fileTmpName): void {
             $mock->shouldReceive('filesystem->put')
                 ->andReturnTrue()
                 ->once();
@@ -113,7 +114,7 @@ class MakeDownloadFilesServiceTest extends TestCase
                 ->once();
         });
 
-        $fileContentMock = $this->mock(GetFileContentInterface::class, function (MockInterface $mock) use ($file) {
+        $fileContentMock = $this->mock(GetFileContentInterface::class, function (MockInterface $mock) use ($file): void {
             $mock->shouldReceive('getContent')
                 ->with($file)
                 ->andReturn('content')

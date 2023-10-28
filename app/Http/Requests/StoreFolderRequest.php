@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\File;
@@ -23,7 +25,7 @@ class StoreFolderRequest extends ParentIdBaseRequest
                 Rule::unique(File::class, 'name')
                     ->where('created_by', Auth::id())
                     ->where('parent_id', $this->parentFolder?->id ?? File::rootFolderByUser(Auth::user())->id)
-                    ->whereNull('deleted_at')
+                    ->whereNull('deleted_at'),
             ],
         ];
     }
@@ -32,7 +34,7 @@ class StoreFolderRequest extends ParentIdBaseRequest
     {
         return [
             'name.unique' => 'Folder ":input" already exist',
-            'not_regex' => 'Folder name ":input" contain invalid symbols : * ? < > | \ /'
+            'not_regex' => 'Folder name ":input" contain invalid symbols : * ? < > | \ /',
         ];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Contracts\FilesArchiveInterface;
@@ -51,22 +53,22 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(
             StorageLocalServiceInterface::class,
-            fn() => new StorageService(Storage::disk(DiskEnum::LOCAL->value), DiskEnum::LOCAL)
+            fn () => new StorageService(Storage::disk(DiskEnum::LOCAL->value), DiskEnum::LOCAL)
         );
 
         $this->app->singleton(
             StorageCloudServiceInterface::class,
-            fn() => new StorageService(Storage::disk(DiskEnum::CLOUD->value), DiskEnum::CLOUD)
+            fn () => new StorageService(Storage::disk(DiskEnum::CLOUD->value), DiskEnum::CLOUD)
         );
 
         $this->app->singleton(
             UploadTreeFilesServiceInterface::class,
-            fn() => new UploadTreeFilesService($this->app->make(StorageLocalServiceInterface::class))
+            fn () => new UploadTreeFilesService($this->app->make(StorageLocalServiceInterface::class))
         );
 
         $this->app->singleton(
             MoveFileBetweenStorageInterface::class,
-            fn() => new MoveFileBetweenStorage(
+            fn () => new MoveFileBetweenStorage(
                 $this->app->make(StorageLocalServiceInterface::class),
                 $this->app->make(StorageCloudServiceInterface::class)
             )

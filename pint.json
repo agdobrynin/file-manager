@@ -1,0 +1,27 @@
+{
+  "preset": "laravel",
+  "exclude": [
+    "bootstrap",
+    "config",
+    "database/migrations",
+    "routes"
+  ],
+  "notPath": [
+    "public/index.php"
+  ],
+  "rules": {
+    "align_multiline_comment": true,
+    "array_indentation": true,
+    "array_syntax": true,
+    "trim_array_spaces": true,
+    "array_push": true,
+    "method_argument_space": {
+      "on_multiline": "ensure_fully_multiline"
+    },
+    "declare_parentheses": true,
+    "declare_strict_types": true,
+    "simplified_if_return": true,
+    "void_return": true,
+    "yoda_style": true
+  }
+}

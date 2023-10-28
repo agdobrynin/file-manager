@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Models;
 
 use App\Enums\DiskEnum;
@@ -28,7 +30,7 @@ class FileTest extends TestCase
                 $file = File::makeRootByUser($user);
 
                 return ['user' => $user, 'file' => $file];
-            }
+            },
         ];
 
         yield 'root not exist' => [
@@ -37,7 +39,7 @@ class FileTest extends TestCase
                 Auth::shouldReceive('id')->andReturn($user->id);
 
                 return ['user' => $user, 'file' => null];
-            }
+            },
         ];
     }
 
@@ -61,7 +63,7 @@ class FileTest extends TestCase
     public static function dataFolderByRoot(): \Generator
     {
         yield 'root not detected and user is null' => [
-            'data' => fn() => ['user' => null, 'file' => null],
+            'data' => fn () => ['user' => null, 'file' => null],
             'exception' => ModelNotFoundException::class,
         ];
 
@@ -113,7 +115,7 @@ class FileTest extends TestCase
 
         $foundRoot = File::rootFolderByUser($user);
 
-        if (!$exception) {
+        if (! $exception) {
             $this->assertEquals($foundRoot->id, $file->id);
         }
     }
@@ -129,11 +131,11 @@ class FileTest extends TestCase
         $subFolder1 = File::create([...(new FileFolderVO('Bar'))->toArray()], $folder1);
         $file = File::create([
             ...(new FileVO(
-            name: 'baz.png',
-            mime: 'img/img',
-            size: 100,
-            path: null,
-            storagePath: null
+                name: 'baz.png',
+                mime: 'img/img',
+                size: 100,
+                path: null,
+                storagePath: null
             ))->toArray(),
         ], $subFolder1);
 

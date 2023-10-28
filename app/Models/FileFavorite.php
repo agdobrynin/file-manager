@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int $file_id
  * @property int $user_id
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|FileFavorite newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FileFavorite newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FileFavorite query()
@@ -22,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|FileFavorite whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FileFavorite whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FileFavorite whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class FileFavorite extends Model

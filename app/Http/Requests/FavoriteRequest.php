@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\File;
@@ -13,7 +15,7 @@ class FavoriteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return (bool)$this->user();
+        return (bool) $this->user();
     }
 
     /**
@@ -28,12 +30,12 @@ class FavoriteRequest extends FormRequest
                 'bail',
                 'required',
                 'integer',
-                function (string $attribute, int $id, Closure $fail) {
-                    if (!File::find($id)?->isOwnedByUser($this->user())) {
-                        $fail('Invalid file ID ' . $id . ' for auth user.');
+                function (string $attribute, int $id, Closure $fail): void {
+                    if (! File::find($id)?->isOwnedByUser($this->user())) {
+                        $fail('Invalid file ID '.$id.' for auth user.');
                     }
-                }
-            ]
+                },
+            ],
         ];
     }
 }

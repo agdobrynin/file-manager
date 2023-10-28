@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -12,8 +13,7 @@ readonly class GetFileContent implements GetFileContentInterface
 {
     public function __construct(
         private StorageByDiskTypeServiceInterface $storageByModelService
-    )
-    {
+    ) {
     }
 
     public function getContent(File $file): ?string

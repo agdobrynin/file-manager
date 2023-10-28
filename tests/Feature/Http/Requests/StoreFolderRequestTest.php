@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Requests;
 
 use App\Http\Requests\StoreFolderRequest;
@@ -21,67 +23,67 @@ class StoreFolderRequestTest extends TestCase
         yield 'folder name with invalid symbols #1' => [
             'data' => ['name' => 'Folder<folder'],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
 
         yield 'folder name with invalid symbols #2' => [
             'data' => ['name' => 'Folder * folder'],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
 
         yield 'folder name with invalid symbols #3' => [
             'data' => ['name' => 'Folder / folder'],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
 
         yield 'folder name with invalid symbols #4' => [
             'data' => ['name' => 'Folder > folder'],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
 
         yield 'folder name with invalid symbols #5' => [
             'data' => ['name' => 'Folder | folder'],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
 
         yield 'folder name with invalid symbols #6' => [
             'data' => ['name' => 'Folder: folder'],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
 
         yield 'folder name with invalid symbols #7' => [
             'data' => ['name' => 'Folder? folder'],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
 
         yield 'folder name with invalid symbols #8' => [
             'data' => ['name' => 'Folder\folder'],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
 
         yield 'folder success' => [
             'data' => ['name' => '🎈 новая папка'],
             'passed' => true,
-            'errors key' => []
+            'errors key' => [],
         ];
 
         yield 'folder is required' => [
             'data' => [],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
 
         yield 'folder is required with empty string' => [
             'data' => ['name' => '   '],
             'passed' => false,
-            'errors key' => ['name']
+            'errors key' => ['name'],
         ];
     }
 
@@ -94,12 +96,11 @@ class StoreFolderRequestTest extends TestCase
         $this->actingAs($user);
         $root = File::makeRootByUser($user);
 
-        $request = StoreFolderRequest::create('/file/create/' . $root->id, 'POST');
-        $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
+        $request = StoreFolderRequest::create('/file/create/'.$root->id, 'POST');
+        $request->setRouteResolver(fn () => Route::getRoutes()->match($request));
 
         $this->assertTrue($request->authorize());
         $this->assertEquals($root->id, $request->parentFolder->id);
-
 
         $validator = Validator::make($data, $request->rules());
         $this->assertEquals($passes, $validator->passes());
@@ -115,8 +116,8 @@ class StoreFolderRequestTest extends TestCase
         $folder = File::factory()->isFolder()->make(['name' => 'Папка 1']);
         $root->appendNode($folder);
 
-        $request = StoreFolderRequest::create('/file/create/' . $root->id, 'POST');
-        $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
+        $request = StoreFolderRequest::create('/file/create/'.$root->id, 'POST');
+        $request->setRouteResolver(fn () => Route::getRoutes()->match($request));
         $request->authorize();
 
         $this->assertEquals($root->id, $request->parentFolder->id);
@@ -133,8 +134,8 @@ class StoreFolderRequestTest extends TestCase
         $file = File::factory()->isFile()->make();
         $root->appendNode($file);
 
-        $request = StoreFolderRequest::create('/file/create/' . $file->id, 'POST');
-        $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
+        $request = StoreFolderRequest::create('/file/create/'.$file->id, 'POST');
+        $request->setRouteResolver(fn () => Route::getRoutes()->match($request));
 
         $this->assertFalse($request->authorize());
     }
@@ -145,7 +146,7 @@ class StoreFolderRequestTest extends TestCase
         $this->actingAs($user);
 
         $request = StoreFolderRequest::create('/file/create/10000000000', 'POST');
-        $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
+        $request->setRouteResolver(fn () => Route::getRoutes()->match($request));
 
         $this->expectException(ModelNotFoundException::class);
 
@@ -159,7 +160,7 @@ class StoreFolderRequestTest extends TestCase
         File::makeRootByUser($user);
 
         $request = StoreFolderRequest::create('/file/create', 'POST', ['name' => 'abc']);
-        $request->setRouteResolver(fn() => Route::getRoutes()->match($request));
+        $request->setRouteResolver(fn () => Route::getRoutes()->match($request));
 
         $this->assertTrue($request->authorize());
         $this->assertNull($request->parentFolder);

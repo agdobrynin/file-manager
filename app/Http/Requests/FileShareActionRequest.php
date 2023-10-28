@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\FileShare;
@@ -17,18 +19,18 @@ class FileShareActionRequest extends ActionWithAllKeyRequest
         return array_merge(parent::rules(), [
             'ids' => [
                 'bail',
-                'required_if:' . self::ALL_FILES_KEY . ',false',
+                'required_if:'.self::ALL_FILES_KEY.',false',
                 'array',
-                function (string $attribute, array $ids, $fail) {
-                        $fileSharCount = FileShare::fileShareForUserOrByUser($this->user())
-                            ->whereIn('id', $ids)
-                            ->count();
+                function (string $attribute, array $ids, $fail): void {
+                    $fileSharCount = FileShare::fileShareForUserOrByUser($this->user())
+                        ->whereIn('id', $ids)
+                        ->count();
 
-                        if ($fileSharCount !== count($ids)) {
-                            $fail('Some file share IDs are not valid.');
-                        }
+                    if ($fileSharCount !== count($ids)) {
+                        $fail('Some file share IDs are not valid.');
                     }
-            ]
+                },
+            ],
         ]);
     }
 }

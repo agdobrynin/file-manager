@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -20,32 +21,32 @@ readonly class MakeDownloadFilesService
 {
     public function __construct(
         private StorageLocalServiceInterface $localService,
-        private GetFileContentInterface      $fileContent,
-        private FilesArchiveInterface        $archive,
-    )
-    {
+        private GetFileContentInterface $fileContent,
+        private FilesArchiveInterface $archive,
+    ) {
     }
 
     /**
-     * @param Collection<File>|BaseCollection<File> $files
-     * @throws Throwable|OpenArchiveException|DownloadEmptyFolderException|RuntimeException
+     * @param  Collection<File>|BaseCollection<File>  $files
      * @return string Full path to download file
+     *
+     * @throws Throwable|OpenArchiveException|DownloadEmptyFolderException|RuntimeException
      */
     public function handle(BaseCollection|Collection $files): string
     {
         throw_if($files->isEmpty(), message: 'No files for download');
 
-        if ($files->count() === 1) {
+        if (1 === $files->count()) {
             /** @var File $file */
             $file = $files->first();
 
             throw_if(
-                $file->isFolder() && $file->children()->count() === 0,
+                $file->isFolder() && 0 === $file->children()->count(),
                 DownloadEmptyFolderException::class,
-                message: 'Folder "' . $files->first()->name . '" is empty',
+                message: 'Folder "'.$files->first()->name.'" is empty',
             );
 
-            if (!$file->isFolder()) {
+            if (! $file->isFolder()) {
                 $storageFileName = Str::random(32);
                 $content = $this->fileContent->getContent($file);
 

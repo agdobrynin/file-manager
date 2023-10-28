@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -16,7 +18,7 @@ class FileResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'isFavorite' => !!$this->favorite,
+            'isFavorite' => (bool) $this->favorite,
             'name' => $this->name,
             'disk' => $this->disk,
             'path' => $this->path,

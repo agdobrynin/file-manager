@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Services;
 
 use App\Contracts\StorageByDiskTypeServiceInterface;
@@ -14,13 +16,14 @@ use Tests\TestCase;
 class GetFileContentTest extends TestCase
 {
     use RefreshDatabase;
+
     public function test_get_file_content(): void
     {
         $file = File::factory()->isFile(User::factory()->create())->createQuietly();
 
         $mockStorage = $this->mock(
             StorageByDiskTypeServiceInterface::class,
-            function (MockInterface $mock) {
+            function (MockInterface $mock): void {
                 $mock->shouldReceive('resolve->filesystem->get')
                     ->andReturn('file-content-as-string');
             }
@@ -36,7 +39,7 @@ class GetFileContentTest extends TestCase
 
         $mockStorage = $this->mock(
             StorageByDiskTypeServiceInterface::class,
-            function (MockInterface $mock) {
+            function (MockInterface $mock): void {
                 $mock->shouldReceive('resolve->filesystem->get')
                     ->andReturnNull();
             }

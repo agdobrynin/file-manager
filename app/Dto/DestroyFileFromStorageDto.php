@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Dto;
@@ -9,8 +10,7 @@ readonly class DestroyFileFromStorageDto
 {
     public function __construct(
         public DiskEnum $disk,
-        public string   $fileStoragePath
-    )
-    {
+        public string $fileStoragePath
+    ) {
     }
 }

@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 class MyFilesListRequest extends ParentIdBaseRequest
 {
     protected const ONLY_FAVORITES_QUERY_PARAM = 'onlyFavorites';
+
     /**
      * Get the validation rules that apply to the request.
      *
