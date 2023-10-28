@@ -74,25 +74,6 @@ class FileShare extends Model
             });
     }
 
-    protected function fileShareByFilter(Builder $builder, FilesListFilterDto $dto): Builder
-    {
-        return $builder
-            ->whereHas('file')
-            ->when($dto->search, function (Builder $builder) use ($dto): void {
-                $builder->whereHas(
-                    'file',
-                    function (Builder $query) use ($dto) {
-                        return $query->where(
-                            'name',
-                            'like',
-                            '%'.$dto->search.'%'
-                        );
-                    }
-                );
-            })
-            ->orderBy('created_at', 'desc');
-    }
-
     public function scopeFileShareForUser(Builder $builder, User $user): Builder
     {
         return $builder->whereHas('file')
@@ -122,5 +103,19 @@ class FileShare extends Model
         return $this->fileShareByFilter($builder, $dto)
             ->with(['file.user', 'forUser'])
             ->where('for_user_id', $user->getAuthIdentifier());
+    }
+
+    protected function fileShareByFilter(Builder $builder, FilesListFilterDto $dto): Builder
+    {
+        return $builder
+            ->whereHas('file')
+            ->when(
+                $dto->search,
+                fn (Builder $builder) => $builder->whereHas(
+                    'file',
+                    fn (Builder $query) => $query->where('name', 'like', '%'.$dto->search.'%')
+                )
+            )
+            ->orderBy('created_at', 'desc');
     }
 }
