@@ -26,8 +26,7 @@ class DeleteFileFromStorageJob implements ShouldQueue
 
     public function handle(StorageByDiskTypeServiceInterface $storageByModelService): void
     {
-        $storageByModelService->resolve($this->dto->disk)
-            ->filesystem()
-            ->delete($this->dto->fileStoragePath);
+        $storage = $storageByModelService->resolve($this->dto->disk);
+        $storage->filesystem()->delete($this->dto->fileStoragePath);
     }
 }
