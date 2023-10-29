@@ -180,9 +180,7 @@ class File extends Model
     protected static function makePath(File $model): void
     {
         if (! $model->isRoot()) {
-            $separator = str_ends_with($model->parent->path ?? '', DIRECTORY_SEPARATOR)
-                ? ''
-                : DIRECTORY_SEPARATOR;
+            $separator = str_ends_with($model->parent->path ?? '', DIRECTORY_SEPARATOR) ? '' : DIRECTORY_SEPARATOR;
 
             $model->path = $model->parent?->path.$separator.$model->name;
         }
