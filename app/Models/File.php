@@ -7,7 +7,7 @@ namespace App\Models;
 use App\Dto\FilesListFilterDto;
 use App\Dto\MyFilesListFilterDto;
 use App\Enums\DiskEnum;
-use App\Traits\HasCreatorAndUpdater;
+use App\Models\Traits\HasCreatorAndUpdater;
 use App\VO\FileFolderVO;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
