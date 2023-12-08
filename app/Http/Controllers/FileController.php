@@ -23,6 +23,7 @@ use App\Jobs\MoveFileToCloud;
 use App\Models\File;
 use App\Models\FileFavorite;
 use App\Models\FileShare;
+use App\Notifications\FileShareNotification;
 use App\Services\MakeDownloadFilesService;
 use App\VO\DownloadFileVO;
 use App\VO\FileFavoriteVO;
@@ -196,12 +197,7 @@ class FileController extends Controller
             );
 
             FileShare::insert($insertData->toArray());
-
-            $notify = new \App\Notifications\FileShare(
-                files: $files,
-                formUser: $request->user()
-            );
-            $request->shareToUser->notify($notify);
+            $request->shareToUser->notify(new FileShareNotification($files, $request->user()));
         }
 
         return back()->with(FlashMessagesEnum::SUCCESS->value, 'Selected files will be shared if user with email exist.');

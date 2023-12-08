@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-class FileShare extends Notification implements ShouldQueue
+class FileShareNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

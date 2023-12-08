@@ -7,6 +7,7 @@ namespace Tests\Feature\Http\Controllers;
 use App\Models\File;
 use App\Models\FileShare;
 use App\Models\User;
+use App\Notifications\FileShareNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -157,7 +158,7 @@ class FileControllerMethodShareTest extends TestCase
             ->assertSessionDoesntHaveErrors(['ids', 'all', 'email'])
             ->assertSessionHas('success');
 
-        Notification::assertSentTo([$shareForUser], \App\Notifications\FileShare::class);
+        Notification::assertSentTo([$shareForUser], FileShareNotification::class);
 
         foreach ($ids as $id) {
             $this->assertDatabaseHas(FileShare::class, ['file_id' => $id, 'for_user_id' => $shareForUser->id]);
@@ -183,7 +184,7 @@ class FileControllerMethodShareTest extends TestCase
             ->assertSessionDoesntHaveErrors(['ids', 'all', 'email'])
             ->assertSessionHas('success');
 
-        Notification::assertSentTo([$shareForUser], \App\Notifications\FileShare::class);
+        Notification::assertSentTo([$shareForUser], FileShareNotification::class);
 
         foreach ($files->pluck('id') as $id) {
             $this->assertDatabaseHas(FileShare::class, ['file_id' => $id, 'for_user_id' => $shareForUser->id]);
